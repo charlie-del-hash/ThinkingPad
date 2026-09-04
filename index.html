@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ThinkPad Notes</title>
+<meta name="description" content="A skeuomorphic plain-text notepad in the shape of an early-2000s IBM ThinkPad.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231d1f23'/%3E%3Crect x='5' y='8' width='22' height='14' rx='1' fill='%23cfd8d0'/%3E%3Ccircle cx='16' cy='26' r='2.5' fill='%23d21f3c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/chassis.css">
+<link rel="stylesheet" href="css/notepad.css">
+</head>
+<body class="font-period">
+
+<div class="desk" id="desk">
+  <div class="room-light" aria-hidden="true"></div>
+
+  <div class="machine" id="machine">
+
+    <!-- ============ LID ============ -->
+    <div class="lid">
+      <div class="lid-latches" aria-hidden="true"><i></i><i></i></div>
+      <div class="bezel">
+        <div class="bezel-top">
+          <button type="button" class="thinklight" id="thinklightBtn" title="ThinkLight (Fn+PgUp)" aria-label="ThinkLight">
+            <span class="bulb" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="screen">
+          <span class="bumper tl" aria-hidden="true"></span>
+          <span class="bumper tr" aria-hidden="true"></span>
+          <span class="bumper bl" aria-hidden="true"></span>
+          <span class="bumper br" aria-hidden="true"></span>
+
+          <div class="lcd" id="lcd">
+            <div class="lcd-inner" id="lcdInner">
+
+              <!-- ============ THE SOFTWARE ============ -->
+              <div class="win" id="win">
+                <div class="titlebar" id="titlebar">
+                  <span class="app-icon" aria-hidden="true"></span>
+                  <span class="title" id="winTitle">Untitled - ThinkPad Notes</span>
+                  <span class="tb-buttons">
+                    <button type="button" class="tb" id="tbMin" title="Minimise (Standby)" aria-label="Standby"><b class="g-min"></b></button>
+                    <button type="button" class="tb" id="tbMax" title="Toggle note list" aria-label="Toggle note list"><b class="g-max"></b></button>
+                    <button type="button" class="tb" id="tbClose" title="Close lid (Standby)" aria-label="Standby"><b class="g-close"></b></button>
+                  </span>
+                </div>
+
+                <div class="menubar" id="menubar" role="menubar"></div>
+
+                <div class="workspace" id="workspace">
+                  <div class="pane pane-notes" id="paneNotes">
+                    <div class="find">
+                      <label for="search">F<u>i</u>nd:</label>
+                      <input type="text" id="search" spellcheck="false" autocomplete="off" placeholder="">
+                    </div>
+                    <div class="listbox" id="listbox" role="listbox" tabindex="0" aria-label="Notes"></div>
+                    <div class="pane-foot">
+                      <button type="button" class="btn" id="btnNew">New</button>
+                      <button type="button" class="btn" id="btnDelete">Delete</button>
+                    </div>
+                  </div>
+
+                  <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+
+                  <div class="pane pane-editor">
+                    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+                              aria-label="Note text" placeholder=""></textarea>
+                  </div>
+                </div>
+
+                <div class="statusbar">
+                  <span class="cell grow" id="stMsg">Ready</span>
+                  <span class="cell" id="stPos">Ln 1, Col 1</span>
+                  <span class="cell" id="stCount">0 words</span>
+                  <span class="cell click" id="stFont" title="Click to switch typeface">Courier New</span>
+                </div>
+              </div>
+              <!-- ============ /THE SOFTWARE ============ -->
+
+            </div>
+            <div class="lcd-grain" aria-hidden="true"></div>
+            <div class="lcd-glare" aria-hidden="true"></div>
+            <div class="lcd-dark" id="lcdDark" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="bezel-foot">
+          <div class="ibm-logo" aria-label="IBM"><span>IBM</span></div>
+          <div class="leds" id="leds" aria-hidden="true">
+            <span class="led-cell"><i class="led led-pwr on"></i><em>PWR</em></span>
+            <span class="led-cell"><i class="led led-bat on"></i><em>BAT</em></span>
+            <span class="led-cell"><i class="led led-slp"></i><em>SLP</em></span>
+            <span class="led-cell"><i class="led led-hdd"></i><em>HDD</em></span>
+            <span class="led-cell"><i class="led led-num"></i><em>NUM</em></span>
+            <span class="led-cell"><i class="led led-cap"></i><em>CAP</em></span>
+          </div>
+          <div class="tp-logo" aria-label="ThinkPad">Th<span class="i">ı<b></b></span>nkPad</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HINGES ============ -->
+    <div class="hinges" aria-hidden="true">
+      <i class="hinge"></i>
+      <div class="hinge-gap"></div>
+      <i class="hinge"></i>
+    </div>
+
+    <!-- ============ BASE ============ -->
+    <div class="base">
+      <div class="topdeck">
+        <button type="button" class="access-ibm" id="accessBtn" title="Access IBM — help &amp; shortcuts">Access IBM</button>
+        <div class="drilled" aria-hidden="true"></div>
+        <div class="hw-buttons">
+          <button type="button" class="hwb" id="volDown" title="Volume down (key click)">&minus;</button>
+          <button type="button" class="hwb" id="volUp" title="Volume up (key click)">+</button>
+          <button type="button" class="hwb" id="volMute" title="Mute key click"><span class="mute-led"></span>&#9679;</button>
+          <button type="button" class="power" id="powerBtn" title="Standby"><span class="ring"></span></button>
+        </div>
+      </div>
+
+      <div class="keyboard" id="keyboard">
+        <div class="trackpoint" id="trackpoint" title="TrackPoint — drag to scroll" role="button" tabindex="0" aria-label="TrackPoint scroller"></div>
+      </div>
+
+      <div class="palmrest">
+        <div class="tp-buttons" aria-hidden="false">
+          <button type="button" class="tpb left" id="tpbLeft" title="Previous note"></button>
+          <button type="button" class="tpb center" id="tpbCenter" title="Scroll lock — drag the TrackPoint"></button>
+          <button type="button" class="tpb right" id="tpbRight" title="Next note"></button>
+        </div>
+        <div class="badge" aria-hidden="true">
+          <span class="badge-plate">ThinkPad</span>
+        </div>
+      </div>
+      <div class="front-lip" aria-hidden="true"><i class="latch-slot"></i><i class="latch-slot"></i></div>
+    </div>
+
+  </div>
+
+  <p class="footnote">
+    Everything you type is stored in this browser only (localStorage). An unaffiliated homage — no connection to IBM or Lenovo.
+  </p>
+</div>
+
+<div class="modal-layer" id="modalLayer" hidden></div>
+<div class="print-sheet" id="printSheet" aria-hidden="true"></div>
+<input type="file" id="fileInput" accept=".txt,.md,text/plain" hidden>
+
+<script src="js/keyboard.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+/* ============================================================
+   chassis.css — the physical machine
+   An early-2000s IBM ThinkPad (A/T series era, 1999-2004):
+   matte black magnesium-look plastic, chunky bezel, red
+   TrackPoint, blue Access IBM button, ThinkLight.
+   ============================================================ */
+
+:root{
+  /* casing */
+  --case:#1c1e22;
+  --case-dk:#141518;
+  --case-dkr:#0c0d0f;
+  --case-lt:#292c32;
+  --case-edge:#3d424a;
+  --hair:rgba(255,255,255,.075);
+  --hair-lo:rgba(255,255,255,.04);
+  --shadow:rgba(0,0,0,.65);
+
+  /* accents */
+  --tp-red:#d4213c;
+  --tp-red-lt:#f0475f;
+  --tp-red-dk:#7d0f20;
+  --ibm-blue:#2a6ec7;
+  --ibm-blue-lt:#5b9df0;
+  --led-green:#63ff86;
+  --led-amber:#ffb63d;
+  --key-text:#c9ccd1;
+
+  /* metrics */
+  --u:clamp(21px,2.45vh,30px);          /* key unit height          */
+  --key-gap:3px;
+  --bezel:clamp(16px,2.2vh,26px);       /* side bezel width         */
+  --radius:14px;
+
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:#0e0f11;
+  color:#e8e8e8;
+  overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+
+/* ---------- the desk / room ---------- */
+.desk{
+  position:relative;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:clamp(6px,1.6vh,20px) 10px;
+  background:
+    radial-gradient(120% 95% at 50% -12%, #55565b 0%, #35373b 30%, #212327 60%, #131416 88%, #0d0e10 100%);
+  transition:background .5s ease;
+}
+.desk::after{ /* desk grain */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--noise);opacity:.16;mix-blend-mode:overlay;
+}
+.room-light{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 45% at 50% 8%, rgba(255,244,214,.10), transparent 70%);
+  opacity:0;transition:opacity .45s ease;
+}
+.desk.night{
+  background:radial-gradient(120% 90% at 50% 0%, #131417 0%, #0a0b0c 45%, #050506 100%);
+}
+.desk.night .room-light{opacity:1}
+
+.footnote{
+  flex:0 0 auto;margin:0;
+  font:400 10px/1.5 Tahoma,Verdana,sans-serif;
+  color:#5c6068;text-align:center;letter-spacing:.02em;
+  max-width:70ch;
+}
+@media (max-height:700px){ .footnote{display:none} }
+
+/* ---------- the machine ---------- */
+.machine{
+  position:relative;
+  flex:1 1 auto;
+  width:min(1060px,97vw);
+  max-height:940px;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  filter:drop-shadow(0 26px 40px rgba(0,0,0,.62));
+}
+
+/* =====================  LID  ===================== */
+.lid{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;
+  position:relative;
+  padding:6px 6px 0;
+  border-radius:var(--radius) var(--radius) 3px 3px;
+  background:
+    linear-gradient(180deg,var(--case-lt) 0%,var(--case) 4px,var(--case) 100%);
+  box-shadow:
+    inset 0 1px 0 var(--hair),
+    inset 1px 0 0 var(--hair-lo),
+    inset -1px 0 0 var(--hair-lo),
+    0 2px 0 var(--case-dkr);
+}
+.lid-latches{
+  position:absolute;top:-5px;left:0;right:0;height:6px;
+  display:flex;justify-content:center;gap:26%;
+}
+.lid-latches i{
+  width:44px;height:6px;border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,var(--case-lt),var(--case-dk));
+  box-shadow:inset 0 1px 0 var(--hair);
+}
+
+.bezel{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;
+  padding:0 var(--bezel);
+  border-radius:9px 9px 2px 2px;
+  background:
+    linear-gradient(180deg,#26282d,#191b1f 30%,#16181b 100%);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55);
+  position:relative;overflow:hidden;
+}
+.bezel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--noise);opacity:.2;mix-blend-mode:overlay;
+}
+
+.bezel-top{
+  flex:0 0 auto;height:clamp(14px,2vh,22px);
+  display:flex;align-items:center;justify-content:center;
+}
+.thinklight{
+  appearance:none;border:0;background:none;padding:4px 10px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;position:relative;
+}
+.thinklight .bulb{
+  width:9px;height:5px;border-radius:5px 5px 2px 2px;
+  background:linear-gradient(180deg,#4b4f56,#2a2d32);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  transition:background .2s,box-shadow .2s;
+}
+.thinklight::after{ /* engraved lamp label */
+  content:"";position:absolute;inset:auto auto -1px 50%;
+  transform:translateX(-50%);
+  width:26px;height:1px;background:rgba(255,255,255,.05);
+}
+.desk.night .thinklight .bulb{
+  background:linear-gradient(180deg,#fff9e6,#ffe9a8);
+  box-shadow:0 0 6px 2px rgba(255,232,170,.75),0 0 16px 6px rgba(255,226,150,.35);
+}
+
+/* screen well */
+.screen{
+  flex:1 1 auto;min-height:0;position:relative;
+  padding:3px;border-radius:3px;
+  background:linear-gradient(180deg,#0a0b0c,#101113);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.9),
+    0 1px 0 var(--hair-lo);
+}
+.bumper{
+  position:absolute;width:7px;height:7px;border-radius:50%;z-index:5;
+  background:radial-gradient(circle at 35% 30%,#3b3f45,#15161a 70%);
+  box-shadow:0 1px 1px rgba(0,0,0,.6);
+}
+.bumper.tl{top:-5px;left:-5px} .bumper.tr{top:-5px;right:-5px}
+.bumper.bl{bottom:-5px;left:-5px} .bumper.br{bottom:-5px;right:-5px}
+
+/* the panel itself */
+.lcd{
+  position:relative;height:100%;width:100%;overflow:hidden;
+  border-radius:1px;
+  background:#c3c7c2;
+  isolation:isolate;
+}
+.lcd-inner{position:absolute;inset:0;display:flex;overflow:hidden}
+
+/* subpixel grain + vignette */
+.lcd-grain{
+  position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 1px,transparent 1px 3px),
+    radial-gradient(120% 120% at 50% 50%,transparent 58%,rgba(20,26,20,.16) 100%);
+  opacity:1;transition:opacity .25s;
+}
+body.no-grain .lcd-grain{opacity:0}
+
+/* backlight glare on the glass */
+.lcd-glare{
+  position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:
+    linear-gradient(122deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.05) 22%,transparent 42%),
+    linear-gradient(0deg,rgba(255,255,255,.05),transparent 30%);
+  opacity:1;transition:opacity .25s;
+}
+body.no-glare .lcd-glare{opacity:0}
+
+/* dimmed / asleep */
+.lcd-dark{
+  position:absolute;inset:0;z-index:70;pointer-events:none;
+  background:#05060a;opacity:0;transition:opacity .6s ease;
+}
+.desk.standby .lcd-dark{opacity:.985}
+.desk.night .lcd-dark{opacity:.11}
+.desk.night.standby .lcd-dark{opacity:.985}
+
+/* bezel foot: IBM · indicators · ThinkPad */
+.bezel-foot{
+  flex:0 0 auto;height:clamp(20px,2.9vh,30px);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:0 2px;position:relative;z-index:2;
+}
+.ibm-logo{width:9ch;flex:0 0 auto}
+.ibm-logo span{
+  display:inline-block;
+  font:700 clamp(11px,1.5vh,15px)/1 Rockwell,"Courier New",Georgia,serif;
+  letter-spacing:.06em;
+  background-image:repeating-linear-gradient(
+    180deg,#b9bec6 0 2px,rgba(0,0,0,0) 2px 3px);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.6));
+}
+.tp-logo{
+  flex:0 0 auto;text-align:right;position:relative;
+  font:600 clamp(10px,1.45vh,14px)/1 Tahoma,Verdana,sans-serif;
+  letter-spacing:-.01em;color:#9aa0a8;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.55));
+}
+.tp-logo .i{position:relative;display:inline-block}
+.tp-logo .i b{
+  position:absolute;left:50%;top:-.34em;transform:translateX(-50%);
+  width:.26em;height:.26em;border-radius:1px;background:var(--tp-red);
+  box-shadow:0 0 3px rgba(212,33,60,.7);
+}
+.leds{display:flex;align-items:center;gap:clamp(6px,1.1vw,14px)}
+.led-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.led{
+  width:5px;height:5px;border-radius:50%;
+  background:#1a1c20;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+  transition:background .12s,box-shadow .12s;
+}
+.led em{font-style:normal}
+.led-cell em{
+  font:400 clamp(5px,.72vh,7px)/1 Tahoma,Verdana,sans-serif;
+  letter-spacing:.06em;color:#575c64;
+}
+.led.on{background:var(--led-green);box-shadow:0 0 5px rgba(99,255,134,.75),inset 0 0 2px rgba(255,255,255,.7)}
+.led.amber{background:var(--led-amber);box-shadow:0 0 5px rgba(255,182,61,.7),inset 0 0 2px rgba(255,255,255,.6)}
+.led.blink{animation:ledblink .16s steps(1) 2}
+@keyframes ledblink{0%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}100%{background:#1a1c20;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}}
+.led.pulse{animation:ledpulse 2.4s ease-in-out infinite}
+@keyframes ledpulse{
+  0%,100%{background:#3a2c12;box-shadow:none}
+  50%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}
+}
+
+/* =====================  HINGES  ===================== */
+.hinges{
+  flex:0 0 auto;height:9px;display:flex;align-items:stretch;
+  padding:0 34px;gap:0;
+}
+.hinges .hinge{
+  width:78px;border-radius:0 0 4px 4px;
+  background:linear-gradient(180deg,#2e3238,#15161a 60%,#0d0e10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 3px rgba(0,0,0,.5);
+}
+.hinge-gap{
+  flex:1;
+  background:linear-gradient(180deg,#0a0b0c,#131418);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8);
+  margin:0 6px;border-radius:0 0 2px 2px;
+}
+
+/* =====================  BASE  ===================== */
+.base{
+  flex:0 0 auto;
+  padding:5px 10px 0;
+  border-radius:3px 3px calc(var(--radius) + 4px) calc(var(--radius) + 4px);
+  background:linear-gradient(180deg,#232529,#1a1c20 40%,#141519);
+  box-shadow:
+    inset 0 1px 0 var(--hair),
+    inset 1px 0 0 var(--hair-lo),
+    inset -1px 0 0 var(--hair-lo),
+    0 10px 0 -2px rgba(0,0,0,.5);
+  position:relative;
+}
+.base::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background-image:var(--noise);opacity:.18;mix-blend-mode:overlay;
+}
+
+/* top row: Access IBM, speaker holes, volume, power */
+.topdeck{
+  height:clamp(18px,2.4vh,26px);
+  display:flex;align-items:center;gap:10px;
+  padding:0 6px 2px;position:relative;z-index:2;
+}
+.access-ibm{
+  appearance:none;cursor:pointer;
+  padding:2px 9px;border-radius:3px;
+  border:1px solid #0e3a76;
+  background:linear-gradient(180deg,var(--ibm-blue-lt),var(--ibm-blue) 45%,#1b508f);
+  color:#eaf2ff;
+  font:700 clamp(7px,.95vh,9px)/1.4 Tahoma,Verdana,sans-serif;
+  letter-spacing:.04em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.6);
+  white-space:nowrap;
+}
+.access-ibm:hover{filter:brightness(1.12)}
+.access-ibm:active{
+  transform:translateY(1px);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.5);
+}
+.drilled{
+  flex:1;height:8px;border-radius:4px;
+  background-image:radial-gradient(circle,#0a0b0c 32%,transparent 34%);
+  background-size:7px 7px;background-position:0 1px;
+  opacity:.85;
+}
+.hw-buttons{display:flex;align-items:center;gap:5px}
+.hwb{
+  appearance:none;cursor:pointer;width:20px;height:11px;border-radius:2px;
+  border:1px solid #0a0b0d;
+  background:linear-gradient(180deg,#34383f,#1c1e22);
+  color:#9aa0a8;font:700 8px/1 Tahoma,sans-serif;
+  display:inline-flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.5);
+}
+.hwb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.mute-led{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#1a1c20;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+}
+body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182,61,.8)}
+.power{
+  appearance:none;cursor:pointer;
+  width:22px;height:22px;border-radius:50%;border:1px solid #0a0b0d;
+  background:radial-gradient(circle at 40% 32%,#3a3e45,#1a1c20 62%,#101114);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.6);
+  display:grid;place-items:center;margin-left:4px;
+}
+.power .ring{
+  width:9px;height:9px;border-radius:50%;
+  border:1.5px solid #7f858d;border-top-color:transparent;
+  position:relative;
+}
+.power .ring::after{
+  content:"";position:absolute;left:50%;top:-3px;transform:translateX(-50%);
+  width:1.5px;height:6px;background:#7f858d;border-radius:1px;
+}
+.power:active{transform:translateY(1px)}
+.desk:not(.standby) .power .ring{border-color:#9fe3ad;border-top-color:transparent}
+.desk:not(.standby) .power .ring::after{background:#9fe3ad}
+
+/* =====================  KEYBOARD  ===================== */
+.keyboard{
+  position:relative;z-index:2;
+  padding:6px 8px 7px;
+  display:flex;flex-direction:column;gap:var(--key-gap);
+  background:linear-gradient(180deg,#101114,#0c0d0f);
+  border-radius:4px;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85),0 1px 0 var(--hair-lo);
+}
+body.no-keyboard .keyboard,body.no-keyboard .tp-buttons{display:none}
+.krow{display:flex;gap:var(--key-gap);height:var(--u)}
+.krow.fn-row{height:calc(var(--u) * .72)}
+.key{
+  appearance:none;
+  flex:1 1 0;min-width:0;
+  border:0;border-radius:3px 3px 5px 5px;
+  background:linear-gradient(180deg,#3a3e45 0%,#2a2d33 42%,#1f2228 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -2px 3px rgba(0,0,0,.45),
+    0 2px 2px rgba(0,0,0,.55);
+  color:var(--key-text);
+  font:500 clamp(6px,.98vh,10px)/1.1 Tahoma,Verdana,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 1px;cursor:pointer;user-select:none;
+  transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
+  overflow:hidden;text-overflow:clip;white-space:nowrap;
+}
+.key.wide-label{font-size:clamp(5px,.82vh,8px)}
+.key.fn{color:var(--ibm-blue-lt)}
+.key.spacer{background:none;box-shadow:none;pointer-events:none}
+.key.down,.key:active{
+  transform:translateY(1.5px);
+  background:linear-gradient(180deg,#2b2e34,#232227 60%,#1b1d21);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.7),0 0 0 rgba(0,0,0,0);
+}
+.desk.night .key{
+  color:#e6dcc0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,244,214,.22),
+    inset 0 -2px 3px rgba(0,0,0,.45),
+    0 2px 2px rgba(0,0,0,.55);
+}
+
+/* TrackPoint */
+.trackpoint{
+  position:absolute;z-index:6;
+  left:45.4%;top:65%;
+  transform:translate(-50%,-50%);
+  width:calc(var(--u) * .62);height:calc(var(--u) * .62);
+  max-width:20px;max-height:20px;min-width:12px;min-height:12px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 34% 28%,var(--tp-red-lt),var(--tp-red) 46%,var(--tp-red-dk) 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,.7),inset 0 -1px 2px rgba(0,0,0,.35);
+  cursor:grab;touch-action:none;
+}
+.trackpoint::after{ /* the cat's-tongue cap texture */
+  content:"";position:absolute;inset:1px;border-radius:50%;
+  background-image:radial-gradient(circle,rgba(0,0,0,.45) 34%,transparent 36%);
+  background-size:3px 3px;opacity:.65;
+}
+.trackpoint:active,.trackpoint.dragging{cursor:grabbing}
+.trackpoint.dragging{box-shadow:0 0 0 2px rgba(212,33,60,.25),0 1px 2px rgba(0,0,0,.7)}
+
+/* =====================  PALM REST  ===================== */
+.palmrest{
+  position:relative;z-index:2;
+  height:clamp(30px,5.4vh,56px);
+  margin-top:4px;
+  border-radius:2px 2px 10px 10px;
+  background:linear-gradient(180deg,#1e2024,#191b1f 55%,#141619);
+  box-shadow:inset 0 1px 0 var(--hair-lo);
+  display:flex;align-items:flex-start;justify-content:center;
+}
+.tp-buttons{
+  margin-top:-1px;display:flex;gap:2px;
+  width:clamp(150px,22%,210px);height:clamp(12px,1.8vh,18px);
+}
+.tpb{
+  appearance:none;border:0;cursor:pointer;flex:1;
+  background:linear-gradient(180deg,#33373d,#212429 60%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 1px 2px rgba(0,0,0,.5);
+}
+.tpb.left{border-radius:0 0 0 8px}
+.tpb.right{border-radius:0 0 8px 0}
+.tpb.center{
+  flex:0 0 26%;
+  background:linear-gradient(180deg,#3b6fb5,#28517f 60%,#1d3c60);
+  position:relative;
+}
+.tpb.center::after{
+  content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:2px;height:60%;border-radius:1px;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 1px,transparent 1px 3px);
+}
+.tpb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.badge{position:absolute;left:16px;bottom:8px}
+.badge-plate{
+  display:inline-block;padding:2px 7px;border-radius:2px;
+  font:600 clamp(6px,.9vh,9px)/1.2 Tahoma,Verdana,sans-serif;
+  letter-spacing:.02em;color:#6f757d;
+  background:linear-gradient(180deg,#232529,#191b1e);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5);
+}
+.front-lip{
+  height:8px;margin:0 -10px;
+  border-radius:0 0 var(--radius) var(--radius);
+  background:linear-gradient(180deg,#111214,#08090a);
+  display:flex;justify-content:center;gap:26%;align-items:flex-start;
+}
+.front-lip .latch-slot{
+  width:40px;height:3px;border-radius:0 0 2px 2px;
+  background:#050506;box-shadow:inset 0 1px 1px rgba(0,0,0,.9);
+}
+
+/* =====================  THINKLIGHT  ===================== */
+/* warm cone thrown from the top of the lid down onto the keys */
+.base .light-cone{
+  position:absolute;left:0;right:0;top:-10px;bottom:0;pointer-events:none;
+  z-index:3;opacity:0;transition:opacity .45s ease;
+  background:
+    radial-gradient(74% 150% at 50% -26%,rgba(255,238,196,.34) 0%,rgba(255,228,170,.17) 32%,rgba(255,222,160,.07) 55%,transparent 78%);
+  mix-blend-mode:screen;
+}
+.desk.night .base .light-cone{opacity:1}
+.desk.night .base{background:linear-gradient(180deg,#1b1d21,#131417 40%,#0e0f12)}
+
+/* light spilling off the panel onto the top of the deck */
+.base .screen-spill{
+  position:absolute;left:0;right:0;top:0;height:38%;pointer-events:none;z-index:3;
+  background:linear-gradient(180deg,rgba(198,214,235,.075),transparent 100%);
+  mix-blend-mode:screen;transition:opacity .5s ease;
+}
+.desk.standby .base .screen-spill{opacity:0}
+
+/* =====================  STANDBY  ===================== */
+.desk.standby .machine{filter:drop-shadow(0 26px 40px rgba(0,0,0,.7)) brightness(.85)}
+.desk.standby .lcd-inner{pointer-events:none}
+
+/* =====================  RESPONSIVE  ===================== */
+@media (max-width:820px){
+  :root{--bezel:10px;--radius:10px}
+  .machine{width:100%}
+  .keyboard,.tp-buttons{display:none}
+  .hinges{padding:0 18px}
+  .hinges .hinge{width:42px}
+}
+@media (max-height:560px){
+  .keyboard,.palmrest,.topdeck,.front-lip{display:none}
+  .base{padding:0;height:8px}
+}
+
+/* =====================  PRINT  ===================== */
+.print-sheet{display:none}
+@media print{
+  body{overflow:visible;background:#fff}
+  .desk,.modal-layer{display:none !important}
+  .print-sheet{
+    display:block;white-space:pre-wrap;word-break:break-word;
+    font:12pt/1.45 "Courier New",monospace;color:#000;
+    padding:0;margin:0;
+  }
+  .print-sheet h1{font:bold 13pt/1.4 Tahoma,sans-serif;margin:0 0 .6em;border-bottom:1px solid #999;padding-bottom:.3em}
+  .print-sheet .meta{font:9pt Tahoma,sans-serif;color:#555;margin:0 0 1.2em}
+}
+
+/* ---------- dual-legend keys (the shifted character above) ---------- */
+.key.dual{
+  flex-direction:column;justify-content:center;gap:0;line-height:1;
+  padding-top:1px;
+}
+.key.dual .sub{
+  font-size:.78em;opacity:.62;line-height:1;
+}
+.key.dual .main{line-height:1.05}
+@media (max-height:760px){
+  .key.dual .sub{display:none}
+}
