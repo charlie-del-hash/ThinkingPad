@@ -40,7 +40,7 @@
 
   var DEFAULT_PREFS = {
     font: 'period', size: 'm', wrap: true, list: true, keyboard: true,
-    night: false, glare: true, grain: true, sound: false, vol: 0.35, listWidth: 210
+    night: false, glare: true, grain: true, sound: false, vol: 0.35, listWidth: 176
   };
 
   var prefs = Object.assign({}, DEFAULT_PREFS, readJSON(PREFS_KEY, {}));
@@ -262,6 +262,53 @@
   }
 
   /* ---------------------------------------------------------
+     panel geometry — a 4:3 screen, and a case that fits the window
+
+     Measure the machine with the panel filling the height, subtract the
+     case from the space available, then hand the panel back a 4:3 box
+     and the case a width to match. Re-run whenever the window resizes
+     or a part of the case appears or disappears.
+     --------------------------------------------------------- */
+  var machine = $('#machine'), screenEl = $('.screen'), MIN_FIT_WIDTH = 820;
+
+  function fitScreen() {
+    body.classList.remove('fitted');
+    machine.style.removeProperty('--machine-w');
+    machine.style.removeProperty('--screen-h');
+
+    var deskStyle = window.getComputedStyle(desk);
+    var availW = desk.clientWidth -
+      (parseFloat(deskStyle.paddingLeft) || 0) - (parseFloat(deskStyle.paddingRight) || 0);
+    if (availW < MIN_FIT_WIDTH) return;         // phone-shaped window: stay fluid
+
+    var availH = machine.clientHeight;          // what the flex row grants the case
+    var pad = 6;                                // .screen padding, both sides
+    var chromeV = availH - screenEl.offsetHeight;
+    var chromeH = machine.clientWidth - screenEl.offsetWidth;
+
+    var screenH = availH - chromeV;
+    var lcdH = Math.max(180, screenH - pad);
+    var lcdW = lcdH * 4 / 3;
+
+    if (lcdW + pad + chromeH > availW) {        // short and wide: width decides instead
+      lcdW = availW - chromeH - pad;
+      lcdH = lcdW * 3 / 4;
+    }
+
+    machine.style.setProperty('--screen-h', Math.round(lcdH + pad) + 'px');
+    machine.style.setProperty('--machine-w', Math.round(lcdW + pad + chromeH) + 'px');
+    body.classList.add('fitted');
+  }
+
+  var fitPending = false;
+  function scheduleFit() {
+    if (fitPending) return;
+    fitPending = true;
+    requestAnimationFrame(function () { fitPending = false; fitScreen(); });
+  }
+  window.addEventListener('resize', scheduleFit);
+
+  /* ---------------------------------------------------------
      preferences applied to the machine
      --------------------------------------------------------- */
   function applyPrefs() {
@@ -283,6 +330,7 @@
       ? 'IBM Plex Mono (2017) — click for the period-correct face'
       : 'Courier New / Tahoma (period correct) — click for IBM Plex';
     savePrefs();
+    fitScreen();
   }
   function setFont(mode) {
     prefs.font = mode;
@@ -1058,6 +1106,7 @@
     var note = active();
     editor.value = note ? note.body : '';
     applyPrefs();
+    fitScreen();
     renderAll();
     if (note && note.caret) {
       var c = Math.min(note.caret, editor.value.length);

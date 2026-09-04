@@ -27,7 +27,7 @@
   --key-text:#c9ccd1;
 
   /* metrics */
-  --u:clamp(21px,2.45vh,30px);          /* key unit height          */
+  --u:clamp(21px,2.6vh,32px);           /* key unit height          */
   --key-gap:3px;
   --bezel:clamp(16px,2.2vh,26px);       /* side bezel width         */
   --radius:14px;
@@ -86,12 +86,25 @@ body{
   position:relative;
   flex:1 1 auto;
   width:min(1060px,97vw);
-  max-height:940px;
+  max-height:1000px;
   min-height:0;
   display:flex;
   flex-direction:column;
   filter:drop-shadow(0 26px 40px rgba(0,0,0,.62));
 }
+
+/* The panel is 4:3, the way every ThinkPad panel was before widescreen.
+   app.js measures the case around it and sets these two values so the
+   whole machine lands inside the window. Without JS the layout below
+   simply fills the height instead. */
+body.fitted .machine{
+  flex:0 0 auto;
+  width:var(--machine-w);
+  height:auto;
+  max-height:none;
+}
+body.fitted .lid{flex:0 0 auto}
+body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 
 /* =====================  LID  ===================== */
 .lid{

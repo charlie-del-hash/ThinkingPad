@@ -151,7 +151,7 @@ body.fs-l{--mono-size:15.5px}
 }
 .pane{display:flex;flex-direction:column;min-width:0;min-height:0}
 .pane-notes{
-  flex:0 0 auto;width:210px;min-width:120px;max-width:60%;
+  flex:0 0 auto;width:176px;min-width:110px;max-width:60%;
   padding-right:3px;gap:3px;
 }
 body.no-list .pane-notes,body.no-list .splitter{display:none}

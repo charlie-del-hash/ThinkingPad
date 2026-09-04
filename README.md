@@ -25,6 +25,14 @@ export anything you'd hate to lose.
 - Print (`Ctrl+P`) prints just the text, no chrome
 - `F5` stamps the time and date, the way Notepad always has
 
+## The panel
+
+A true 4:3 screen, the way every ThinkPad was before widescreen. `app.js`
+measures the case around it and sizes the panel so the whole machine lands
+inside your window, on every resize — on a 1920x1080 display that's roughly
+a 740x555 panel with the keyboard out, and 960x720 with it folded away
+(**View > Keyboard**), which is about what a T-series actually ran.
+
 ## Two typefaces
 
 | Mode | Chrome | Page | Why |
@@ -75,7 +83,7 @@ index.html          markup for the machine and the window on its screen
 css/chassis.css     the hardware: case, bezel, LEDs, keys, TrackPoint, ThinkLight
 css/notepad.css     the software: bevelled chrome, menus, listbox, dialogs, print
 js/keyboard.js      the seven-row keyboard — builds it, mirrors real keystrokes
-js/app.js           notes, storage, menus, dialogs, and the working hardware
+js/app.js           notes, storage, menus, dialogs, the 4:3 fitter, working hardware
 ```
 
 Storage keys: `thinkpad.notes.v1` (notes) and `thinkpad.prefs.v1` (typeface,
