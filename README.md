@@ -18,9 +18,12 @@ USB stick, email to yourself, or double-click from anywhere. `--fragment`
 writes the same page without the document wrapper, for hosts that supply
 their own.
 
-**On the web:** the repo is a static site as it stands, so GitHub Pages needs
-no workflow — *Settings > Pages > Deploy from a branch*, pick this branch and
-`/ (root)`, and `index.html` is served as-is.
+**On the web:** `.github/workflows/pages.yml` publishes the repository to
+GitHub Pages on every push. Pages has to be switched on once by hand —
+*Settings > Pages > Source: **GitHub Actions*** — because a workflow token is
+not allowed to switch it on for you; until then the job reports that and
+stops instead of failing. The site serves `index.html` at the root and the
+one-file copy at `/dist/thinkpad-notes.html`.
 
 ## What it does
 

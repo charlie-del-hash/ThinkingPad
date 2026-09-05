@@ -1,6 +1,10 @@
 # Publishes the notepad to GitHub Pages.
-# configure-pages turns Pages on the first time this runs, so there is
-# nothing to switch on by hand in the repository settings.
+#
+# It tries to switch Pages on by itself. A workflow token is usually
+# refused that ("Create Pages site: Resource not accessible by
+# integration"), in which case this job says so and stops rather than
+# failing — turn Pages on once at Settings > Pages > Source: GitHub
+# Actions and every run after that deploys.
 name: Pages
 
 on:
@@ -34,15 +38,28 @@ jobs:
         run: git diff --exit-code -- dist/
 
       - name: Configure Pages
+        id: pages
+        continue-on-error: true
         uses: actions/configure-pages@v5
         with:
           enablement: true
 
+      - name: Pages is not switched on yet
+        if: steps.pages.outcome != 'success'
+        run: |
+          echo "::notice title=GitHub Pages is off::Settings > Pages > Source: GitHub Actions, then re-run this workflow."
+          echo "Pages is not enabled for this repository, so there is nowhere to deploy to."
+          echo "The workflow token was not allowed to switch it on by itself."
+          echo "Enable it once here: https://github.com/${{ github.repository }}/settings/pages"
+          echo "Source: GitHub Actions. Then re-run this workflow and the site goes up."
+
       - name: Upload the site
+        if: steps.pages.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: .
 
       - name: Deploy
         id: deployment
+        if: steps.pages.outcome == 'success'
         uses: actions/deploy-pages@v4
