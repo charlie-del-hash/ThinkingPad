@@ -38,12 +38,7 @@
     catch (e) { return false; }
   }
 
-  var DEFAULT_PREFS = {
-    font: 'period', size: 'm', wrap: true, list: true, keyboard: true,
-    night: false, glare: true, grain: true, sound: false, vol: 0.35, listWidth: 176
-  };
-
-  var prefs = Object.assign({}, DEFAULT_PREFS, readJSON(PREFS_KEY, {}));
+  var prefs = TPSettings.migrate(readJSON(PREFS_KEY, null));
   var db = readJSON(NOTES_KEY, null);
   if (!db || !Array.isArray(db.notes)) db = { notes: [], activeId: null };
 
@@ -118,6 +113,7 @@
   function dateStamp(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
   function friendly(ts) {
     var d = new Date(ts), now = new Date();
+    if (prefs.dateFormat === 'iso') return dateStamp(d) + ' ' + clockStamp(d);
     var sameDay = d.toDateString() === now.toDateString();
     var yest = new Date(now.getTime() - 864e5).toDateString() === d.toDateString();
     if (sameDay) return clockStamp(d);
@@ -184,9 +180,16 @@
     });
   }
 
+  function sortNotes(a, b) {
+    if (prefs.sort === 'title') {
+      return titleOf(a).toLowerCase().localeCompare(titleOf(b).toLowerCase());
+    }
+    if (prefs.sort === 'created') return b.created - a.created;
+    return b.updated - a.updated;
+  }
   function visibleNotes() {
     var q = search.value.trim().toLowerCase();
-    var list = db.notes.slice().sort(function (a, b) { return b.updated - a.updated; });
+    var list = db.notes.slice().sort(sortNotes);
     if (!q) return list;
     return list.filter(function (n) {
       return String(n.body || '').toLowerCase().indexOf(q) !== -1;
@@ -270,12 +273,15 @@
      or a part of the case appears or disappears.
      --------------------------------------------------------- */
   var machine = $('#machine'), screenEl = $('.screen'), MIN_FIT_WIDTH = 820;
+  var ASPECTS = { '4:3': 4 / 3, '16:10': 1.6 };
 
   function fitScreen() {
     body.classList.remove('fitted');
     machine.style.removeProperty('--machine-w');
     machine.style.removeProperty('--screen-h');
+    if (!prefs.showCase || prefs.aspect === 'fill') return;
 
+    var ratio = ASPECTS[prefs.aspect] || ASPECTS['4:3'];
     var deskStyle = window.getComputedStyle(desk);
     var availW = desk.clientWidth -
       (parseFloat(deskStyle.paddingLeft) || 0) - (parseFloat(deskStyle.paddingRight) || 0);
@@ -288,11 +294,11 @@
 
     var screenH = availH - chromeV;
     var lcdH = Math.max(180, screenH - pad);
-    var lcdW = lcdH * 4 / 3;
+    var lcdW = lcdH * ratio;
 
     if (lcdW + pad + chromeH > availW) {        // short and wide: width decides instead
       lcdW = availW - chromeH - pad;
-      lcdH = lcdW * 3 / 4;
+      lcdH = lcdW / ratio;
     }
 
     machine.style.setProperty('--screen-h', Math.round(lcdH + pad) + 'px');
@@ -312,30 +318,68 @@
      preferences applied to the machine
      --------------------------------------------------------- */
   function applyPrefs() {
-    body.classList.toggle('font-plex', prefs.font === 'plex');
-    body.classList.toggle('font-period', prefs.font !== 'plex');
-    body.classList.remove('fs-s', 'fs-m', 'fs-l');
-    body.classList.add('fs-' + prefs.size);
-    body.classList.toggle('no-wrap', !prefs.wrap);
-    body.classList.toggle('no-list', !prefs.list);
-    body.classList.toggle('no-keyboard', !prefs.keyboard);
+    /* the machine */
+    body.dataset.case = prefs.caseFinish;
+    body.dataset.desk = prefs.desk;
+    body.dataset.cap = prefs.capStyle;
+    body.classList.toggle('no-case', !prefs.showCase);
+    body.classList.toggle('no-keyboard', !prefs.deck);
+    body.classList.toggle('no-tpb', !prefs.tpButtons);
+    body.classList.toggle('no-leds', !prefs.leds);
     body.classList.toggle('no-glare', !prefs.glare);
     body.classList.toggle('no-grain', !prefs.grain);
     body.classList.toggle('muted', !prefs.sound);
     desk.classList.toggle('night', !!prefs.night);
+
+    /* the screen */
+    lcd.dataset.theme = prefs.theme;
+    body.style.setProperty('--ui-font', TPSettings.UI_FONTS[prefs.uiFont] || TPSettings.UI_FONTS.tahoma);
+    body.style.setProperty('--mono-font', TPSettings.MONO_FONTS[prefs.monoFont] || TPSettings.MONO_FONTS.courier);
+    body.style.setProperty('--mono-size', prefs.fontSize + 'px');
+    body.style.setProperty('--mono-lh', String(prefs.lineHeight));
+    body.classList.toggle('no-wrap', !prefs.wrap);
+    body.classList.toggle('no-status', !prefs.statusbar);
     editor.setAttribute('wrap', prefs.wrap ? 'soft' : 'off');
+    editor.style.tabSize = String(prefs.tabSize);
+    editor.spellcheck = !!prefs.spellcheck;
+
+    /* the notes */
+    body.classList.toggle('no-list', !prefs.list);
+    body.classList.toggle('list-right', prefs.listSide === 'right');
     paneNotes.style.width = prefs.listWidth + 'px';
-    stFont.textContent = prefs.font === 'plex' ? 'IBM Plex Mono' : 'Courier New';
-    stFont.title = prefs.font === 'plex'
+
+    stFont.textContent = TPSettings.MONO_NAMES[prefs.monoFont] || prefs.monoFont;
+    stFont.title = prefs.preset === 'plex'
       ? 'IBM Plex Mono (2017) — click for the period-correct face'
-      : 'Courier New / Tahoma (period correct) — click for IBM Plex';
+      : 'Click to switch typeface — Settings for the rest';
     savePrefs();
     fitScreen();
   }
+
+  function applyPreset(name) {
+    if (name === 'period') { prefs.uiFont = 'tahoma'; prefs.monoFont = 'courier'; }
+    else if (name === 'plex') { prefs.uiFont = 'plex'; prefs.monoFont = 'plex'; }
+    prefs.preset = name;
+  }
   function setFont(mode) {
-    prefs.font = mode;
+    applyPreset(mode);
     applyPrefs();
-    setMsg(mode === 'plex' ? 'Typeface: IBM Plex — fifteen years early' : 'Typeface: period correct');
+    if (settingsForm) settingsForm.refresh();
+    setMsg(mode === 'plex' ? 'Typeface: IBM Plex — sixteen years early' : 'Typeface: period correct');
+  }
+  function nudgeSize(dir) {
+    prefs.fontSize = Math.max(10, Math.min(20, prefs.fontSize + dir));
+    applyPrefs();
+    if (settingsForm) settingsForm.refresh();
+    setMsg('Note size ' + prefs.fontSize + ' px');
+  }
+  function toggler(key, msg) {
+    return function () {
+      prefs[key] = !prefs[key];
+      applyPrefs();
+      if (settingsForm) settingsForm.refresh();
+      if (msg) setMsg(msg + (prefs[key] ? ' on' : ' off'));
+    };
   }
 
   /* ---------------------------------------------------------
@@ -399,11 +443,11 @@
   /* ---------------------------------------------------------
      dialogs
      --------------------------------------------------------- */
-  var openDialogEl = null;
+  var openDialogEl = null, settingsForm = null;
   function dialog(opts) {
     closeDialog();
     var dlg = document.createElement('div');
-    dlg.className = 'dlg';
+    dlg.className = 'dlg' + (opts.wide ? ' wide' : '');
     dlg.setAttribute('role', 'dialog');
     dlg.setAttribute('aria-modal', 'true');
 
@@ -446,6 +490,7 @@
   }
   function closeDialog() {
     if (!openDialogEl) return;
+    settingsForm = null;
     modalLayer.hidden = true;
     modalLayer.textContent = '';
     openDialogEl = null;
@@ -458,6 +503,41 @@
   /* ---------------------------------------------------------
      commands
      --------------------------------------------------------- */
+  /* Handing the viewer a file. A local page can just click an anchor;
+     a published copy has to ask its host, which shows its own prompt. */
+  var hostSave = null;
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(
+        function (d) { hostSave = d; },
+        function () { hostSave = null; }
+      );
+    } catch (e) { hostSave = null; }
+  }
+
+  function saveFile(filename, text, mime) {
+    if (hostSave) {
+      hostSave.save({ filename: filename, data: text }).then(function (r) {
+        setMsg((r && r.status === 'delivered' ? 'Sent ' : 'Saved ') + filename);
+      }, function (err) {
+        var code = err && err.code;
+        setMsg(code === 'declined' ? 'Save cancelled'
+          : 'Could not save ' + filename + (code ? ' — ' + code : ''));
+      });
+      return;
+    }
+    var blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    setMsg('Exported ' + filename);
+  }
+
   function saveNow() {
     if (flushSave()) setMsg('Saved to this browser · ' + timeStamp(new Date()));
   }
@@ -467,28 +547,16 @@
     if (!note) return;
     flushSave();
     var name = titleOf(note).replace(/[\\/:*?"<>|]+/g, '-').replace(/…$/, '').trim() || 'note';
-    var blob = new Blob([note.body], { type: 'text/plain;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = name + '.txt';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-    setMsg('Exported ' + name + '.txt');
+    saveFile(name + '.txt', note.body);
   }
 
   function exportAll() {
     flushSave();
-    var out = db.notes.slice().sort(function (a, b) { return b.updated - a.updated; })
+    var out = db.notes.slice().sort(sortNotes)
       .map(function (n) {
         return '=== ' + titleOf(n) + ' === (' + friendly(n.updated) + ')\n\n' + n.body;
       }).join('\n\n\n');
-    var blob = new Blob([out], { type: 'text/plain;charset=utf-8' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url; a.download = 'thinkpad-notes-' + dateStamp(new Date()) + '.txt';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
-    setMsg('Exported ' + db.notes.length + ' notes');
+    saveFile('thinkpad-notes-' + dateStamp(new Date()) + '.txt', out);
   }
 
   function importText(text, name) {
@@ -573,9 +641,129 @@
      --------------------------------------------------------- */
   function storageReport() {
     var bytes = 0;
-    try { bytes = (localStorage.getItem(NOTES_KEY) || '').length; } catch (e) {}
-    var kb = (bytes / 1024).toFixed(1);
-    return db.notes.length + ' note' + (db.notes.length === 1 ? '' : 's') + ' · ' + kb + ' KB of localStorage';
+    try {
+      bytes = (localStorage.getItem(NOTES_KEY) || '').length +
+              (localStorage.getItem(PREFS_KEY) || '').length;
+    } catch (e) {}
+    var words = 0;
+    db.notes.forEach(function (n) {
+      var t = String(n.body || '').trim();
+      if (t) words += t.split(/\s+/).length;
+    });
+    return db.notes.length + ' note' + (db.notes.length === 1 ? '' : 's') + ' · ' +
+           words + ' words · ' + (bytes / 1024).toFixed(1) + ' KB of localStorage';
+  }
+
+  /* ---------------------------------------------------------
+     settings
+     --------------------------------------------------------- */
+  function openSettings() {
+    var actions = {
+      report: storageReport,
+      backup: backupAll,
+      restore: function () { pickFile('json'); },
+      reset: resetSettings,
+      erase: eraseAllNotes
+    };
+    var form = TPSettings.buildForm(prefs, function (key, value, item) {
+      prefs[key] = value;
+      if (key === 'preset') applyPreset(value);
+      if (key === 'uiFont' || key === 'monoFont') prefs.preset = 'custom';
+      applyPrefs();
+      if (item && item.t !== 'range') form.refresh();
+    }, actions);
+
+    dialog({
+      title: 'Settings',
+      wide: true,
+      bodyHTML: '',
+      onBuild: function (bodyEl) { bodyEl.appendChild(form.node); },
+      buttons: [{ label: 'Close', primary: true }]
+    });
+    settingsForm = form;
+  }
+
+  function backupAll() {
+    flushSave();
+    var payload = {
+      app: 'thinkpad-notes', version: 1,
+      exported: new Date().toISOString(),
+      prefs: prefs, notes: db.notes
+    };
+    saveFile('thinkpad-notes-backup-' + dateStamp(new Date()) + '.json',
+             JSON.stringify(payload, null, 2), 'application/json');
+  }
+
+  function restoreFrom(text) {
+    var data;
+    try { data = JSON.parse(text); } catch (e) { data = null; }
+    if (!data || !Array.isArray(data.notes)) {
+      Sound.beep();
+      dialog({ title: 'Restore', bodyHTML: '<p>That is not a ThinkPad Notes backup.</p>' });
+      return;
+    }
+    dialog({
+      title: 'Restore backup',
+      bodyHTML: '<p>Replace everything on this machine with <b></b> note(s) from the backup?</p>' +
+                '<p class="hint">What is here now is overwritten and cannot be recovered.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(data.notes.length); },
+      buttons: [
+        { label: 'Restore', primary: true, act: function () {
+            db.notes = data.notes.filter(function (n) { return n && typeof n.body === 'string'; })
+              .map(function (n) {
+                return {
+                  id: n.id || uid(), body: n.body,
+                  created: n.created || Date.now(), updated: n.updated || Date.now(),
+                  caret: n.caret || 0
+                };
+              });
+            if (data.prefs) { prefs = TPSettings.migrate(data.prefs); }
+            if (!db.notes.length) db.notes.push({ id: uid(), body: '', created: Date.now(), updated: Date.now() });
+            db.activeId = db.notes[0].id;
+            editor.value = db.notes[0].body;
+            applyPrefs();
+            renderAll();
+            flushSave();
+            setMsg('Restored ' + db.notes.length + ' notes');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function resetSettings() {
+    dialog({
+      title: 'Reset settings',
+      bodyHTML: '<p>Put every switch back to standard? Your notes are not touched.</p>',
+      buttons: [
+        { label: 'Reset', primary: true, act: function () {
+            prefs = TPSettings.migrate(null);
+            applyPrefs();
+            renderAll();
+            setMsg('Settings reset');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function eraseAllNotes() {
+    dialog({
+      title: 'Erase all notes',
+      bodyHTML: '<p>Delete <b></b> note(s) permanently?</p>' +
+                '<p class="hint">Back up first — this cannot be undone.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(db.notes.length); },
+      buttons: [
+        { label: 'Erase', primary: true, act: function () {
+            db.notes = [];
+            db.activeId = null;
+            editor.value = '';
+            newNote('');
+            setMsg('All notes erased');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
   }
 
   function showHelp(tab) {
@@ -595,6 +783,8 @@
         'Nothing is uploaded, there is no account, and clearing site data erases it, ' +
         'so export anything you would miss.</p>' +
         '<div class="sunken">' + storageReport() + '</div>' +
+        '<p>Back up everything to a .json file from <b>Settings &gt; Data</b>, ' +
+        'and drop that file back on the screen to restore it.</p>' +
         '<h4>Typeface</h4>' +
         '<p><b>Period correct</b> is Tahoma for the chrome and Courier New for the page — ' +
         'what a ThinkPad actually put on screen around 2001.<br>' +
@@ -611,6 +801,8 @@
         '<dt>Ctrl+P</dt><dd>Print</dd>' +
         '<dt>F5</dt><dd>Stamp the time and date</dd>' +
         '<dt>Alt+L</dt><dd>ThinkLight</dd>' +
+        '<dt>Ctrl+,</dt><dd>Settings</dd>' +
+        '<dt>Alt+= / Alt+-</dt><dd>Bigger / smaller text</dd>' +
         '<dt>Esc</dt><dd>Close menu or dialog</dd>' +
         '</dl>' +
         '<p class="hint">Alt+F, Alt+E, Alt+O, Alt+V, Alt+H open the menus.</p>',
@@ -623,8 +815,11 @@
         '<dt>Access IBM</dt><dd>This window.</dd>' +
         '<dt>Volume</dt><dd>Key click volume. The dot lights when muted.</dd>' +
         '<dt>Power</dt><dd>Standby. Click anywhere to wake.</dd>' +
-        '<dt>Keyboard</dt><dd>Mirrors what you type; click the caps to type with the mouse.</dd>' +
-        '</dl>'
+        '<dt>Keyboard</dt><dd>Folded away by default. <b>View &gt; Keyboard</b> brings it back — ' +
+        'it mirrors what you type, and you can click the caps to type with the mouse.</dd>' +
+        '</dl>' +
+        '<p class="hint">Everything here, plus case finish, panel shape, colours and ' +
+        'typefaces, lives in <b>Settings</b> (Ctrl+,).</p>'
     };
     var tabs = $$('.dlg-tab', d);
     function show(name) {
@@ -644,11 +839,13 @@
   var MENUS = [
     { id: 'file', label: 'File', key: 'f', items: [
       { label: 'New Note', accel: 'Alt+N', act: function () { newNote(''); } },
-      { label: 'Open .txt…', act: function () { fileInput.click(); } },
+      { label: 'Open .txt…', act: function () { pickFile('txt'); } },
       SEP,
       { label: 'Save Now', accel: 'Ctrl+S', act: saveNow },
       { label: 'Export .txt', accel: 'Ctrl+E', act: exportTxt },
       { label: 'Export All Notes…', act: exportAll },
+      { label: 'Back Up Everything…', act: backupAll },
+      { label: 'Restore Backup…', act: function () { pickFile('json'); } },
       { label: 'Print…', accel: 'Ctrl+P', act: printNote },
       SEP,
       { label: 'Delete Note', accel: 'Ctrl+D', act: deleteNote }
@@ -662,32 +859,37 @@
       { label: 'Next Note', accel: 'Ctrl+]', act: function () { cycleNote(1); } }
     ]},
     { id: 'format', label: 'Format', key: 'o', items: [
-      { label: 'Period Correct (Courier New)', radio: 'font', value: 'period',
+      { label: 'Period Correct — Tahoma / Courier New', radio: 'preset', value: 'period',
         act: function () { setFont('period'); } },
-      { label: 'IBM Plex (anachronistic)', radio: 'font', value: 'plex',
+      { label: 'IBM Plex — sixteen years early', radio: 'preset', value: 'plex',
         act: function () { setFont('plex'); } },
       SEP,
-      { label: 'Small', radio: 'size', value: 's', act: function () { prefs.size = 's'; applyPrefs(); } },
-      { label: 'Medium', radio: 'size', value: 'm', act: function () { prefs.size = 'm'; applyPrefs(); } },
-      { label: 'Large', radio: 'size', value: 'l', act: function () { prefs.size = 'l'; applyPrefs(); } },
+      { label: 'Larger Text', accel: 'Alt+=', act: function () { nudgeSize(1); } },
+      { label: 'Smaller Text', accel: 'Alt+-', act: function () { nudgeSize(-1); } },
+      { label: 'Word Wrap', check: 'wrap', act: toggler('wrap', 'Word wrap') },
+      { label: 'Spell Check', check: 'spellcheck', act: toggler('spellcheck', 'Spell check') },
       SEP,
-      { label: 'Word Wrap', check: 'wrap', act: function () { prefs.wrap = !prefs.wrap; applyPrefs(); } }
+      { label: 'Settings…', accel: 'Ctrl+,', act: openSettings }
     ]},
     { id: 'view', label: 'View', key: 'v', items: [
-      { label: 'Note List', check: 'list', act: function () { prefs.list = !prefs.list; applyPrefs(); } },
-      { label: 'Keyboard', check: 'keyboard', act: function () { prefs.keyboard = !prefs.keyboard; applyPrefs(); } },
+      { label: 'Keyboard', check: 'deck', act: toggler('deck', 'Keyboard') },
+      { label: 'Note List', check: 'list', act: toggler('list', 'Note list') },
+      { label: 'Status Bar', check: 'statusbar', act: toggler('statusbar', 'Status bar') },
+      { label: 'The Machine', check: 'showCase', act: toggler('showCase', 'Case') },
       SEP,
       { label: 'ThinkLight', accel: 'Alt+L', check: 'night', act: toggleThinkLight },
-      { label: 'Screen Glare', check: 'glare', act: function () { prefs.glare = !prefs.glare; applyPrefs(); } },
-      { label: 'LCD Grain', check: 'grain', act: function () { prefs.grain = !prefs.grain; applyPrefs(); } },
+      { label: 'Screen Glare', check: 'glare', act: toggler('glare', 'Glare') },
+      { label: 'LCD Grain', check: 'grain', act: toggler('grain', 'Grain') },
       { label: 'Key Click', check: 'sound', act: function () { setVolume(0); } },
       SEP,
+      { label: 'Settings…', accel: 'Ctrl+,', act: openSettings },
       { label: 'Standby', act: function () { setStandby(true); } }
     ]},
     { id: 'help', label: 'Help', key: 'h', items: [
       { label: 'Keyboard Shortcuts', act: function () { showHelp('keys'); } },
       { label: 'The Hardware', act: function () { showHelp('hw'); } },
       SEP,
+      { label: 'Settings…', accel: 'Ctrl+,', act: openSettings },
       { label: 'About ThinkPad Notes', act: function () { showHelp('about'); } }
     ]}
   ];
@@ -837,21 +1039,31 @@
   });
   stFont.addEventListener('click', function () { setFont(prefs.font === 'plex' ? 'period' : 'plex'); });
 
-  fileInput.addEventListener('change', function () {
-    var f = fileInput.files && fileInput.files[0];
-    if (!f) return;
+  var fileMode = 'txt';
+  function pickFile(mode) {
+    fileMode = mode;
+    fileInput.accept = mode === 'json' ? '.json,application/json' : '.txt,.md,text/plain';
+    fileInput.click();
+  }
+  function readFile(f, mode) {
     var reader = new FileReader();
     reader.onload = function () {
-      importText(String(reader.result || ''), f.name.replace(/\.[^.]+$/, ''));
+      var text = String(reader.result || '');
+      if (mode === 'json' || /\.json$/i.test(f.name)) restoreFrom(text);
+      else importText(text, f.name.replace(/\.[^.]+$/, ''));
     };
     reader.readAsText(f);
+  }
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    if (f) readFile(f, fileMode);
     fileInput.value = '';
   });
 
   /* drag a .txt onto the screen */
   var dropzone = document.createElement('div');
   dropzone.className = 'dropzone';
-  dropzone.innerHTML = '<span>Drop a .txt file to open it</span>';
+  dropzone.innerHTML = '<span>Drop a .txt file to open it, or a .json backup to restore</span>';
   lcd.appendChild(dropzone);
   ['dragenter', 'dragover'].forEach(function (ev) {
     lcd.addEventListener(ev, function (e) {
@@ -870,12 +1082,7 @@
   });
   lcd.addEventListener('drop', function (e) {
     var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
-    if (!f) return;
-    var reader = new FileReader();
-    reader.onload = function () {
-      importText(String(reader.result || ''), f.name.replace(/\.[^.]+$/, ''));
-    };
-    reader.readAsText(f);
+    if (f) readFile(f, /\.json$/i.test(f.name) ? 'json' : 'txt');
   });
 
   /* ---------------------------------------------------------
@@ -1048,6 +1255,8 @@
       if (e.key.toLowerCase() === 'n') { e.preventDefault(); newNote(''); return; }
       if (e.key.toLowerCase() === 'l') { e.preventDefault(); toggleThinkLight(); return; }
       if (e.key.toLowerCase() === 'i') { e.preventDefault(); search.focus(); search.select(); return; }
+      if (e.key === '=' || e.key === '+') { e.preventDefault(); nudgeSize(1); return; }
+      if (e.key === '-' || e.key === '_') { e.preventDefault(); nudgeSize(-1); return; }
     }
 
     if (e.key === 'F5' && document.activeElement === editor) {
@@ -1061,6 +1270,7 @@
     else if (k === 'f') { e.preventDefault(); search.focus(); search.select(); }
     else if (k === 'e') { e.preventDefault(); exportTxt(); }
     else if (k === 'p') { e.preventDefault(); printNote(); }
+    else if (k === ',') { e.preventDefault(); openSettings(); }
     else if (k === '[') { e.preventDefault(); cycleNote(-1); }
     else if (k === ']') { e.preventDefault(); cycleNote(1); }
   });
@@ -1085,6 +1295,10 @@
     'no sync. Export anything you would hate to lose (Ctrl+E).\n' +
     '\n' +
     'Things worth trying:\n' +
+    '  * Settings — in the Format menu, or Ctrl and the comma key — holds\n' +
+    '    the case finish, panel shape, screen colours and typefaces.\n' +
+    '  * View > Keyboard unfolds the seven-row keyboard. It mirrors what\n' +
+    '    you type, at the cost of some screen.\n' +
     '  * The lamp above the screen is the ThinkLight (Alt+L).\n' +
     '  * Push the red TrackPoint to scroll a long note.\n' +
     '  * Format menu: period-correct Courier New, or the anachronistic\n' +
@@ -1102,6 +1316,11 @@
       writeJSON(NOTES_KEY, db);
     }
     if (!active()) db.activeId = db.notes[0].id;
+
+    if (prefs.startup === 'new' && String((active() || {}).body || '').trim()) {
+      db.notes.unshift({ id: uid(), body: '', created: Date.now(), updated: Date.now(), caret: 0 });
+      db.activeId = db.notes[0].id;
+    }
 
     var note = active();
     editor.value = note ? note.body : '';

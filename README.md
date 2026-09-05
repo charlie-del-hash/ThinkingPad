@@ -12,6 +12,16 @@ git clone <this repo> && open index.html
 # or, if you'd rather serve it:  python3 -m http.server
 ```
 
+**One file instead:** `node build.js` folds the whole machine into
+`dist/thinkpad-notes.html` — a single self-contained page you can drop on a
+USB stick, email to yourself, or double-click from anywhere. `--fragment`
+writes the same page without the document wrapper, for hosts that supply
+their own.
+
+**On the web:** the repo is a static site as it stands, so GitHub Pages needs
+no workflow — *Settings > Pages > Deploy from a branch*, pick this branch and
+`/ (root)`, and `index.html` is served as-is.
+
 ## What it does
 
 Plain text notes, nothing else. The first line of a note becomes its title.
@@ -29,9 +39,29 @@ export anything you'd hate to lose.
 
 A true 4:3 screen, the way every ThinkPad was before widescreen. `app.js`
 measures the case around it and sizes the panel so the whole machine lands
-inside your window, on every resize — on a 1920x1080 display that's roughly
-a 740x555 panel with the keyboard out, and 960x720 with it folded away
-(**View > Keyboard**), which is about what a T-series actually ran.
+inside your window, on every resize.
+
+The keyboard starts folded away, which on a 1920x1080 display gives about a
+960x720 panel — near enough to what a T-series actually ran. **View >
+Keyboard** unfolds it, at the cost of roughly 170 vertical pixels of screen
+(740x555). The panel stays 4:3 either way; **Settings > Machine > Panel
+shape** offers 16:10 or fill-the-window if you'd rather have the pixels.
+
+## Settings
+
+**Ctrl+comma**, or **Format > Settings**. Everything is saved the moment you
+change it.
+
+| Tab | What's in it |
+| --- | --- |
+| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, ThinkLight, screen glare, LCD grain, key click and its volume |
+| **Screen** | Colour scheme (classic grey / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
+| **Notes** | Note list on or off, list on the left or right, list width, sort by last edited / created / title, date format, and whether opening the app resumes your last note or starts a blank one |
+| **Data** | Back up everything to `.json`, restore from a backup, reset every setting, erase all notes — with a live count of notes, words and storage used |
+
+Turning the machine off entirely (**Machine > Show the machine**) leaves the
+notepad alone in the window, which is the mode to use when you actually have
+to get work done.
 
 ## Two typefaces
 
@@ -44,11 +74,16 @@ Switch in **Format**, or click the typeface name in the status bar. The choice
 is remembered. Plex is pulled from Google Fonts when you're online and falls
 back to the period stack when you aren't, so the app works offline either way.
 
+Either face can be picked apart in **Settings > Screen** — Verdana, MS Sans
+Serif or a system stack for the chrome; Lucida Console, Andale Mono, Consolas
+or a system mono for the page — which switches the preset to Custom.
+
 ## Things on the machine that work
 
 | Part | What it does |
 | --- | --- |
 | ThinkLight (the lamp above the screen) | Darkens the room and throws a warm cone over the keys. `Alt+L` |
+| Keyboard | Folded away by default — **View > Keyboard** brings it back |
 | TrackPoint | Push the red nub to scroll a long note, like the real thing |
 | Mouse buttons | Left and right walk through your notes |
 | Access IBM (blue button) | Help, shortcuts, and how much storage you've used |
@@ -70,6 +105,8 @@ back to the period stack when you aren't, so the app works offline either way.
 | `Ctrl+P` | Print |
 | `F5` | Stamp time and date |
 | `Alt+L` | ThinkLight |
+| `Ctrl+,` | Settings |
+| `Alt+=` / `Alt+-` | Bigger / smaller text |
 | `Alt+F` `Alt+E` `Alt+O` `Alt+V` `Alt+H` | Open the menus |
 | `Esc` | Close a menu or dialog |
 
@@ -82,12 +119,20 @@ why New is `Alt+N`.
 index.html          markup for the machine and the window on its screen
 css/chassis.css     the hardware: case, bezel, LEDs, keys, TrackPoint, ThinkLight
 css/notepad.css     the software: bevelled chrome, menus, listbox, dialogs, print
+css/themes.css      case finishes, desk surfaces, panel colours, the settings form
+js/settings.js      the settings spec, its form, and migration of older preferences
 js/keyboard.js      the seven-row keyboard — builds it, mirrors real keystrokes
 js/app.js           notes, storage, menus, dialogs, the 4:3 fitter, working hardware
+build.js            folds all of the above into dist/thinkpad-notes.html
 ```
 
-Storage keys: `thinkpad.notes.v1` (notes) and `thinkpad.prefs.v1` (typeface,
-size, wrap, ThinkLight, glare, grain, sound, pane width).
+Storage keys: `thinkpad.notes.v1` (notes) and `thinkpad.prefs.v1` (every
+setting). Preferences saved by an older version are migrated on load rather
+than discarded.
+
+Exports use a plain download link when the page is opened from a file or a
+server. When it runs somewhere that mediates saves — a sandboxed host — it
+asks that host instead, so Export and Back Up work in both places.
 
 ## Not affiliated with anyone
 

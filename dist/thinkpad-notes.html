@@ -1,0 +1,3067 @@
+<!doctype html>
+<!-- ThinkPad Notes — built 2026-09-05 by build.js. Edit the sources, not this file. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ThinkPad Notes</title>
+<meta name="description" content="A skeuomorphic plain-text notepad in the shape of an early-2000s IBM ThinkPad.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231d1f23'/%3E%3Crect x='5' y='8' width='22' height='14' rx='1' fill='%23cfd8d0'/%3E%3Ccircle cx='16' cy='26' r='2.5' fill='%23d21f3c'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* css/chassis.css */
+/* ============================================================
+   chassis.css — the physical machine
+   An early-2000s IBM ThinkPad (A/T series era, 1999-2004):
+   matte black magnesium-look plastic, chunky bezel, red
+   TrackPoint, blue Access IBM button, ThinkLight.
+   ============================================================ */
+
+:root{
+  /* casing */
+  --case:#1c1e22;
+  --case-dk:#141518;
+  --case-dkr:#0c0d0f;
+  --case-lt:#292c32;
+  --case-edge:#3d424a;
+  --hair:rgba(255,255,255,.075);
+  --hair-lo:rgba(255,255,255,.04);
+  --shadow:rgba(0,0,0,.65);
+
+  /* accents */
+  --tp-red:#d4213c;
+  --tp-red-lt:#f0475f;
+  --tp-red-dk:#7d0f20;
+  --ibm-blue:#2a6ec7;
+  --ibm-blue-lt:#5b9df0;
+  --led-green:#63ff86;
+  --led-amber:#ffb63d;
+  --key-text:#c9ccd1;
+
+  /* metrics */
+  --u:clamp(21px,2.6vh,32px);           /* key unit height          */
+  --key-gap:3px;
+  --bezel:clamp(16px,2.2vh,26px);       /* side bezel width         */
+  --radius:14px;
+
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:#0e0f11;
+  color:#e8e8e8;
+  overflow:hidden;
+  -webkit-text-size-adjust:100%;
+}
+
+/* ---------- the desk / room ---------- */
+.desk{
+  position:relative;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:clamp(6px,1.6vh,20px) 10px;
+  background:
+    radial-gradient(120% 95% at 50% -12%, #55565b 0%, #35373b 30%, #212327 60%, #131416 88%, #0d0e10 100%);
+  transition:background .5s ease;
+}
+.desk::after{ /* desk grain */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--noise);opacity:.16;mix-blend-mode:overlay;
+}
+.room-light{
+  position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 45% at 50% 8%, rgba(255,244,214,.10), transparent 70%);
+  opacity:0;transition:opacity .45s ease;
+}
+.desk.night{
+  background:radial-gradient(120% 90% at 50% 0%, #131417 0%, #0a0b0c 45%, #050506 100%);
+}
+.desk.night .room-light{opacity:1}
+
+.footnote{
+  flex:0 0 auto;margin:0;
+  font:400 10px/1.5 Tahoma,Verdana,sans-serif;
+  color:#5c6068;text-align:center;letter-spacing:.02em;
+  max-width:70ch;
+}
+@media (max-height:700px){ .footnote{display:none} }
+
+/* ---------- the machine ---------- */
+.machine{
+  position:relative;
+  flex:1 1 auto;
+  width:min(1060px,97vw);
+  max-height:1000px;
+  min-height:0;
+  display:flex;
+  flex-direction:column;
+  filter:drop-shadow(0 26px 40px rgba(0,0,0,.62));
+}
+
+/* The panel is 4:3, the way every ThinkPad panel was before widescreen.
+   app.js measures the case around it and sets these two values so the
+   whole machine lands inside the window. Without JS the layout below
+   simply fills the height instead. */
+body.fitted .machine{
+  flex:0 0 auto;
+  width:var(--machine-w);
+  height:auto;
+  max-height:none;
+}
+body.fitted .lid{flex:0 0 auto}
+body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
+
+/* =====================  LID  ===================== */
+.lid{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;
+  position:relative;
+  padding:6px 6px 0;
+  border-radius:var(--radius) var(--radius) 3px 3px;
+  background:
+    linear-gradient(180deg,var(--case-lt) 0%,var(--case) 4px,var(--case) 100%);
+  box-shadow:
+    inset 0 1px 0 var(--hair),
+    inset 1px 0 0 var(--hair-lo),
+    inset -1px 0 0 var(--hair-lo),
+    0 2px 0 var(--case-dkr);
+}
+.lid-latches{
+  position:absolute;top:-5px;left:0;right:0;height:6px;
+  display:flex;justify-content:center;gap:26%;
+}
+.lid-latches i{
+  width:44px;height:6px;border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,var(--case-lt),var(--case-dk));
+  box-shadow:inset 0 1px 0 var(--hair);
+}
+
+.bezel{
+  flex:1 1 auto;min-height:0;
+  display:flex;flex-direction:column;
+  padding:0 var(--bezel);
+  border-radius:9px 9px 2px 2px;
+  background:
+    linear-gradient(180deg,#26282d,#191b1f 30%,#16181b 100%);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.55);
+  position:relative;overflow:hidden;
+}
+.bezel::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--noise);opacity:.2;mix-blend-mode:overlay;
+}
+
+.bezel-top{
+  flex:0 0 auto;height:clamp(14px,2vh,22px);
+  display:flex;align-items:center;justify-content:center;
+}
+.thinklight{
+  appearance:none;border:0;background:none;padding:4px 10px;cursor:pointer;
+  display:flex;align-items:center;gap:6px;position:relative;
+}
+.thinklight .bulb{
+  width:9px;height:5px;border-radius:5px 5px 2px 2px;
+  background:linear-gradient(180deg,#4b4f56,#2a2d32);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  transition:background .2s,box-shadow .2s;
+}
+.thinklight::after{ /* engraved lamp label */
+  content:"";position:absolute;inset:auto auto -1px 50%;
+  transform:translateX(-50%);
+  width:26px;height:1px;background:rgba(255,255,255,.05);
+}
+.desk.night .thinklight .bulb{
+  background:linear-gradient(180deg,#fff9e6,#ffe9a8);
+  box-shadow:0 0 6px 2px rgba(255,232,170,.75),0 0 16px 6px rgba(255,226,150,.35);
+}
+
+/* screen well */
+.screen{
+  flex:1 1 auto;min-height:0;position:relative;
+  padding:3px;border-radius:3px;
+  background:linear-gradient(180deg,#0a0b0c,#101113);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.9),
+    0 1px 0 var(--hair-lo);
+}
+.bumper{
+  position:absolute;width:7px;height:7px;border-radius:50%;z-index:5;
+  background:radial-gradient(circle at 35% 30%,#3b3f45,#15161a 70%);
+  box-shadow:0 1px 1px rgba(0,0,0,.6);
+}
+.bumper.tl{top:-5px;left:-5px} .bumper.tr{top:-5px;right:-5px}
+.bumper.bl{bottom:-5px;left:-5px} .bumper.br{bottom:-5px;right:-5px}
+
+/* the panel itself */
+.lcd{
+  position:relative;height:100%;width:100%;overflow:hidden;
+  border-radius:1px;
+  background:#c3c7c2;
+  isolation:isolate;
+}
+.lcd-inner{position:absolute;inset:0;display:flex;overflow:hidden}
+
+/* subpixel grain + vignette */
+.lcd-grain{
+  position:absolute;inset:0;pointer-events:none;z-index:3;
+  background:
+    repeating-linear-gradient(90deg,rgba(0,0,0,.035) 0 1px,transparent 1px 3px),
+    radial-gradient(120% 120% at 50% 50%,transparent 58%,rgba(20,26,20,.16) 100%);
+  opacity:1;transition:opacity .25s;
+}
+body.no-grain .lcd-grain{opacity:0}
+
+/* backlight glare on the glass */
+.lcd-glare{
+  position:absolute;inset:0;pointer-events:none;z-index:4;
+  background:
+    linear-gradient(122deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.05) 22%,transparent 42%),
+    linear-gradient(0deg,rgba(255,255,255,.05),transparent 30%);
+  opacity:1;transition:opacity .25s;
+}
+body.no-glare .lcd-glare{opacity:0}
+
+/* dimmed / asleep */
+.lcd-dark{
+  position:absolute;inset:0;z-index:70;pointer-events:none;
+  background:#05060a;opacity:0;transition:opacity .6s ease;
+}
+.desk.standby .lcd-dark{opacity:.985}
+.desk.night .lcd-dark{opacity:.11}
+.desk.night.standby .lcd-dark{opacity:.985}
+
+/* bezel foot: IBM · indicators · ThinkPad */
+.bezel-foot{
+  flex:0 0 auto;height:clamp(20px,2.9vh,30px);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:0 2px;position:relative;z-index:2;
+}
+.ibm-logo{width:9ch;flex:0 0 auto}
+.ibm-logo span{
+  display:inline-block;
+  font:700 clamp(11px,1.5vh,15px)/1 Rockwell,"Courier New",Georgia,serif;
+  letter-spacing:.06em;
+  background-image:repeating-linear-gradient(
+    180deg,#b9bec6 0 2px,rgba(0,0,0,0) 2px 3px);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.6));
+}
+.tp-logo{
+  flex:0 0 auto;text-align:right;position:relative;
+  font:600 clamp(10px,1.45vh,14px)/1 Tahoma,Verdana,sans-serif;
+  letter-spacing:-.01em;color:#9aa0a8;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,.55));
+}
+.tp-logo .i{position:relative;display:inline-block}
+.tp-logo .i b{
+  position:absolute;left:50%;top:-.34em;transform:translateX(-50%);
+  width:.26em;height:.26em;border-radius:1px;background:var(--tp-red);
+  box-shadow:0 0 3px rgba(212,33,60,.7);
+}
+.leds{display:flex;align-items:center;gap:clamp(6px,1.1vw,14px)}
+.led-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
+.led{
+  width:5px;height:5px;border-radius:50%;
+  background:#1a1c20;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+  transition:background .12s,box-shadow .12s;
+}
+.led em{font-style:normal}
+.led-cell em{
+  font:400 clamp(5px,.72vh,7px)/1 Tahoma,Verdana,sans-serif;
+  letter-spacing:.06em;color:#575c64;
+}
+.led.on{background:var(--led-green);box-shadow:0 0 5px rgba(99,255,134,.75),inset 0 0 2px rgba(255,255,255,.7)}
+.led.amber{background:var(--led-amber);box-shadow:0 0 5px rgba(255,182,61,.7),inset 0 0 2px rgba(255,255,255,.6)}
+.led.blink{animation:ledblink .16s steps(1) 2}
+@keyframes ledblink{0%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}100%{background:#1a1c20;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}}
+.led.pulse{animation:ledpulse 2.4s ease-in-out infinite}
+@keyframes ledpulse{
+  0%,100%{background:#3a2c12;box-shadow:none}
+  50%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}
+}
+
+/* =====================  HINGES  ===================== */
+.hinges{
+  flex:0 0 auto;height:9px;display:flex;align-items:stretch;
+  padding:0 34px;gap:0;
+}
+.hinges .hinge{
+  width:78px;border-radius:0 0 4px 4px;
+  background:linear-gradient(180deg,#2e3238,#15161a 60%,#0d0e10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 3px rgba(0,0,0,.5);
+}
+.hinge-gap{
+  flex:1;
+  background:linear-gradient(180deg,#0a0b0c,#131418);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.8);
+  margin:0 6px;border-radius:0 0 2px 2px;
+}
+
+/* =====================  BASE  ===================== */
+.base{
+  flex:0 0 auto;
+  padding:5px 10px 0;
+  border-radius:3px 3px calc(var(--radius) + 4px) calc(var(--radius) + 4px);
+  background:linear-gradient(180deg,#232529,#1a1c20 40%,#141519);
+  box-shadow:
+    inset 0 1px 0 var(--hair),
+    inset 1px 0 0 var(--hair-lo),
+    inset -1px 0 0 var(--hair-lo),
+    0 10px 0 -2px rgba(0,0,0,.5);
+  position:relative;
+}
+.base::after{
+  content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+  background-image:var(--noise);opacity:.18;mix-blend-mode:overlay;
+}
+
+/* top row: Access IBM, speaker holes, volume, power */
+.topdeck{
+  height:clamp(18px,2.4vh,26px);
+  display:flex;align-items:center;gap:10px;
+  padding:0 6px 2px;position:relative;z-index:2;
+}
+.access-ibm{
+  appearance:none;cursor:pointer;
+  padding:2px 9px;border-radius:3px;
+  border:1px solid #0e3a76;
+  background:linear-gradient(180deg,var(--ibm-blue-lt),var(--ibm-blue) 45%,#1b508f);
+  color:#eaf2ff;
+  font:700 clamp(7px,.95vh,9px)/1.4 Tahoma,Verdana,sans-serif;
+  letter-spacing:.04em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.6);
+  white-space:nowrap;
+}
+.access-ibm:hover{filter:brightness(1.12)}
+.access-ibm:active{
+  transform:translateY(1px);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.5);
+}
+.drilled{
+  flex:1;height:8px;border-radius:4px;
+  background-image:radial-gradient(circle,#0a0b0c 32%,transparent 34%);
+  background-size:7px 7px;background-position:0 1px;
+  opacity:.85;
+}
+.hw-buttons{display:flex;align-items:center;gap:5px}
+.hwb{
+  appearance:none;cursor:pointer;width:20px;height:11px;border-radius:2px;
+  border:1px solid #0a0b0d;
+  background:linear-gradient(180deg,#34383f,#1c1e22);
+  color:#9aa0a8;font:700 8px/1 Tahoma,sans-serif;
+  display:inline-flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.5);
+}
+.hwb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.mute-led{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#1a1c20;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+}
+body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182,61,.8)}
+.power{
+  appearance:none;cursor:pointer;
+  width:22px;height:22px;border-radius:50%;border:1px solid #0a0b0d;
+  background:radial-gradient(circle at 40% 32%,#3a3e45,#1a1c20 62%,#101114);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.6);
+  display:grid;place-items:center;margin-left:4px;
+}
+.power .ring{
+  width:9px;height:9px;border-radius:50%;
+  border:1.5px solid #7f858d;border-top-color:transparent;
+  position:relative;
+}
+.power .ring::after{
+  content:"";position:absolute;left:50%;top:-3px;transform:translateX(-50%);
+  width:1.5px;height:6px;background:#7f858d;border-radius:1px;
+}
+.power:active{transform:translateY(1px)}
+.desk:not(.standby) .power .ring{border-color:#9fe3ad;border-top-color:transparent}
+.desk:not(.standby) .power .ring::after{background:#9fe3ad}
+
+/* =====================  KEYBOARD  ===================== */
+.keyboard{
+  position:relative;z-index:2;
+  padding:6px 8px 7px;
+  display:flex;flex-direction:column;gap:var(--key-gap);
+  background:linear-gradient(180deg,#101114,#0c0d0f);
+  border-radius:4px;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.85),0 1px 0 var(--hair-lo);
+}
+body.no-keyboard .keyboard{display:none}
+.krow{display:flex;gap:var(--key-gap);height:var(--u)}
+.krow.fn-row{height:calc(var(--u) * .72)}
+.key{
+  appearance:none;
+  flex:1 1 0;min-width:0;
+  border:0;border-radius:3px 3px 5px 5px;
+  background:linear-gradient(180deg,#3a3e45 0%,#2a2d33 42%,#1f2228 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 -2px 3px rgba(0,0,0,.45),
+    0 2px 2px rgba(0,0,0,.55);
+  color:var(--key-text);
+  font:500 clamp(6px,.98vh,10px)/1.1 Tahoma,Verdana,sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  padding:0 1px;cursor:pointer;user-select:none;
+  transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
+  overflow:hidden;text-overflow:clip;white-space:nowrap;
+}
+.key.wide-label{font-size:clamp(5px,.82vh,8px)}
+.key.fn{color:var(--ibm-blue-lt)}
+.key.spacer{background:none;box-shadow:none;pointer-events:none}
+.key.down,.key:active{
+  transform:translateY(1.5px);
+  background:linear-gradient(180deg,#2b2e34,#232227 60%,#1b1d21);
+  box-shadow:inset 0 2px 4px rgba(0,0,0,.7),0 0 0 rgba(0,0,0,0);
+}
+.desk.night .key{
+  color:#e6dcc0;
+  box-shadow:
+    inset 0 1px 0 rgba(255,244,214,.22),
+    inset 0 -2px 3px rgba(0,0,0,.45),
+    0 2px 2px rgba(0,0,0,.55);
+}
+
+/* TrackPoint */
+.trackpoint{
+  position:absolute;z-index:6;
+  left:45.4%;top:65%;
+  transform:translate(-50%,-50%);
+  width:calc(var(--u) * .62);height:calc(var(--u) * .62);
+  max-width:20px;max-height:20px;min-width:12px;min-height:12px;
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 34% 28%,var(--tp-red-lt),var(--tp-red) 46%,var(--tp-red-dk) 100%);
+  box-shadow:0 1px 2px rgba(0,0,0,.7),inset 0 -1px 2px rgba(0,0,0,.35);
+  cursor:grab;touch-action:none;
+}
+.trackpoint::after{ /* the cat's-tongue cap texture */
+  content:"";position:absolute;inset:1px;border-radius:50%;
+  background-image:radial-gradient(circle,rgba(0,0,0,.45) 34%,transparent 36%);
+  background-size:3px 3px;opacity:.65;
+}
+.trackpoint:active,.trackpoint.dragging{cursor:grabbing}
+.trackpoint.dragging{box-shadow:0 0 0 2px rgba(212,33,60,.25),0 1px 2px rgba(0,0,0,.7)}
+
+/* =====================  PALM REST  ===================== */
+.palmrest{
+  position:relative;z-index:2;
+  height:clamp(30px,5.4vh,56px);
+  margin-top:4px;
+  border-radius:2px 2px 10px 10px;
+  background:linear-gradient(180deg,#1e2024,#191b1f 55%,#141619);
+  box-shadow:inset 0 1px 0 var(--hair-lo);
+  display:flex;align-items:flex-start;justify-content:center;
+}
+.tp-buttons{
+  margin-top:-1px;display:flex;gap:2px;
+  width:clamp(150px,22%,210px);height:clamp(12px,1.8vh,18px);
+}
+.tpb{
+  appearance:none;border:0;cursor:pointer;flex:1;
+  background:linear-gradient(180deg,#33373d,#212429 60%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 1px 2px rgba(0,0,0,.5);
+}
+.tpb.left{border-radius:0 0 0 8px}
+.tpb.right{border-radius:0 0 8px 0}
+.tpb.center{
+  flex:0 0 26%;
+  background:linear-gradient(180deg,#3b6fb5,#28517f 60%,#1d3c60);
+  position:relative;
+}
+.tpb.center::after{
+  content:"";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:2px;height:60%;border-radius:1px;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 1px,transparent 1px 3px);
+}
+.tpb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.badge{position:absolute;left:16px;bottom:8px}
+.badge-plate{
+  display:inline-block;padding:2px 7px;border-radius:2px;
+  font:600 clamp(6px,.9vh,9px)/1.2 Tahoma,Verdana,sans-serif;
+  letter-spacing:.02em;color:#6f757d;
+  background:linear-gradient(180deg,#232529,#191b1e);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5);
+}
+.front-lip{
+  height:8px;margin:0 -10px;
+  border-radius:0 0 var(--radius) var(--radius);
+  background:linear-gradient(180deg,#111214,#08090a);
+  display:flex;justify-content:center;gap:26%;align-items:flex-start;
+}
+.front-lip .latch-slot{
+  width:40px;height:3px;border-radius:0 0 2px 2px;
+  background:#050506;box-shadow:inset 0 1px 1px rgba(0,0,0,.9);
+}
+
+/* =====================  THINKLIGHT  ===================== */
+/* warm cone thrown from the top of the lid down onto the keys */
+.base .light-cone{
+  position:absolute;left:0;right:0;top:-10px;bottom:0;pointer-events:none;
+  z-index:3;opacity:0;transition:opacity .45s ease;
+  background:
+    radial-gradient(74% 150% at 50% -26%,rgba(255,238,196,.34) 0%,rgba(255,228,170,.17) 32%,rgba(255,222,160,.07) 55%,transparent 78%);
+  mix-blend-mode:screen;
+}
+.desk.night .base .light-cone{opacity:1}
+.desk.night .base{background:linear-gradient(180deg,#1b1d21,#131417 40%,#0e0f12)}
+
+/* light spilling off the panel onto the top of the deck */
+.base .screen-spill{
+  position:absolute;left:0;right:0;top:0;height:38%;pointer-events:none;z-index:3;
+  background:linear-gradient(180deg,rgba(198,214,235,.075),transparent 100%);
+  mix-blend-mode:screen;transition:opacity .5s ease;
+}
+.desk.standby .base .screen-spill{opacity:0}
+
+/* =====================  STANDBY  ===================== */
+.desk.standby .machine{filter:drop-shadow(0 26px 40px rgba(0,0,0,.7)) brightness(.85)}
+.desk.standby .lcd-inner{pointer-events:none}
+
+/* =====================  RESPONSIVE  ===================== */
+@media (max-width:820px){
+  :root{--bezel:10px;--radius:10px}
+  .machine{width:100%}
+  .keyboard,.tp-buttons{display:none}
+  .hinges{padding:0 18px}
+  .hinges .hinge{width:42px}
+}
+@media (max-height:560px){
+  .keyboard,.palmrest,.topdeck,.front-lip{display:none}
+  .base{padding:0;height:8px}
+}
+
+/* =====================  PRINT  ===================== */
+.print-sheet{display:none}
+@media print{
+  body{overflow:visible;background:#fff}
+  .desk,.modal-layer{display:none !important}
+  .print-sheet{
+    display:block;white-space:pre-wrap;word-break:break-word;
+    font:12pt/1.45 "Courier New",monospace;color:#000;
+    padding:0;margin:0;
+  }
+  .print-sheet h1{font:bold 13pt/1.4 Tahoma,sans-serif;margin:0 0 .6em;border-bottom:1px solid #999;padding-bottom:.3em}
+  .print-sheet .meta{font:9pt Tahoma,sans-serif;color:#555;margin:0 0 1.2em}
+}
+
+/* ---------- dual-legend keys (the shifted character above) ---------- */
+.key.dual{
+  flex-direction:column;justify-content:center;gap:0;line-height:1;
+  padding-top:1px;
+}
+.key.dual .sub{
+  font-size:.78em;opacity:.62;line-height:1;
+}
+.key.dual .main{line-height:1.05}
+@media (max-height:760px){
+  .key.dual .sub{display:none}
+}
+</style>
+<style>
+/* css/notepad.css */
+/* ============================================================
+   notepad.css — the software running on the screen
+   A period-correct 3D-bevelled desktop application:
+   grey #d4d0c8 chrome, navy gradient title bar, sunken fields.
+   ============================================================ */
+
+body{
+  /* PERIOD-CORRECT (default): what actually shipped on these machines */
+  --ui-font:Tahoma,"MS Sans Serif","Microsoft Sans Serif",Verdana,Geneva,sans-serif;
+  --mono-font:"Courier New","Lucida Console","Andale Mono",monospace;
+  --ui-size:11px;
+  --mono-size:13px;
+  --mono-lh:1.45;
+  --typeface-name:"Courier New";
+}
+body.font-plex{
+  /* ANACHRONISTIC: IBM Plex, drawn in 2017, fifteen years too late */
+  --ui-font:"IBM Plex Sans",Tahoma,Verdana,sans-serif;
+  --mono-font:"IBM Plex Mono","Courier New",monospace;
+  --ui-size:11.5px;
+  --mono-size:13px;
+  --mono-lh:1.55;
+  --typeface-name:"IBM Plex Mono";
+}
+body.fs-s{--mono-size:11.5px}
+body.fs-m{--mono-size:13px}
+body.fs-l{--mono-size:15.5px}
+
+.lcd{
+  /* classic desktop colours */
+  --face:#d4d0c8;
+  --face-lt:#e8e5e0;
+  --hi:#ffffff;
+  --sh:#8b8880;
+  --dk:#3f3f3f;
+  --ink:#0a0a0a;
+  --navy:#0a246a;
+  --navy-lt:#a6caf0;
+  --paper:#ffffff;
+  --paper-ink:#111;
+}
+
+/* ---------- window ---------- */
+.win{
+  flex:1;min-width:0;
+  display:flex;flex-direction:column;
+  background:var(--face);
+  font:400 var(--ui-size)/1.35 var(--ui-font);
+  color:var(--ink);
+  border:1px solid var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk);
+}
+
+.titlebar{
+  flex:0 0 auto;
+  display:flex;align-items:center;gap:5px;
+  height:19px;margin:2px 2px 0;padding:0 2px 0 3px;
+  background:linear-gradient(90deg,var(--navy) 0%,#2a5fb0 62%,var(--navy-lt) 100%);
+  color:#fff;
+}
+.app-icon{
+  width:13px;height:13px;flex:0 0 auto;border-radius:1px;
+  background:linear-gradient(180deg,#f4f2ea 0 46%,#d8d4c8 46% 100%);
+  box-shadow:inset 0 0 0 1px #4a4a4a;
+  position:relative;
+}
+.app-icon::after{
+  content:"";position:absolute;left:2px;right:2px;top:3px;height:1px;
+  background:#6a6a6a;box-shadow:0 3px 0 #6a6a6a,0 6px 0 #6a6a6a;
+}
+.titlebar .title{
+  flex:1;min-width:0;
+  font:700 var(--ui-size)/1 var(--ui-font);
+  letter-spacing:.01em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  text-shadow:0 1px 0 rgba(0,0,0,.35);
+}
+.tb-buttons{display:flex;gap:2px;align-items:center}
+.tb{
+  appearance:none;width:16px;height:14px;padding:0;cursor:pointer;
+  background:var(--face);border:0;
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+  display:grid;place-items:center;
+}
+.tb:active{box-shadow:inset 1px 1px 0 var(--dk),inset -1px -1px 0 var(--hi)}
+.tb b{display:block;background:#000}
+.g-min{width:6px;height:2px;margin-top:5px}
+.g-max{width:8px;height:7px;background:none !important;border:1px solid #000;border-top-width:2px}
+.g-close{
+  width:8px;height:8px;background:none !important;position:relative;
+}
+.g-close::before,.g-close::after{
+  content:"";position:absolute;left:0;top:3px;width:9px;height:1.5px;background:#000;
+}
+.g-close::before{transform:rotate(45deg)} .g-close::after{transform:rotate(-45deg)}
+
+/* ---------- menu bar ---------- */
+.menubar{
+  flex:0 0 auto;display:flex;align-items:stretch;
+  height:19px;margin:1px 2px 0;padding:0 1px;
+  border-bottom:1px solid var(--sh);
+  box-shadow:0 1px 0 var(--hi);
+  position:relative;z-index:40;
+}
+.menu-top{
+  appearance:none;border:0;background:none;cursor:pointer;
+  padding:0 7px;color:var(--ink);
+  font:400 var(--ui-size)/1 var(--ui-font);
+}
+.menu-top u{text-decoration:underline;text-underline-offset:1px}
+.menu-top:hover{background:var(--navy);color:#fff}
+.menu-top.open{background:var(--navy);color:#fff}
+
+.dropdown{
+  position:absolute;top:19px;min-width:194px;padding:2px;
+  background:var(--face);
+  box-shadow:
+    inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),
+    inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh),
+    2px 2px 3px rgba(0,0,0,.35);
+  z-index:50;
+}
+.dropdown[hidden]{display:none}
+.mi{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:3px 6px 3px 20px;position:relative;
+  background:none;border:0;cursor:pointer;text-align:left;
+  color:var(--ink);font:400 var(--ui-size)/1.3 var(--ui-font);
+}
+.mi:hover,.mi.focus{background:var(--navy);color:#fff}
+.mi .lbl{flex:1;white-space:nowrap}
+.mi .accel{opacity:.75;font-size:calc(var(--ui-size) - .5px);white-space:nowrap}
+.mi u{text-underline-offset:1px}
+.mi.checked::before{
+  content:"";position:absolute;left:7px;top:50%;
+  width:4px;height:8px;margin-top:-5px;
+  border:solid currentColor;border-width:0 1.6px 1.6px 0;
+  transform:rotate(42deg);
+}
+.mi.radio.checked::before{
+  content:"";width:5px;height:5px;border:0;border-radius:50%;
+  background:currentColor;transform:none;margin-top:-2px;left:8px;
+}
+.mi.disabled{color:var(--sh);pointer-events:none}
+.msep{height:0;margin:3px 2px;border-top:1px solid var(--sh);border-bottom:1px solid var(--hi)}
+
+/* ---------- workspace ---------- */
+.workspace{
+  flex:1 1 auto;min-height:0;
+  display:flex;margin:2px;gap:0;
+}
+.pane{display:flex;flex-direction:column;min-width:0;min-height:0}
+.pane-notes{
+  flex:0 0 auto;width:176px;min-width:110px;max-width:60%;
+  padding-right:3px;gap:3px;
+}
+body.no-list .pane-notes,body.no-list .splitter{display:none}
+.pane-editor{flex:1 1 auto}
+
+.find{display:flex;align-items:center;gap:4px;padding:1px 0 0}
+.find label{flex:0 0 auto;color:#2a2a2a}
+.find input{
+  flex:1;min-width:0;height:17px;padding:1px 3px;
+  border:0;background:var(--paper);color:var(--paper-ink);
+  font:400 var(--ui-size)/1.2 var(--ui-font);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+  outline:0;
+}
+.find input:focus{box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk),0 0 0 1px var(--navy)}
+
+.listbox{
+  flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;
+  background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+  outline:0;
+}
+.note-item{
+  display:block;width:100%;text-align:left;
+  padding:3px 5px;border:0;background:none;cursor:pointer;
+  border-bottom:1px dotted #d8d8d8;
+  color:var(--paper-ink);font:400 var(--ui-size)/1.3 var(--ui-font);
+}
+.note-item .nt{
+  display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.note-item .np{
+  display:block;color:#5a5a5a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-size:calc(var(--ui-size) - .5px);
+}
+.note-item .nd{
+  display:block;color:#7a7a7a;font-size:calc(var(--ui-size) - 1.5px);margin-top:1px;
+}
+.note-item.sel{background:var(--navy);color:#fff}
+.note-item.sel .np,.note-item.sel .nd{color:#cfe0f7}
+.listbox .empty{padding:8px 6px;color:#6a6a6a;font-style:italic}
+
+.pane-foot{display:flex;gap:3px}
+.btn{
+  appearance:none;flex:1;min-width:0;height:19px;padding:0 6px;cursor:pointer;
+  background:var(--face);color:var(--ink);border:0;
+  font:400 var(--ui-size)/1 var(--ui-font);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+}
+.btn:active{box-shadow:inset 1px 1px 0 var(--dk),inset -1px -1px 0 var(--hi);padding:1px 5px 0 7px}
+.btn.primary{font-weight:700}
+
+.splitter{
+  flex:0 0 4px;cursor:col-resize;background:var(--face);
+}
+.splitter:hover{background:#c8c4bc}
+
+/* ---------- the paper ---------- */
+#editor{
+  flex:1 1 auto;width:100%;min-height:0;resize:none;
+  padding:4px 5px;border:0;outline:0;
+  background:var(--paper);color:var(--paper-ink);
+  font:400 var(--mono-size)/var(--mono-lh) var(--mono-font);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+  white-space:pre-wrap;overflow-wrap:break-word;
+  tab-size:8;
+}
+body.no-wrap #editor{white-space:pre;overflow-wrap:normal;overflow-x:auto}
+#editor::selection{background:var(--navy);color:#fff}
+
+/* ---------- period scrollbars ---------- */
+.listbox::-webkit-scrollbar,#editor::-webkit-scrollbar,.dlg-body::-webkit-scrollbar{
+  width:16px;height:16px;
+}
+.listbox::-webkit-scrollbar-track,#editor::-webkit-scrollbar-track,.dlg-body::-webkit-scrollbar-track{
+  background-color:#e6e3de;
+  background-image:radial-gradient(circle,#fff 40%,transparent 42%);
+  background-size:2px 2px;
+}
+.listbox::-webkit-scrollbar-thumb,#editor::-webkit-scrollbar-thumb,.dlg-body::-webkit-scrollbar-thumb{
+  background:var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+  border:0;
+}
+.listbox::-webkit-scrollbar-button:vertical:start:decrement,
+#editor::-webkit-scrollbar-button:vertical:start:decrement,
+.dlg-body::-webkit-scrollbar-button:vertical:start:decrement,
+.listbox::-webkit-scrollbar-button:vertical:end:increment,
+#editor::-webkit-scrollbar-button:vertical:end:increment,
+.dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  display:block;height:16px;
+  background-color:var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+}
+.listbox::-webkit-scrollbar-corner,#editor::-webkit-scrollbar-corner{background:var(--face)}
+.listbox,#editor,.dlg-body{scrollbar-color:var(--face) #e6e3de;scrollbar-width:auto}
+
+/* ---------- status bar ---------- */
+.statusbar{
+  flex:0 0 auto;display:flex;gap:2px;margin:0 2px 2px;padding-top:2px;
+  font:400 var(--ui-size)/1 var(--ui-font);
+}
+.statusbar .cell{
+  padding:2px 5px;color:#2a2a2a;white-space:nowrap;
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi);
+}
+.statusbar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.statusbar .click{cursor:pointer}
+.statusbar .click:hover{background:#cac6be}
+.statusbar .flash{background:var(--flash,#ffffcc);color:var(--flash-ink,var(--ink))}
+
+/* ---------- dialogs ---------- */
+.modal-layer{
+  position:absolute;inset:0;z-index:60;
+  display:grid;place-items:center;
+  background:rgba(10,12,10,.28);
+}
+.modal-layer[hidden]{display:none}
+.dlg{
+  width:min(430px,88%);max-height:86%;
+  display:flex;flex-direction:column;
+  background:var(--face);color:var(--ink);
+  font:400 var(--ui-size)/1.45 var(--ui-font);
+  box-shadow:
+    inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),
+    inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh),
+    3px 4px 10px rgba(0,0,0,.45);
+  padding:2px;
+}
+.dlg .titlebar{margin:0}
+.dlg-body{padding:11px 12px;overflow:auto;flex:1 1 auto;min-height:0}
+.dlg-body p{margin:0 0 8px}
+.dlg-body p:last-child{margin-bottom:0}
+.dlg-body h4{margin:12px 0 5px;font-size:var(--ui-size)}
+.dlg-body dl{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:0}
+.dlg-body dt{font-family:var(--mono-font);font-size:calc(var(--mono-size) - 2px);white-space:nowrap}
+.dlg-body dd{margin:0}
+.dlg-body .sunken{
+  background:var(--paper);padding:6px 8px;margin:6px 0;
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+}
+.dlg-foot{display:flex;justify-content:flex-end;gap:6px;padding:0 12px 11px}
+.dlg-foot .btn{flex:0 0 auto;min-width:76px;height:21px}
+.dlg-tabs{display:flex;gap:2px;padding:8px 12px 0}
+.dlg-tab{
+  appearance:none;border:0;cursor:pointer;padding:3px 10px;
+  background:var(--face);color:var(--ink);font:400 var(--ui-size)/1.2 var(--ui-font);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px 0 0 var(--dk),inset -2px 0 0 var(--sh);
+}
+.dlg-tab.on{font-weight:700;background:var(--face-lt);box-shadow:inset 1px 1px 0 var(--hi),inset -1px 0 0 var(--dk)}
+
+/* ---------- misc ---------- */
+.hint{color:#5a5a5a}
+kbd{
+  font:400 calc(var(--ui-size) - .5px)/1.2 var(--mono-font);
+  background:var(--face-lt);padding:0 3px;
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--sh);
+}
+.dropzone{
+  position:absolute;inset:0;z-index:55;display:none;
+  place-items:center;background:rgba(10,36,106,.18);
+  border:3px dashed var(--navy);
+}
+.lcd.dragging .dropzone{display:grid}
+.dropzone span{
+  background:var(--face);padding:8px 14px;font:700 12px var(--ui-font);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),3px 3px 8px rgba(0,0,0,.4);
+}
+
+@media (max-width:640px){
+  .pane-notes{width:150px}
+  .statusbar .cell:nth-child(2){display:none}
+}
+</style>
+<style>
+/* css/themes.css */
+/* ============================================================
+   themes.css — the parts you can change
+   Case finishes, desk surfaces, panel colour schemes, the
+   settings form, and the mode with no machine around it.
+   ============================================================ */
+
+/* ---------- case finishes ---------- */
+body[data-case="graphite"]{
+  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;--case-edge:#4d525b;
+  --key-text:#d6d9de;
+}
+body[data-case="titanium"]{
+  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;--case-edge:#b4b9c1;
+  --key-text:#23262b;
+  --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
+}
+body[data-case="graphite"] .lid,
+body[data-case="graphite"] .base{
+  background:linear-gradient(180deg,var(--case-lt),var(--case) 30%,var(--case-dk));
+}
+body[data-case="titanium"] .lid,
+body[data-case="titanium"] .base{
+  background:linear-gradient(180deg,#b0b5bd,#8d9199 34%,#74787f);
+}
+body[data-case="titanium"] .bezel{background:linear-gradient(180deg,#2a2c30,#1c1e21 40%,#191b1e)}
+body[data-case="titanium"] .palmrest{background:linear-gradient(180deg,#9ba0a8,#878b93 55%,#767a81)}
+body[data-case="titanium"] .keyboard{background:linear-gradient(180deg,#3a3d43,#2c2f34)}
+body[data-case="titanium"] .key{
+  background:linear-gradient(180deg,#e6e8ea 0%,#d2d5d9 42%,#b9bdc3 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(0,0,0,.16),0 2px 2px rgba(0,0,0,.35);
+}
+body[data-case="titanium"] .key.down,body[data-case="titanium"] .key:active{
+  background:linear-gradient(180deg,#c3c7cc,#b3b7bd 60%,#a6aab0);
+}
+body[data-case="titanium"] .key.fn{color:#12408f}
+body[data-case="titanium"] .badge-plate{color:#3c4046;background:linear-gradient(180deg,#a9aeb6,#93979f)}
+body[data-case="titanium"] .front-lip{background:linear-gradient(180deg,#6e7279,#4f5259)}
+body[data-case="titanium"] .hinges .hinge{background:linear-gradient(180deg,#a7acb4,#7c8087 60%,#63666c)}
+
+/* ---------- desk surfaces ---------- */
+body[data-desk="office"] .desk{
+  background:radial-gradient(120% 95% at 50% -12%,#8b8d92 0%,#6a6d73 30%,#4a4d53 62%,#2e3035 88%,#212327 100%);
+}
+body[data-desk="office"] .desk.night{
+  background:radial-gradient(120% 90% at 50% 0%,#2a2c30 0%,#1a1c1f 45%,#101113 100%);
+}
+body[data-desk="void"] .desk,
+body[data-desk="void"] .desk.night{background:#000}
+body[data-desk="void"] .desk::after{opacity:.05}
+
+/* ---------- TrackPoint caps ---------- */
+body[data-cap="dome"] .trackpoint::after{
+  background-image:radial-gradient(circle at 38% 32%,rgba(255,255,255,.32),transparent 46%);
+  background-size:auto;opacity:1;
+}
+body[data-cap="eraser"] .trackpoint{
+  border-radius:38%;
+}
+body[data-cap="eraser"] .trackpoint::after{
+  border-radius:38%;
+  background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);
+  background-size:auto;opacity:.8;
+}
+
+/* ---------- panel colour schemes ---------- */
+.lcd[data-theme="paper"]{
+  --face:#ded9cd;--face-lt:#f2eee4;--hi:#fffdf7;--sh:#948d7c;--dk:#4a463d;
+  --ink:#1d1a14;--navy:#4a3a22;--navy-lt:#d8c9a8;
+  --paper:#fbf7ec;--paper-ink:#26221a;
+}
+.lcd[data-theme="midnight"]{
+  --face:#2b2f36;--face-lt:#3a3f48;--hi:rgba(255,255,255,.16);--sh:#171a1f;--dk:#0b0d10;
+  --ink:#ccd2da;--navy:#1d3f73;--navy-lt:#4a7ec0;--paper:#12151a;--paper-ink:#c9d1da;
+  --flash:#2f3a4a;--flash-ink:#dfe6ee;
+}
+.lcd[data-theme="amber"]{
+  --face:#2a2013;--face-lt:#3a2d1b;--hi:rgba(255,190,90,.22);--sh:#180f06;--dk:#0d0803;
+  --ink:#ffc97a;--navy:#7a4a00;--navy-lt:#c98a2a;--paper:#1d1407;--paper-ink:#ffb545;
+  --flash:#4a3208;--flash-ink:#ffd79a;
+}
+.lcd[data-theme="green"]{
+  --face:#16221a;--face-lt:#203126;--hi:rgba(120,255,160,.2);--sh:#0a130d;--dk:#050a07;
+  --ink:#9fffbc;--navy:#12401f;--navy-lt:#2f8f4c;--paper:#08120b;--paper-ink:#65ff92;
+  --flash:#17361f;--flash-ink:#b6ffcd;
+}
+.lcd[data-theme="midnight"] .note-item,
+.lcd[data-theme="amber"] .note-item,
+.lcd[data-theme="green"] .note-item{border-bottom-color:rgba(255,255,255,.08)}
+.lcd[data-theme="midnight"] .note-item .np,
+.lcd[data-theme="amber"] .note-item .np,
+.lcd[data-theme="green"] .note-item .np{color:rgba(255,255,255,.5)}
+.lcd[data-theme="midnight"] .note-item .nd,
+.lcd[data-theme="amber"] .note-item .nd,
+.lcd[data-theme="green"] .note-item .nd{color:rgba(255,255,255,.38)}
+.lcd[data-theme="midnight"] .titlebar,
+.lcd[data-theme="amber"] .titlebar,
+.lcd[data-theme="green"] .titlebar{
+  background:linear-gradient(90deg,var(--navy) 0%,var(--navy-lt) 100%);
+}
+.lcd[data-theme="midnight"] .statusbar .cell,
+.lcd[data-theme="amber"] .statusbar .cell,
+.lcd[data-theme="green"] .statusbar .cell{color:var(--ink)}
+.lcd[data-theme="midnight"] .find label,
+.lcd[data-theme="amber"] .find label,
+.lcd[data-theme="green"] .find label{color:var(--ink)}
+.lcd[data-theme="midnight"] .tb b,
+.lcd[data-theme="amber"] .tb b,
+.lcd[data-theme="green"] .tb b{background:var(--ink)}
+.lcd[data-theme="midnight"] .g-max,
+.lcd[data-theme="amber"] .g-max,
+.lcd[data-theme="green"] .g-max{border-color:var(--ink)}
+.lcd[data-theme="midnight"] .g-close::before,.lcd[data-theme="midnight"] .g-close::after,
+.lcd[data-theme="amber"] .g-close::before,.lcd[data-theme="amber"] .g-close::after,
+.lcd[data-theme="green"] .g-close::before,.lcd[data-theme="green"] .g-close::after{background:var(--ink)}
+.lcd[data-theme="midnight"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="amber"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="green"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="midnight"] #editor::-webkit-scrollbar-track,
+.lcd[data-theme="amber"] #editor::-webkit-scrollbar-track,
+.lcd[data-theme="green"] #editor::-webkit-scrollbar-track{background-color:var(--face-lt);background-image:none}
+.lcd[data-theme="midnight"] .empty,
+.lcd[data-theme="amber"] .empty,
+.lcd[data-theme="green"] .empty{color:var(--paper-ink);opacity:.7}
+
+/* ---------- optional parts of the window ---------- */
+body.no-status .statusbar{display:none}
+body.no-leds .leds{visibility:hidden}
+body.no-tpb .tp-buttons{display:none}
+body.list-right .workspace{flex-direction:row-reverse}
+body.list-right .pane-notes{padding-right:0;padding-left:3px}
+
+/* ---------- no machine at all ---------- */
+body.no-case .desk{padding:0;gap:0}
+body.no-case .footnote{display:none}
+body.no-case .machine{
+  width:100% !important;height:100%;max-height:none;flex:1 1 auto;filter:none;
+}
+body.no-case .lid{padding:0;border-radius:0;background:none;box-shadow:none}
+body.no-case .bezel{padding:0;border-radius:0;background:none;box-shadow:none}
+body.no-case .bezel::after{display:none}
+body.no-case .screen{
+  padding:0;border-radius:0;box-shadow:none;background:none;
+  height:auto !important;flex:1 1 auto !important;
+}
+body.no-case .bezel-top,body.no-case .bezel-foot,body.no-case .hinges,
+body.no-case .base,body.no-case .lid-latches,body.no-case .bumper{display:none}
+body.no-case .lcd-glare,body.no-case .lcd-grain{opacity:0}
+body.no-case .lcd{border-radius:0}
+
+/* ============================================================
+   the settings form
+   ============================================================ */
+.settings{display:flex;flex-direction:column;min-height:0}
+.set-panes{padding:9px 2px 0;min-height:0}
+.set-pane{display:flex;flex-direction:column;gap:7px}
+.set-pane[hidden]{display:none}
+.set-row{
+  display:grid;grid-template-columns:11em 1fr;align-items:center;gap:4px 10px;
+}
+.set-row.is-check{grid-template-columns:11em auto}
+.set-row.is-action{grid-template-columns:1fr;gap:2px}
+.set-label{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.set-field{display:flex;align-items:center;gap:8px;min-width:0}
+.set-hint{
+  grid-column:1 / -1;color:var(--sh);margin:-2px 0 2px;
+  font-size:calc(var(--ui-size) - .5px);
+}
+.set-row.is-action .btn{justify-self:start;flex:0 0 auto;min-width:190px;height:21px}
+
+/* period-correct checkbox */
+.set-check{
+  appearance:none;margin:0;width:13px;height:13px;cursor:pointer;position:relative;
+  background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+}
+.set-check:checked::after{
+  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid var(--paper-ink);border-width:0 2px 2px 0;transform:rotate(42deg);
+}
+.set-check:focus-visible{outline:1px dotted var(--ink);outline-offset:2px}
+
+/* period-correct dropdown */
+.set-select{
+  appearance:none;flex:1;min-width:0;height:19px;padding:0 20px 0 4px;cursor:pointer;
+  background:var(--face);color:var(--ink);border:0;
+  font:400 var(--ui-size)/1 var(--ui-font);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),
+             inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),
+                   linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:calc(100% - 12px) 8px,calc(100% - 7px) 8px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+}
+.set-select option{background:var(--face);color:var(--ink)}
+
+/* period-correct slider */
+.set-range{
+  appearance:none;flex:1;min-width:60px;height:16px;background:none;cursor:pointer;margin:0;
+}
+.set-range::-webkit-slider-runnable-track{
+  height:4px;background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+}
+.set-range::-webkit-slider-thumb{
+  appearance:none;width:11px;height:16px;margin-top:-6px;background:var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),
+             inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+}
+.set-range::-moz-range-track{
+  height:4px;background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset 2px 2px 0 var(--dk);
+}
+.set-range::-moz-range-thumb{
+  width:11px;height:16px;border:0;border-radius:0;background:var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk);
+}
+.set-out{
+  flex:0 0 auto;min-width:4.2em;text-align:right;color:var(--ink);
+  font-family:var(--mono-font);font-size:calc(var(--ui-size) - .5px);
+}
+
+.dlg.wide{width:min(520px,94%)}
+.dlg.wide .dlg-body{padding-top:0}
+</style>
+</head>
+<body class="font-period">
+
+<div class="desk" id="desk">
+  <div class="room-light" aria-hidden="true"></div>
+
+  <div class="machine" id="machine">
+
+    <!-- ============ LID ============ -->
+    <div class="lid">
+      <div class="lid-latches" aria-hidden="true"><i></i><i></i></div>
+      <div class="bezel">
+        <div class="bezel-top">
+          <button type="button" class="thinklight" id="thinklightBtn" title="ThinkLight (Fn+PgUp)" aria-label="ThinkLight">
+            <span class="bulb" aria-hidden="true"></span>
+          </button>
+        </div>
+
+        <div class="screen">
+          <span class="bumper tl" aria-hidden="true"></span>
+          <span class="bumper tr" aria-hidden="true"></span>
+          <span class="bumper bl" aria-hidden="true"></span>
+          <span class="bumper br" aria-hidden="true"></span>
+
+          <div class="lcd" id="lcd">
+            <div class="lcd-inner" id="lcdInner">
+
+              <!-- ============ THE SOFTWARE ============ -->
+              <div class="win" id="win">
+                <div class="titlebar" id="titlebar">
+                  <span class="app-icon" aria-hidden="true"></span>
+                  <span class="title" id="winTitle">Untitled - ThinkPad Notes</span>
+                  <span class="tb-buttons">
+                    <button type="button" class="tb" id="tbMin" title="Minimise (Standby)" aria-label="Standby"><b class="g-min"></b></button>
+                    <button type="button" class="tb" id="tbMax" title="Toggle note list" aria-label="Toggle note list"><b class="g-max"></b></button>
+                    <button type="button" class="tb" id="tbClose" title="Close lid (Standby)" aria-label="Standby"><b class="g-close"></b></button>
+                  </span>
+                </div>
+
+                <div class="menubar" id="menubar" role="menubar"></div>
+
+                <div class="workspace" id="workspace">
+                  <div class="pane pane-notes" id="paneNotes">
+                    <div class="find">
+                      <label for="search">F<u>i</u>nd:</label>
+                      <input type="text" id="search" spellcheck="false" autocomplete="off" placeholder="">
+                    </div>
+                    <div class="listbox" id="listbox" role="listbox" tabindex="0" aria-label="Notes"></div>
+                    <div class="pane-foot">
+                      <button type="button" class="btn" id="btnNew">New</button>
+                      <button type="button" class="btn" id="btnDelete">Delete</button>
+                    </div>
+                  </div>
+
+                  <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+
+                  <div class="pane pane-editor">
+                    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+                              aria-label="Note text" placeholder=""></textarea>
+                  </div>
+                </div>
+
+                <div class="statusbar">
+                  <span class="cell grow" id="stMsg">Ready</span>
+                  <span class="cell" id="stPos">Ln 1, Col 1</span>
+                  <span class="cell" id="stCount">0 words</span>
+                  <span class="cell click" id="stFont" title="Click to switch typeface">Courier New</span>
+                </div>
+              </div>
+              <!-- ============ /THE SOFTWARE ============ -->
+
+            </div>
+            <div class="lcd-grain" aria-hidden="true"></div>
+            <div class="lcd-glare" aria-hidden="true"></div>
+            <div class="lcd-dark" id="lcdDark" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <div class="bezel-foot">
+          <div class="ibm-logo" aria-label="IBM"><span>IBM</span></div>
+          <div class="leds" id="leds" aria-hidden="true">
+            <span class="led-cell"><i class="led led-pwr on"></i><em>PWR</em></span>
+            <span class="led-cell"><i class="led led-bat on"></i><em>BAT</em></span>
+            <span class="led-cell"><i class="led led-slp"></i><em>SLP</em></span>
+            <span class="led-cell"><i class="led led-hdd"></i><em>HDD</em></span>
+            <span class="led-cell"><i class="led led-num"></i><em>NUM</em></span>
+            <span class="led-cell"><i class="led led-cap"></i><em>CAP</em></span>
+          </div>
+          <div class="tp-logo" aria-label="ThinkPad">Th<span class="i">ı<b></b></span>nkPad</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ HINGES ============ -->
+    <div class="hinges" aria-hidden="true">
+      <i class="hinge"></i>
+      <div class="hinge-gap"></div>
+      <i class="hinge"></i>
+    </div>
+
+    <!-- ============ BASE ============ -->
+    <div class="base">
+      <div class="topdeck">
+        <button type="button" class="access-ibm" id="accessBtn" title="Access IBM — help &amp; shortcuts">Access IBM</button>
+        <div class="drilled" aria-hidden="true"></div>
+        <div class="hw-buttons">
+          <button type="button" class="hwb" id="volDown" title="Volume down (key click)">&minus;</button>
+          <button type="button" class="hwb" id="volUp" title="Volume up (key click)">+</button>
+          <button type="button" class="hwb" id="volMute" title="Mute key click"><span class="mute-led"></span>&#9679;</button>
+          <button type="button" class="power" id="powerBtn" title="Standby"><span class="ring"></span></button>
+        </div>
+      </div>
+
+      <div class="keyboard" id="keyboard">
+        <div class="trackpoint" id="trackpoint" title="TrackPoint — drag to scroll" role="button" tabindex="0" aria-label="TrackPoint scroller"></div>
+      </div>
+
+      <div class="palmrest">
+        <div class="tp-buttons" aria-hidden="false">
+          <button type="button" class="tpb left" id="tpbLeft" title="Previous note"></button>
+          <button type="button" class="tpb center" id="tpbCenter" title="Scroll lock — drag the TrackPoint"></button>
+          <button type="button" class="tpb right" id="tpbRight" title="Next note"></button>
+        </div>
+        <div class="badge" aria-hidden="true">
+          <span class="badge-plate">ThinkPad</span>
+        </div>
+      </div>
+      <div class="front-lip" aria-hidden="true"><i class="latch-slot"></i><i class="latch-slot"></i></div>
+    </div>
+
+  </div>
+
+  <p class="footnote">
+    Everything you type is stored in this browser only (localStorage). An unaffiliated homage — no connection to IBM or Lenovo.
+  </p>
+</div>
+
+<div class="modal-layer" id="modalLayer" hidden></div>
+<div class="print-sheet" id="printSheet" aria-hidden="true"></div>
+<input type="file" id="fileInput" accept=".txt,.md,.json,text/plain,application/json" hidden>
+
+<script>
+/* js/settings.js */
+/* ============================================================
+   settings.js — everything about the machine you can change
+   A declarative spec, the period-correct form that renders it,
+   and the defaults / migration for older saved preferences.
+   ============================================================ */
+(function (global) {
+  'use strict';
+
+  var DEFAULTS = {
+    /* the machine */
+    showCase: true, deck: false, tpButtons: true, leds: true,
+    caseFinish: 'black', capStyle: 'tongue', desk: 'studio', aspect: '4:3',
+    night: false, glare: true, grain: true, sound: false, vol: 0.35,
+    /* the screen */
+    theme: 'classic', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
+    fontSize: 13, lineHeight: 1.45, wrap: true, tabSize: 8,
+    spellcheck: false, statusbar: true,
+    /* the notes */
+    list: true, listSide: 'left', listWidth: 176,
+    sort: 'updated', dateFormat: 'relative', startup: 'last'
+  };
+
+  var UI_FONTS = {
+    tahoma: 'Tahoma,"MS Sans Serif","Microsoft Sans Serif",Verdana,Geneva,sans-serif',
+    verdana: 'Verdana,Geneva,Tahoma,sans-serif',
+    sans: '"MS Sans Serif","Microsoft Sans Serif",Tahoma,Verdana,sans-serif',
+    plex: '"IBM Plex Sans",Tahoma,Verdana,sans-serif',
+    system: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif'
+  };
+  var MONO_FONTS = {
+    courier: '"Courier New","Lucida Console",monospace',
+    lucida: '"Lucida Console","DejaVu Sans Mono","Courier New",monospace',
+    andale: '"Andale Mono","Lucida Console","Courier New",monospace',
+    consolas: 'Consolas,"Lucida Console","Courier New",monospace',
+    plex: '"IBM Plex Mono","Courier New",monospace',
+    system: 'ui-monospace,SFMono-Regular,Menlo,Consolas,monospace'
+  };
+  var MONO_NAMES = {
+    courier: 'Courier New', lucida: 'Lucida Console', andale: 'Andale Mono',
+    consolas: 'Consolas', plex: 'IBM Plex Mono', system: 'System mono'
+  };
+
+  var pct = function (v) { return Math.round(v * 100) + '%'; };
+  var px = function (v) { return v + ' px'; };
+  var two = function (v) { return (+v).toFixed(2); };
+
+  var GROUPS = [
+    { id: 'machine', label: 'Machine', items: [
+      { k: 'showCase', t: 'check', label: 'Show the machine',
+        hint: 'Off puts the notepad alone in the window' },
+      { k: 'deck', t: 'check', label: 'Keyboard',
+        hint: 'Folding it away gives the panel about 1024x768' },
+      { k: 'tpButtons', t: 'check', label: 'TrackPoint buttons' },
+      { k: 'leds', t: 'check', label: 'Indicator lights' },
+      { k: 'caseFinish', t: 'select', label: 'Case finish', options: [
+        ['black', 'Matte black'], ['graphite', 'Graphite'], ['titanium', 'Titanium'] ] },
+      { k: 'capStyle', t: 'select', label: 'TrackPoint cap', options: [
+        ['tongue', "Cat's tongue"], ['dome', 'Soft dome'], ['eraser', 'Eraser head'] ] },
+      { k: 'desk', t: 'select', label: 'Desk', options: [
+        ['studio', 'Studio dark'], ['office', 'Office grey'], ['void', 'Black'] ] },
+      { k: 'aspect', t: 'select', label: 'Panel shape', options: [
+        ['4:3', '4:3 — period correct'], ['16:10', '16:10'], ['fill', 'Fill the window'] ] },
+      { k: 'night', t: 'check', label: 'ThinkLight', hint: 'Alt+L' },
+      { k: 'glare', t: 'check', label: 'Screen glare' },
+      { k: 'grain', t: 'check', label: 'LCD grain' },
+      { k: 'sound', t: 'check', label: 'Key click' },
+      { k: 'vol', t: 'range', label: 'Click volume', min: 0.05, max: 1, step: 0.05, fmt: pct }
+    ]},
+    { id: 'screen', label: 'Screen', items: [
+      { k: 'theme', t: 'select', label: 'Colours', options: [
+        ['classic', 'Classic grey'], ['paper', 'Warm paper'], ['midnight', 'Midnight'],
+        ['amber', 'Amber monochrome'], ['green', 'Green phosphor'] ] },
+      { k: 'preset', t: 'select', label: 'Typeface', options: [
+        ['period', 'Period correct — Tahoma / Courier New'],
+        ['plex', 'IBM Plex — sixteen years early'],
+        ['custom', 'Custom'] ] },
+      { k: 'uiFont', t: 'select', label: 'Interface face', options: [
+        ['tahoma', 'Tahoma'], ['verdana', 'Verdana'], ['sans', 'MS Sans Serif'],
+        ['plex', 'IBM Plex Sans (2017)'], ['system', 'System sans'] ] },
+      { k: 'monoFont', t: 'select', label: 'Note face', options: [
+        ['courier', 'Courier New'], ['lucida', 'Lucida Console'], ['andale', 'Andale Mono'],
+        ['consolas', 'Consolas (2006)'], ['plex', 'IBM Plex Mono (2017)'], ['system', 'System mono'] ] },
+      { k: 'fontSize', t: 'range', label: 'Note size', min: 10, max: 20, step: 0.5, fmt: px },
+      { k: 'lineHeight', t: 'range', label: 'Line spacing', min: 1.15, max: 1.9, step: 0.05, fmt: two },
+      { k: 'wrap', t: 'check', label: 'Word wrap' },
+      { k: 'tabSize', t: 'select', num: true, label: 'Tab width', options: [
+        [2, '2'], [4, '4'], [8, '8 — period correct'] ] },
+      { k: 'spellcheck', t: 'check', label: 'Spell check',
+        hint: 'Nobody had this in 2001' },
+      { k: 'statusbar', t: 'check', label: 'Status bar' }
+    ]},
+    { id: 'notes', label: 'Notes', items: [
+      { k: 'list', t: 'check', label: 'Note list' },
+      { k: 'listSide', t: 'select', label: 'List position', options: [
+        ['left', 'Left'], ['right', 'Right'] ] },
+      { k: 'listWidth', t: 'range', label: 'List width', min: 110, max: 340, step: 2, fmt: px },
+      { k: 'sort', t: 'select', label: 'Sort by', options: [
+        ['updated', 'Last edited'], ['created', 'Created'], ['title', 'Title A-Z'] ] },
+      { k: 'dateFormat', t: 'select', label: 'Dates', options: [
+        ['relative', 'Today / Yesterday'], ['iso', 'YYYY-MM-DD'] ] },
+      { k: 'startup', t: 'select', label: 'On opening', options: [
+        ['last', 'The note I had open'], ['new', 'A new blank note'] ] }
+    ]}
+  ];
+
+  /* older saved preferences -> the shape above */
+  function migrate(saved) {
+    var p = {};
+    var key;
+    for (key in DEFAULTS) if (DEFAULTS.hasOwnProperty(key)) p[key] = DEFAULTS[key];
+    if (!saved || typeof saved !== 'object') return p;
+
+    for (key in saved) if (p.hasOwnProperty(key)) p[key] = saved[key];
+
+    if (saved.font === 'plex' || saved.font === 'period') p.preset = saved.font;
+    if (saved.preset === undefined && (saved.font === 'plex' || saved.font === 'period')) {
+      p.uiFont = saved.font === 'plex' ? 'plex' : 'tahoma';
+      p.monoFont = saved.font === 'plex' ? 'plex' : 'courier';
+    }
+    if (typeof saved.size === 'string' && saved.fontSize === undefined) {
+      p.fontSize = { s: 11.5, m: 13, l: 15.5 }[saved.size] || DEFAULTS.fontSize;
+    }
+    if (typeof saved.keyboard === 'boolean' && saved.deck === undefined) p.deck = saved.keyboard;
+    return p;
+  }
+
+  /* ---------- the form ---------- */
+  function control(item, prefs, onChange) {
+    var row = document.createElement('div');
+    row.className = 'set-row';
+
+    var label = document.createElement('label');
+    label.className = 'set-label';
+    label.textContent = item.label;
+    var id = 'set-' + item.k;
+    label.htmlFor = id;
+
+    var field = document.createElement('div');
+    field.className = 'set-field';
+    var input;
+
+    if (item.t === 'check') {
+      input = document.createElement('input');
+      input.type = 'checkbox';
+      input.className = 'set-check';
+      input.checked = !!prefs[item.k];
+      input.addEventListener('change', function () { onChange(item.k, input.checked, item); });
+      row.classList.add('is-check');
+      field.appendChild(input);
+    } else if (item.t === 'select') {
+      input = document.createElement('select');
+      input.className = 'set-select';
+      item.options.forEach(function (opt) {
+        var o = document.createElement('option');
+        o.value = String(opt[0]);
+        o.textContent = opt[1];
+        if (String(prefs[item.k]) === String(opt[0])) o.selected = true;
+        input.appendChild(o);
+      });
+      input.addEventListener('change', function () {
+        onChange(item.k, item.num ? Number(input.value) : input.value, item);
+      });
+      field.appendChild(input);
+    } else {
+      input = document.createElement('input');
+      input.type = 'range';
+      input.className = 'set-range';
+      input.min = item.min; input.max = item.max; input.step = item.step;
+      input.value = prefs[item.k];
+      var out = document.createElement('span');
+      out.className = 'set-out';
+      out.textContent = (item.fmt || String)(prefs[item.k]);
+      input.addEventListener('input', function () {
+        var v = Number(input.value);
+        out.textContent = (item.fmt || String)(v);
+        onChange(item.k, v, item);
+      });
+      field.appendChild(input);
+      field.appendChild(out);
+    }
+    input.id = id;
+
+    row.appendChild(label);
+    row.appendChild(field);
+    if (item.hint) {
+      var hint = document.createElement('div');
+      hint.className = 'set-hint';
+      hint.textContent = item.hint;
+      row.appendChild(hint);
+    }
+    return row;
+  }
+
+  /* Returns { node, refresh } — refresh re-reads prefs into the controls
+     so that a change in one place (a preset, say) shows up in another. */
+  function buildForm(prefs, onChange, actions) {
+    var wrap = document.createElement('div');
+    wrap.className = 'settings';
+
+    var tabs = document.createElement('div');
+    tabs.className = 'dlg-tabs';
+    var panes = document.createElement('div');
+    panes.className = 'set-panes';
+    wrap.appendChild(tabs);
+    wrap.appendChild(panes);
+
+    var built = {};
+    function show(id) {
+      Array.prototype.forEach.call(tabs.children, function (t) {
+        t.classList.toggle('on', t.dataset.tab === id);
+      });
+      Array.prototype.forEach.call(panes.children, function (p) {
+        p.hidden = p.dataset.tab !== id;
+      });
+    }
+
+    GROUPS.forEach(function (group, i) {
+      var tab = document.createElement('button');
+      tab.type = 'button';
+      tab.className = 'dlg-tab' + (i === 0 ? ' on' : '');
+      tab.dataset.tab = group.id;
+      tab.textContent = group.label;
+      tab.addEventListener('click', function () { show(group.id); });
+      tabs.appendChild(tab);
+
+      var pane = document.createElement('div');
+      pane.className = 'set-pane';
+      pane.dataset.tab = group.id;
+      pane.hidden = i !== 0;
+      group.items.forEach(function (item) {
+        var row = control(item, prefs, onChange);
+        built[item.k] = row;
+        pane.appendChild(row);
+      });
+      panes.appendChild(pane);
+    });
+
+    /* data tab */
+    var dataTab = document.createElement('button');
+    dataTab.type = 'button';
+    dataTab.className = 'dlg-tab';
+    dataTab.dataset.tab = 'data';
+    dataTab.textContent = 'Data';
+    dataTab.addEventListener('click', function () { show('data'); });
+    tabs.appendChild(dataTab);
+
+    var dataPane = document.createElement('div');
+    dataPane.className = 'set-pane';
+    dataPane.dataset.tab = 'data';
+    dataPane.hidden = true;
+    var report = document.createElement('div');
+    report.className = 'sunken';
+    report.textContent = actions.report();
+    dataPane.appendChild(report);
+    [
+      ['Back up everything (.json)', 'backup', 'Notes and settings in one file.'],
+      ['Restore from a backup…', 'restore', 'Replaces everything currently on this machine.'],
+      ['Reset settings', 'reset', 'Puts every switch on this page back to standard.'],
+      ['Erase all notes…', 'erase', 'There is no wastebasket. Back up first.']
+    ].forEach(function (spec) {
+      var row = document.createElement('div');
+      row.className = 'set-row is-action';
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn';
+      b.textContent = spec[0];
+      b.addEventListener('click', function () { actions[spec[1]](); });
+      var hint = document.createElement('div');
+      hint.className = 'set-hint';
+      hint.textContent = spec[2];
+      row.appendChild(b);
+      row.appendChild(hint);
+      dataPane.appendChild(row);
+    });
+    panes.appendChild(dataPane);
+
+    function refresh() {
+      GROUPS.forEach(function (group) {
+        group.items.forEach(function (item) {
+          var row = built[item.k];
+          if (!row) return;
+          var input = row.querySelector('input,select');
+          if (!input) return;
+          if (item.t === 'check') input.checked = !!prefs[item.k];
+          else input.value = String(prefs[item.k]);
+          var out = row.querySelector('.set-out');
+          if (out) out.textContent = (item.fmt || String)(prefs[item.k]);
+        });
+      });
+      report.textContent = actions.report();
+    }
+
+    return { node: wrap, refresh: refresh };
+  }
+
+  global.TPSettings = {
+    DEFAULTS: DEFAULTS, GROUPS: GROUPS, migrate: migrate, buildForm: buildForm,
+    UI_FONTS: UI_FONTS, MONO_FONTS: MONO_FONTS, MONO_NAMES: MONO_NAMES
+  };
+})(window);
+</script>
+<script>
+/* js/keyboard.js */
+/* ============================================================
+   keyboard.js — the seven-row ThinkPad keyboard
+   Builds the deck, mirrors real keystrokes, and lets you type
+   by clicking the keys. Fn sits in the corner where it belongs.
+   ============================================================ */
+(function (global) {
+  'use strict';
+
+  var S = null; // spacer marker
+
+  function k(code, label, w, opts) {
+    var o = opts || {};
+    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls, toggle: o.toggle };
+  }
+  function sp(w) { return { spacer: true, w: w }; }
+
+  /* Widths per row sum to 15 so the columns line up like a real deck. */
+  var ROWS = [
+    { cls: 'fn-row', keys: [
+      k('Escape', 'Esc', 1.2, { cls: 'wide-label' }), sp(0.4),
+      k('F1', 'F1', 0.8), k('F2', 'F2', 0.8), k('F3', 'F3', 0.8), k('F4', 'F4', 0.8), sp(0.35),
+      k('F5', 'F5', 0.8), k('F6', 'F6', 0.8), k('F7', 'F7', 0.8), k('F8', 'F8', 0.8), sp(0.35),
+      k('F9', 'F9', 0.8), k('F10', 'F10', 0.8), k('F11', 'F11', 0.8), k('F12', 'F12', 0.8), sp(0.3),
+      k('Home', 'Home', 0.7, { cls: 'wide-label' }), k('End', 'End', 0.7, { cls: 'wide-label' }),
+      k('Insert', 'Ins', 0.7, { cls: 'wide-label' }), k('Delete', 'Del', 0.7, { cls: 'wide-label' })
+    ]},
+    { keys: [
+      k('Backquote', '`', 1, { sub: '~', ch: '`' }),
+      k('Digit1', '1', 1, { sub: '!', ch: '1' }), k('Digit2', '2', 1, { sub: '@', ch: '2' }),
+      k('Digit3', '3', 1, { sub: '#', ch: '3' }), k('Digit4', '4', 1, { sub: '$', ch: '4' }),
+      k('Digit5', '5', 1, { sub: '%', ch: '5' }), k('Digit6', '6', 1, { sub: '^', ch: '6' }),
+      k('Digit7', '7', 1, { sub: '&', ch: '7' }), k('Digit8', '8', 1, { sub: '*', ch: '8' }),
+      k('Digit9', '9', 1, { sub: '(', ch: '9' }), k('Digit0', '0', 1, { sub: ')', ch: '0' }),
+      k('Minus', '-', 1, { sub: '_', ch: '-' }), k('Equal', '=', 1, { sub: '+', ch: '=' }),
+      k('Backspace', 'Backspace', 2, { cls: 'wide-label' })
+    ]},
+    { keys: [
+      k('Tab', 'Tab', 1.5, { cls: 'wide-label', ch: '\t' }),
+      k('KeyQ', 'Q', 1, { ch: 'q' }), k('KeyW', 'W', 1, { ch: 'w' }), k('KeyE', 'E', 1, { ch: 'e' }),
+      k('KeyR', 'R', 1, { ch: 'r' }), k('KeyT', 'T', 1, { ch: 't' }), k('KeyY', 'Y', 1, { ch: 'y' }),
+      k('KeyU', 'U', 1, { ch: 'u' }), k('KeyI', 'I', 1, { ch: 'i' }), k('KeyO', 'O', 1, { ch: 'o' }),
+      k('KeyP', 'P', 1, { ch: 'p' }),
+      k('BracketLeft', '[', 1, { sub: '{', ch: '[' }), k('BracketRight', ']', 1, { sub: '}', ch: ']' }),
+      k('Backslash', '\\', 1.5, { sub: '|', ch: '\\' })
+    ]},
+    { keys: [
+      k('CapsLock', 'Caps', 1.75, { cls: 'wide-label', toggle: 'cap' }),
+      k('KeyA', 'A', 1, { ch: 'a' }), k('KeyS', 'S', 1, { ch: 's' }), k('KeyD', 'D', 1, { ch: 'd' }),
+      k('KeyF', 'F', 1, { ch: 'f' }), k('KeyG', 'G', 1, { ch: 'g' }), k('KeyH', 'H', 1, { ch: 'h' }),
+      k('KeyJ', 'J', 1, { ch: 'j' }), k('KeyK', 'K', 1, { ch: 'k' }), k('KeyL', 'L', 1, { ch: 'l' }),
+      k('Semicolon', ';', 1, { sub: ':', ch: ';' }), k('Quote', "'", 1, { sub: '"', ch: "'" }),
+      k('Enter', 'Enter', 2.25, { cls: 'wide-label', ch: '\n' })
+    ]},
+    { keys: [
+      k('ShiftLeft', 'Shift', 2.25, { cls: 'wide-label' }),
+      k('KeyZ', 'Z', 1, { ch: 'z' }), k('KeyX', 'X', 1, { ch: 'x' }), k('KeyC', 'C', 1, { ch: 'c' }),
+      k('KeyV', 'V', 1, { ch: 'v' }), k('KeyB', 'B', 1, { ch: 'b' }), k('KeyN', 'N', 1, { ch: 'n' }),
+      k('KeyM', 'M', 1, { ch: 'm' }),
+      k('Comma', ',', 1, { sub: '<', ch: ',' }), k('Period', '.', 1, { sub: '>', ch: '.' }),
+      k('Slash', '/', 1, { sub: '?', ch: '/' }),
+      k('ShiftRight', 'Shift', 1.75, { cls: 'wide-label' }),
+      k('ArrowUp', '▲', 1)
+    ]},
+    { keys: [
+      k('Fn', 'Fn', 1, { cls: 'fn' }),
+      k('ControlLeft', 'Ctrl', 1, { cls: 'wide-label' }),
+      k('AltLeft', 'Alt', 1.25, { cls: 'wide-label' }),
+      k('Space', '', 6.25, { ch: ' ' }),
+      k('AltRight', 'Alt', 1.25, { cls: 'wide-label' }),
+      k('ControlRight', 'Ctrl', 1.25, { cls: 'wide-label' }),
+      k('ArrowLeft', '◀', 1), k('ArrowDown', '▼', 1), k('ArrowRight', '▶', 1)
+    ]}
+  ];
+
+  var byCode = Object.create(null);
+
+  function build(root, onKeyClick) {
+    var frag = document.createDocumentFragment();
+
+    ROWS.forEach(function (row) {
+      var r = document.createElement('div');
+      r.className = 'krow' + (row.cls ? ' ' + row.cls : '');
+      row.keys.forEach(function (key) {
+        var el = document.createElement(key.spacer ? 'div' : 'button');
+        el.style.flex = key.w + ' 1 0';
+        if (key.spacer) {
+          el.className = 'key spacer';
+          el.setAttribute('aria-hidden', 'true');
+        } else {
+          el.type = 'button';
+          el.className = 'key' + (key.cls ? ' ' + key.cls : '');
+          el.dataset.code = key.code;
+          if (key.ch !== undefined) el.dataset.ch = key.ch;
+          if (key.sub) {
+            el.classList.add('dual');
+            el.innerHTML = '<span class="sub"></span><span class="main"></span>';
+            el.firstChild.textContent = key.sub;
+            el.lastChild.textContent = key.label;
+          } else {
+            el.textContent = key.label;
+          }
+          el.tabIndex = -1;
+          el.setAttribute('aria-label', key.label || 'Space');
+          byCode[key.code] = el;
+          el.addEventListener('mousedown', function (e) { e.preventDefault(); }); // never steal focus
+          el.addEventListener('click', function (e) { onKeyClick(key, e); });
+        }
+        r.appendChild(el);
+      });
+      frag.appendChild(r);
+    });
+
+    // keep the TrackPoint on top of the freshly-built rows
+    var nub = root.querySelector('.trackpoint');
+    root.insertBefore(frag, nub || null);
+  }
+
+  /* physical key -> cap on screen */
+  function press(code) {
+    var el = byCode[code];
+    if (el) el.classList.add('down');
+  }
+  function release(code) {
+    var el = byCode[code];
+    if (el) el.classList.remove('down');
+  }
+  function releaseAll() {
+    Object.keys(byCode).forEach(function (c) { byCode[c].classList.remove('down'); });
+  }
+  function tap(code, ms) {
+    press(code);
+    setTimeout(function () { release(code); }, ms || 90);
+  }
+
+  global.TPKeyboard = {
+    build: build, press: press, release: release, releaseAll: releaseAll, tap: tap,
+    el: function (code) { return byCode[code]; }
+  };
+})(window);
+</script>
+<script>
+/* js/app.js */
+/* ============================================================
+   app.js — ThinkPad Notes
+   Plain text, stored in this browser only.
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  var NOTES_KEY = 'thinkpad.notes.v1';
+  var PREFS_KEY = 'thinkpad.prefs.v1';
+
+  /* ---------------------------------------------------------
+     elements
+     --------------------------------------------------------- */
+  var desk = $('#desk'), body = document.body;
+  var lcd = $('#lcd'), editor = $('#editor'), listbox = $('#listbox'), search = $('#search');
+  var winTitle = $('#winTitle'), stMsg = $('#stMsg'), stPos = $('#stPos'),
+      stCount = $('#stCount'), stFont = $('#stFont');
+  var menubar = $('#menubar'), modalLayer = $('#modalLayer'), printSheet = $('#printSheet');
+  var paneNotes = $('#paneNotes'), splitter = $('#splitter'), workspace = $('#workspace');
+  var keyboardEl = $('#keyboard'), trackpoint = $('#trackpoint'), fileInput = $('#fileInput');
+  var ledHdd = $('.led-hdd'), ledPwr = $('.led-pwr'), ledSlp = $('.led-slp'),
+      ledCap = $('.led-cap'), ledNum = $('.led-num'), ledBat = $('.led-bat');
+
+  /* ---------------------------------------------------------
+     storage
+     --------------------------------------------------------- */
+  function readJSON(key, fallback) {
+    try {
+      var raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : fallback;
+    } catch (e) { return fallback; }
+  }
+  function writeJSON(key, value) {
+    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
+    catch (e) { return false; }
+  }
+
+  var prefs = TPSettings.migrate(readJSON(PREFS_KEY, null));
+  var db = readJSON(NOTES_KEY, null);
+  if (!db || !Array.isArray(db.notes)) db = { notes: [], activeId: null };
+
+  function savePrefs() { writeJSON(PREFS_KEY, prefs); }
+
+  var saveTimer = null, diskFullWarned = false;
+  function flushSave() {
+    if (saveTimer) { clearTimeout(saveTimer); saveTimer = null; }
+    var note = active();
+    if (note) {
+      note.body = editor.value;
+      note.caret = editor.selectionStart;
+    }
+    var ok = writeJSON(NOTES_KEY, db);
+    if (ok) {
+      blink(ledHdd);
+      setMsg('Saved ' + timeStamp(new Date()));
+    } else {
+      ledBat.classList.add('amber');
+      setMsg('Disk full — this note is NOT saved');
+      if (!diskFullWarned) {
+        diskFullWarned = true;
+        dialog({
+          title: 'ThinkPad Notes',
+          bodyHTML: '<p><b>Local storage is full.</b></p><p>The browser refused to write. ' +
+                    'Export a few long notes to .txt and delete them to free space.</p>'
+        });
+      }
+    }
+    return ok;
+  }
+  function scheduleSave() {
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(flushSave, 400);
+    setMsg('Editing…', true);
+  }
+
+  /* ---------------------------------------------------------
+     notes model
+     --------------------------------------------------------- */
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function active() {
+    for (var i = 0; i < db.notes.length; i++) if (db.notes[i].id === db.activeId) return db.notes[i];
+    return null;
+  }
+  function firstLine(text) {
+    var lines = String(text || '').split('\n');
+    for (var i = 0; i < lines.length; i++) {
+      var t = lines[i].trim();
+      if (t) return { text: t, index: i };
+    }
+    return { text: '', index: -1 };
+  }
+  function titleOf(note) {
+    var f = firstLine(note.body).text;
+    return f ? (f.length > 60 ? f.slice(0, 60) + '…' : f) : 'Untitled';
+  }
+  function previewOf(note) {
+    var lines = String(note.body || '').split('\n');
+    var head = firstLine(note.body).index;
+    for (var i = head + 1; i < lines.length; i++) {
+      var t = lines[i].trim();
+      if (t) return t.length > 70 ? t.slice(0, 70) + '…' : t;
+    }
+    return '';
+  }
+  function pad(n) { return n < 10 ? '0' + n : String(n); }
+  function timeStamp(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+  function clockStamp(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function dateStamp(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+  function friendly(ts) {
+    var d = new Date(ts), now = new Date();
+    if (prefs.dateFormat === 'iso') return dateStamp(d) + ' ' + clockStamp(d);
+    var sameDay = d.toDateString() === now.toDateString();
+    var yest = new Date(now.getTime() - 864e5).toDateString() === d.toDateString();
+    if (sameDay) return clockStamp(d);
+    if (yest) return 'Yesterday ' + clockStamp(d);
+    return dateStamp(d) + ' ' + clockStamp(d);
+  }
+
+  function newNote(seedText) {
+    flushSave();
+    var note = {
+      id: uid(), body: seedText || '', created: Date.now(), updated: Date.now(), caret: 0
+    };
+    db.notes.unshift(note);
+    db.activeId = note.id;
+    editor.value = note.body;
+    search.value = '';
+    renderAll();
+    flushSave();
+    editor.focus();
+    editor.setSelectionRange(editor.value.length, editor.value.length);
+    setMsg('New note');
+    return note;
+  }
+
+  function selectNote(id, keepFocus) {
+    if (id === db.activeId) return;
+    flushSave();
+    db.activeId = id;
+    var note = active();
+    editor.value = note ? note.body : '';
+    renderAll();
+    if (note && typeof note.caret === 'number') {
+      var c = Math.min(note.caret, editor.value.length);
+      editor.setSelectionRange(c, c);
+    }
+    if (keepFocus !== false) editor.focus();
+    updatePos();
+    writeJSON(NOTES_KEY, db);
+  }
+
+  function deleteNote() {
+    var note = active();
+    if (!note) return;
+    dialog({
+      title: 'Delete note',
+      bodyHTML: '<p>Delete <b></b> permanently?</p><p class="hint">This cannot be undone — ' +
+                'there is no wastebasket on this machine.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = titleOf(note); },
+      buttons: [
+        { label: 'Delete', primary: true, act: function () {
+            var idx = db.notes.indexOf(note);
+            db.notes.splice(idx, 1);
+            var next = db.notes[idx] || db.notes[idx - 1] || null;
+            db.activeId = next ? next.id : null;
+            if (!db.notes.length) { newNote(''); return; }
+            editor.value = next ? next.body : '';
+            renderAll();
+            flushSave();
+            editor.focus();
+            setMsg('Deleted');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function sortNotes(a, b) {
+    if (prefs.sort === 'title') {
+      return titleOf(a).toLowerCase().localeCompare(titleOf(b).toLowerCase());
+    }
+    if (prefs.sort === 'created') return b.created - a.created;
+    return b.updated - a.updated;
+  }
+  function visibleNotes() {
+    var q = search.value.trim().toLowerCase();
+    var list = db.notes.slice().sort(sortNotes);
+    if (!q) return list;
+    return list.filter(function (n) {
+      return String(n.body || '').toLowerCase().indexOf(q) !== -1;
+    });
+  }
+
+  /* ---------------------------------------------------------
+     rendering
+     --------------------------------------------------------- */
+  var msgTimer = null;
+  function setMsg(text, quiet) {
+    stMsg.textContent = text;
+    if (msgTimer) clearTimeout(msgTimer);
+    if (!quiet) {
+      stMsg.classList.add('flash');
+      msgTimer = setTimeout(function () { stMsg.classList.remove('flash'); }, 700);
+    }
+  }
+  function blink(led) {
+    if (!led) return;
+    led.classList.remove('blink');
+    void led.offsetWidth;
+    led.classList.add('blink');
+  }
+
+  function renderList() {
+    var list = visibleNotes();
+    listbox.textContent = '';
+    if (!list.length) {
+      var empty = document.createElement('div');
+      empty.className = 'empty';
+      empty.textContent = search.value.trim() ? 'No notes match.' : 'No notes yet.';
+      listbox.appendChild(empty);
+      return;
+    }
+    list.forEach(function (note) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'note-item' + (note.id === db.activeId ? ' sel' : '');
+      b.dataset.id = note.id;
+      b.setAttribute('role', 'option');
+      b.setAttribute('aria-selected', note.id === db.activeId ? 'true' : 'false');
+
+      var t = document.createElement('span'); t.className = 'nt'; t.textContent = titleOf(note);
+      var p = document.createElement('span'); p.className = 'np'; p.textContent = previewOf(note) || ' ';
+      var d = document.createElement('span'); d.className = 'nd'; d.textContent = friendly(note.updated);
+      b.appendChild(t); b.appendChild(p); b.appendChild(d);
+      listbox.appendChild(b);
+    });
+  }
+
+  function renderTitle() {
+    var note = active();
+    winTitle.textContent = (note ? titleOf(note) : 'No note') + ' - ThinkPad Notes';
+    document.title = (note ? titleOf(note) : 'ThinkPad Notes');
+  }
+
+  function updateCounts() {
+    var text = editor.value;
+    var words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    stCount.textContent = words + (words === 1 ? ' word' : ' words') + ', ' + text.length + ' ch';
+  }
+  function updatePos() {
+    var upto = editor.value.slice(0, editor.selectionStart);
+    var lines = upto.split('\n');
+    stPos.textContent = 'Ln ' + lines.length + ', Col ' + (lines[lines.length - 1].length + 1);
+  }
+  function renderAll() {
+    renderList();
+    renderTitle();
+    updateCounts();
+    updatePos();
+  }
+
+  /* ---------------------------------------------------------
+     panel geometry — a 4:3 screen, and a case that fits the window
+
+     Measure the machine with the panel filling the height, subtract the
+     case from the space available, then hand the panel back a 4:3 box
+     and the case a width to match. Re-run whenever the window resizes
+     or a part of the case appears or disappears.
+     --------------------------------------------------------- */
+  var machine = $('#machine'), screenEl = $('.screen'), MIN_FIT_WIDTH = 820;
+  var ASPECTS = { '4:3': 4 / 3, '16:10': 1.6 };
+
+  function fitScreen() {
+    body.classList.remove('fitted');
+    machine.style.removeProperty('--machine-w');
+    machine.style.removeProperty('--screen-h');
+    if (!prefs.showCase || prefs.aspect === 'fill') return;
+
+    var ratio = ASPECTS[prefs.aspect] || ASPECTS['4:3'];
+    var deskStyle = window.getComputedStyle(desk);
+    var availW = desk.clientWidth -
+      (parseFloat(deskStyle.paddingLeft) || 0) - (parseFloat(deskStyle.paddingRight) || 0);
+    if (availW < MIN_FIT_WIDTH) return;         // phone-shaped window: stay fluid
+
+    var availH = machine.clientHeight;          // what the flex row grants the case
+    var pad = 6;                                // .screen padding, both sides
+    var chromeV = availH - screenEl.offsetHeight;
+    var chromeH = machine.clientWidth - screenEl.offsetWidth;
+
+    var screenH = availH - chromeV;
+    var lcdH = Math.max(180, screenH - pad);
+    var lcdW = lcdH * ratio;
+
+    if (lcdW + pad + chromeH > availW) {        // short and wide: width decides instead
+      lcdW = availW - chromeH - pad;
+      lcdH = lcdW / ratio;
+    }
+
+    machine.style.setProperty('--screen-h', Math.round(lcdH + pad) + 'px');
+    machine.style.setProperty('--machine-w', Math.round(lcdW + pad + chromeH) + 'px');
+    body.classList.add('fitted');
+  }
+
+  var fitPending = false;
+  function scheduleFit() {
+    if (fitPending) return;
+    fitPending = true;
+    requestAnimationFrame(function () { fitPending = false; fitScreen(); });
+  }
+  window.addEventListener('resize', scheduleFit);
+
+  /* ---------------------------------------------------------
+     preferences applied to the machine
+     --------------------------------------------------------- */
+  function applyPrefs() {
+    /* the machine */
+    body.dataset.case = prefs.caseFinish;
+    body.dataset.desk = prefs.desk;
+    body.dataset.cap = prefs.capStyle;
+    body.classList.toggle('no-case', !prefs.showCase);
+    body.classList.toggle('no-keyboard', !prefs.deck);
+    body.classList.toggle('no-tpb', !prefs.tpButtons);
+    body.classList.toggle('no-leds', !prefs.leds);
+    body.classList.toggle('no-glare', !prefs.glare);
+    body.classList.toggle('no-grain', !prefs.grain);
+    body.classList.toggle('muted', !prefs.sound);
+    desk.classList.toggle('night', !!prefs.night);
+
+    /* the screen */
+    lcd.dataset.theme = prefs.theme;
+    body.style.setProperty('--ui-font', TPSettings.UI_FONTS[prefs.uiFont] || TPSettings.UI_FONTS.tahoma);
+    body.style.setProperty('--mono-font', TPSettings.MONO_FONTS[prefs.monoFont] || TPSettings.MONO_FONTS.courier);
+    body.style.setProperty('--mono-size', prefs.fontSize + 'px');
+    body.style.setProperty('--mono-lh', String(prefs.lineHeight));
+    body.classList.toggle('no-wrap', !prefs.wrap);
+    body.classList.toggle('no-status', !prefs.statusbar);
+    editor.setAttribute('wrap', prefs.wrap ? 'soft' : 'off');
+    editor.style.tabSize = String(prefs.tabSize);
+    editor.spellcheck = !!prefs.spellcheck;
+
+    /* the notes */
+    body.classList.toggle('no-list', !prefs.list);
+    body.classList.toggle('list-right', prefs.listSide === 'right');
+    paneNotes.style.width = prefs.listWidth + 'px';
+
+    stFont.textContent = TPSettings.MONO_NAMES[prefs.monoFont] || prefs.monoFont;
+    stFont.title = prefs.preset === 'plex'
+      ? 'IBM Plex Mono (2017) — click for the period-correct face'
+      : 'Click to switch typeface — Settings for the rest';
+    savePrefs();
+    fitScreen();
+  }
+
+  function applyPreset(name) {
+    if (name === 'period') { prefs.uiFont = 'tahoma'; prefs.monoFont = 'courier'; }
+    else if (name === 'plex') { prefs.uiFont = 'plex'; prefs.monoFont = 'plex'; }
+    prefs.preset = name;
+  }
+  function setFont(mode) {
+    applyPreset(mode);
+    applyPrefs();
+    if (settingsForm) settingsForm.refresh();
+    setMsg(mode === 'plex' ? 'Typeface: IBM Plex — sixteen years early' : 'Typeface: period correct');
+  }
+  function nudgeSize(dir) {
+    prefs.fontSize = Math.max(10, Math.min(20, prefs.fontSize + dir));
+    applyPrefs();
+    if (settingsForm) settingsForm.refresh();
+    setMsg('Note size ' + prefs.fontSize + ' px');
+  }
+  function toggler(key, msg) {
+    return function () {
+      prefs[key] = !prefs[key];
+      applyPrefs();
+      if (settingsForm) settingsForm.refresh();
+      if (msg) setMsg(msg + (prefs[key] ? ' on' : ' off'));
+    };
+  }
+
+  /* ---------------------------------------------------------
+     sound — a synthesised buckling-spring-ish click
+     --------------------------------------------------------- */
+  var Sound = {
+    ctx: null,
+    ensure: function () {
+      if (!this.ctx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        this.ctx = new AC();
+      }
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      return this.ctx;
+    },
+    click: function (down) {
+      if (!prefs.sound) return;
+      var ctx = this.ensure();
+      if (!ctx) return;
+      var now = ctx.currentTime;
+      var len = Math.floor(ctx.sampleRate * 0.03);
+      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
+      var data = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 6);
+      var src = ctx.createBufferSource(); src.buffer = buf;
+      var bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = down ? 2600 : 3400;
+      bp.Q.value = 1.1;
+      var g = ctx.createGain();
+      g.gain.setValueAtTime(prefs.vol * (down ? 0.9 : 0.5), now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
+      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
+      src.start(now); src.stop(now + 0.04);
+
+      if (down) { // the low thock of the plunger bottoming out
+        var osc = ctx.createOscillator(), og = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(190, now);
+        osc.frequency.exponentialRampToValueAtTime(90, now + 0.03);
+        og.gain.setValueAtTime(prefs.vol * 0.35, now);
+        og.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
+        osc.connect(og); og.connect(ctx.destination);
+        osc.start(now); osc.stop(now + 0.06);
+      }
+    },
+    beep: function () {
+      var ctx = this.ensure();
+      if (!ctx || !prefs.sound) return;
+      var now = ctx.currentTime;
+      var osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'square'; osc.frequency.value = 880;
+      g.gain.setValueAtTime(prefs.vol * 0.18, now);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(now); osc.stop(now + 0.2);
+    }
+  };
+
+  /* ---------------------------------------------------------
+     dialogs
+     --------------------------------------------------------- */
+  var openDialogEl = null, settingsForm = null;
+  function dialog(opts) {
+    closeDialog();
+    var dlg = document.createElement('div');
+    dlg.className = 'dlg' + (opts.wide ? ' wide' : '');
+    dlg.setAttribute('role', 'dialog');
+    dlg.setAttribute('aria-modal', 'true');
+
+    var bar = document.createElement('div');
+    bar.className = 'titlebar';
+    bar.innerHTML = '<span class="app-icon"></span><span class="title"></span>' +
+                    '<span class="tb-buttons"><button type="button" class="tb" aria-label="Close">' +
+                    '<b class="g-close"></b></button></span>';
+    $('.title', bar).textContent = opts.title || 'ThinkPad Notes';
+    $('.tb', bar).addEventListener('click', closeDialog);
+
+    var bodyEl = document.createElement('div');
+    bodyEl.className = 'dlg-body';
+    bodyEl.innerHTML = opts.bodyHTML || '';
+    if (opts.onBuild) opts.onBuild(bodyEl);
+
+    var foot = document.createElement('div');
+    foot.className = 'dlg-foot';
+    var buttons = opts.buttons || [{ label: 'OK', primary: true }];
+    buttons.forEach(function (spec) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn' + (spec.primary ? ' primary' : '');
+      b.textContent = spec.label;
+      b.addEventListener('click', function () {
+        closeDialog();
+        if (spec.act) spec.act();
+      });
+      foot.appendChild(b);
+    });
+
+    dlg.appendChild(bar); dlg.appendChild(bodyEl); dlg.appendChild(foot);
+    modalLayer.textContent = '';
+    modalLayer.appendChild(dlg);
+    modalLayer.hidden = false;
+    openDialogEl = dlg;
+    var firstBtn = $('.dlg-foot .btn', dlg);
+    if (firstBtn) firstBtn.focus();
+    return dlg;
+  }
+  function closeDialog() {
+    if (!openDialogEl) return;
+    settingsForm = null;
+    modalLayer.hidden = true;
+    modalLayer.textContent = '';
+    openDialogEl = null;
+    if (!desk.classList.contains('standby')) editor.focus();
+  }
+  modalLayer.addEventListener('mousedown', function (e) {
+    if (e.target === modalLayer) closeDialog();
+  });
+
+  /* ---------------------------------------------------------
+     commands
+     --------------------------------------------------------- */
+  /* Handing the viewer a file. A local page can just click an anchor;
+     a published copy has to ask its host, which shows its own prompt. */
+  var hostSave = null;
+  if (window.claude && typeof window.claude.use === 'function') {
+    try {
+      window.claude.use('downloads').then(
+        function (d) { hostSave = d; },
+        function () { hostSave = null; }
+      );
+    } catch (e) { hostSave = null; }
+  }
+
+  function saveFile(filename, text, mime) {
+    if (hostSave) {
+      hostSave.save({ filename: filename, data: text }).then(function (r) {
+        setMsg((r && r.status === 'delivered' ? 'Sent ' : 'Saved ') + filename);
+      }, function (err) {
+        var code = err && err.code;
+        setMsg(code === 'declined' ? 'Save cancelled'
+          : 'Could not save ' + filename + (code ? ' — ' + code : ''));
+      });
+      return;
+    }
+    var blob = new Blob([text], { type: mime || 'text/plain;charset=utf-8' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+    setMsg('Exported ' + filename);
+  }
+
+  function saveNow() {
+    if (flushSave()) setMsg('Saved to this browser · ' + timeStamp(new Date()));
+  }
+
+  function exportTxt() {
+    var note = active();
+    if (!note) return;
+    flushSave();
+    var name = titleOf(note).replace(/[\\/:*?"<>|]+/g, '-').replace(/…$/, '').trim() || 'note';
+    saveFile(name + '.txt', note.body);
+  }
+
+  function exportAll() {
+    flushSave();
+    var out = db.notes.slice().sort(sortNotes)
+      .map(function (n) {
+        return '=== ' + titleOf(n) + ' === (' + friendly(n.updated) + ')\n\n' + n.body;
+      }).join('\n\n\n');
+    saveFile('thinkpad-notes-' + dateStamp(new Date()) + '.txt', out);
+  }
+
+  function importText(text, name) {
+    var seed = text;
+    if (name && !/^\s*\S/.test(text.split('\n')[0] || '')) seed = name + '\n' + text;
+    newNote(seed);
+    setMsg('Imported ' + (name || 'text'));
+  }
+
+  function printNote() {
+    var note = active();
+    if (!note) return;
+    flushSave();
+    printSheet.textContent = '';
+    var h = document.createElement('h1'); h.textContent = titleOf(note);
+    var m = document.createElement('p'); m.className = 'meta';
+    m.textContent = 'Last edited ' + friendly(note.updated);
+    var pre = document.createElement('div'); pre.textContent = note.body;
+    printSheet.appendChild(h); printSheet.appendChild(m); printSheet.appendChild(pre);
+    window.print();
+  }
+
+  function insertAtCaret(text) {
+    var s = editor.selectionStart, e = editor.selectionEnd;
+    editor.setRangeText(text, s, e, 'end');
+    editor.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  function insertDateTime() {
+    var d = new Date();
+    insertAtCaret(clockStamp(d) + ' ' + dateStamp(d));
+    setMsg('Date/time stamped');
+  }
+
+  function cycleNote(dir) {
+    var list = visibleNotes();
+    if (list.length < 2) return;
+    var i = 0;
+    for (var j = 0; j < list.length; j++) if (list[j].id === db.activeId) i = j;
+    var next = list[(i + dir + list.length) % list.length];
+    selectNote(next.id);
+    setMsg(titleOf(next));
+  }
+
+  function setStandby(on) {
+    desk.classList.toggle('standby', on);
+    if (on) {
+      flushSave();
+      editor.blur();
+      ledPwr.classList.remove('on');
+      ledSlp.classList.add('pulse');
+      TPKeyboard.releaseAll();
+      setMsg('Standby');
+    } else {
+      ledPwr.classList.add('on');
+      ledSlp.classList.remove('pulse');
+      editor.focus();
+      setMsg('Resumed');
+    }
+  }
+  function toggleThinkLight() {
+    prefs.night = !prefs.night;
+    applyPrefs();
+    setMsg(prefs.night ? 'ThinkLight on' : 'ThinkLight off');
+  }
+  function setVolume(delta) {
+    if (delta === 0) {
+      prefs.sound = !prefs.sound;
+      applyPrefs();
+      if (prefs.sound) Sound.click(true);
+      setMsg(prefs.sound ? 'Key click on' : 'Key click muted');
+      return;
+    }
+    prefs.sound = true;
+    prefs.vol = Math.max(0.05, Math.min(1, prefs.vol + delta));
+    applyPrefs();
+    Sound.click(true);
+    setMsg('Key click ' + Math.round(prefs.vol * 100) + '%');
+  }
+
+  /* ---------------------------------------------------------
+     help / about
+     --------------------------------------------------------- */
+  function storageReport() {
+    var bytes = 0;
+    try {
+      bytes = (localStorage.getItem(NOTES_KEY) || '').length +
+              (localStorage.getItem(PREFS_KEY) || '').length;
+    } catch (e) {}
+    var words = 0;
+    db.notes.forEach(function (n) {
+      var t = String(n.body || '').trim();
+      if (t) words += t.split(/\s+/).length;
+    });
+    return db.notes.length + ' note' + (db.notes.length === 1 ? '' : 's') + ' · ' +
+           words + ' words · ' + (bytes / 1024).toFixed(1) + ' KB of localStorage';
+  }
+
+  /* ---------------------------------------------------------
+     settings
+     --------------------------------------------------------- */
+  function openSettings() {
+    var actions = {
+      report: storageReport,
+      backup: backupAll,
+      restore: function () { pickFile('json'); },
+      reset: resetSettings,
+      erase: eraseAllNotes
+    };
+    var form = TPSettings.buildForm(prefs, function (key, value, item) {
+      prefs[key] = value;
+      if (key === 'preset') applyPreset(value);
+      if (key === 'uiFont' || key === 'monoFont') prefs.preset = 'custom';
+      applyPrefs();
+      if (item && item.t !== 'range') form.refresh();
+    }, actions);
+
+    dialog({
+      title: 'Settings',
+      wide: true,
+      bodyHTML: '',
+      onBuild: function (bodyEl) { bodyEl.appendChild(form.node); },
+      buttons: [{ label: 'Close', primary: true }]
+    });
+    settingsForm = form;
+  }
+
+  function backupAll() {
+    flushSave();
+    var payload = {
+      app: 'thinkpad-notes', version: 1,
+      exported: new Date().toISOString(),
+      prefs: prefs, notes: db.notes
+    };
+    saveFile('thinkpad-notes-backup-' + dateStamp(new Date()) + '.json',
+             JSON.stringify(payload, null, 2), 'application/json');
+  }
+
+  function restoreFrom(text) {
+    var data;
+    try { data = JSON.parse(text); } catch (e) { data = null; }
+    if (!data || !Array.isArray(data.notes)) {
+      Sound.beep();
+      dialog({ title: 'Restore', bodyHTML: '<p>That is not a ThinkPad Notes backup.</p>' });
+      return;
+    }
+    dialog({
+      title: 'Restore backup',
+      bodyHTML: '<p>Replace everything on this machine with <b></b> note(s) from the backup?</p>' +
+                '<p class="hint">What is here now is overwritten and cannot be recovered.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(data.notes.length); },
+      buttons: [
+        { label: 'Restore', primary: true, act: function () {
+            db.notes = data.notes.filter(function (n) { return n && typeof n.body === 'string'; })
+              .map(function (n) {
+                return {
+                  id: n.id || uid(), body: n.body,
+                  created: n.created || Date.now(), updated: n.updated || Date.now(),
+                  caret: n.caret || 0
+                };
+              });
+            if (data.prefs) { prefs = TPSettings.migrate(data.prefs); }
+            if (!db.notes.length) db.notes.push({ id: uid(), body: '', created: Date.now(), updated: Date.now() });
+            db.activeId = db.notes[0].id;
+            editor.value = db.notes[0].body;
+            applyPrefs();
+            renderAll();
+            flushSave();
+            setMsg('Restored ' + db.notes.length + ' notes');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function resetSettings() {
+    dialog({
+      title: 'Reset settings',
+      bodyHTML: '<p>Put every switch back to standard? Your notes are not touched.</p>',
+      buttons: [
+        { label: 'Reset', primary: true, act: function () {
+            prefs = TPSettings.migrate(null);
+            applyPrefs();
+            renderAll();
+            setMsg('Settings reset');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function eraseAllNotes() {
+    dialog({
+      title: 'Erase all notes',
+      bodyHTML: '<p>Delete <b></b> note(s) permanently?</p>' +
+                '<p class="hint">Back up first — this cannot be undone.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(db.notes.length); },
+      buttons: [
+        { label: 'Erase', primary: true, act: function () {
+            db.notes = [];
+            db.activeId = null;
+            editor.value = '';
+            newNote('');
+            setMsg('All notes erased');
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function showHelp(tab) {
+    var d = dialog({
+      title: 'Access IBM',
+      bodyHTML: '<div class="dlg-tabs">' +
+          '<button type="button" class="dlg-tab" data-tab="about">About</button>' +
+          '<button type="button" class="dlg-tab" data-tab="keys">Keyboard</button>' +
+          '<button type="button" class="dlg-tab" data-tab="hw">Hardware</button>' +
+        '</div><div class="tabpanes"></div>'
+    });
+    var panes = $('.tabpanes', d);
+    var content = {
+      about:
+        '<p><b>ThinkPad Notes</b> — plain text, nothing else.</p>' +
+        '<p>Every note lives in this browser&rsquo;s localStorage on this machine. ' +
+        'Nothing is uploaded, there is no account, and clearing site data erases it, ' +
+        'so export anything you would miss.</p>' +
+        '<div class="sunken">' + storageReport() + '</div>' +
+        '<p>Back up everything to a .json file from <b>Settings &gt; Data</b>, ' +
+        'and drop that file back on the screen to restore it.</p>' +
+        '<h4>Typeface</h4>' +
+        '<p><b>Period correct</b> is Tahoma for the chrome and Courier New for the page — ' +
+        'what a ThinkPad actually put on screen around 2001.<br>' +
+        '<b>IBM Plex</b> is the anachronism: IBM did not draw it until 2017.</p>' +
+        '<p class="hint">Unaffiliated homage. IBM, ThinkPad and TrackPoint belong to their owners.</p>',
+      keys:
+        '<dl>' +
+        '<dt>Alt+N</dt><dd>New note</dd>' +
+        '<dt>Ctrl+S</dt><dd>Save now (it also autosaves)</dd>' +
+        '<dt>Ctrl+F / Alt+I</dt><dd>Find</dd>' +
+        '<dt>Ctrl+D</dt><dd>Delete note</dd>' +
+        '<dt>Ctrl+[ / ]</dt><dd>Previous / next note</dd>' +
+        '<dt>Ctrl+E</dt><dd>Export .txt</dd>' +
+        '<dt>Ctrl+P</dt><dd>Print</dd>' +
+        '<dt>F5</dt><dd>Stamp the time and date</dd>' +
+        '<dt>Alt+L</dt><dd>ThinkLight</dd>' +
+        '<dt>Ctrl+,</dt><dd>Settings</dd>' +
+        '<dt>Alt+= / Alt+-</dt><dd>Bigger / smaller text</dd>' +
+        '<dt>Esc</dt><dd>Close menu or dialog</dd>' +
+        '</dl>' +
+        '<p class="hint">Alt+F, Alt+E, Alt+O, Alt+V, Alt+H open the menus.</p>',
+      hw:
+        '<h4>Things on the machine that work</h4>' +
+        '<dl>' +
+        '<dt>ThinkLight</dt><dd>The lamp above the screen. Dims the room and lights the keys.</dd>' +
+        '<dt>TrackPoint</dt><dd>Push the red nub to scroll the page, like the real thing.</dd>' +
+        '<dt>Mouse buttons</dt><dd>Left and right walk through your notes.</dd>' +
+        '<dt>Access IBM</dt><dd>This window.</dd>' +
+        '<dt>Volume</dt><dd>Key click volume. The dot lights when muted.</dd>' +
+        '<dt>Power</dt><dd>Standby. Click anywhere to wake.</dd>' +
+        '<dt>Keyboard</dt><dd>Folded away by default. <b>View &gt; Keyboard</b> brings it back — ' +
+        'it mirrors what you type, and you can click the caps to type with the mouse.</dd>' +
+        '</dl>' +
+        '<p class="hint">Everything here, plus case finish, panel shape, colours and ' +
+        'typefaces, lives in <b>Settings</b> (Ctrl+,).</p>'
+    };
+    var tabs = $$('.dlg-tab', d);
+    function show(name) {
+      panes.innerHTML = content[name];
+      tabs.forEach(function (t) { t.classList.toggle('on', t.dataset.tab === name); });
+    }
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () { show(t.dataset.tab); });
+    });
+    show(tab || 'about');
+  }
+
+  /* ---------------------------------------------------------
+     menus
+     --------------------------------------------------------- */
+  var SEP = { sep: true };
+  var MENUS = [
+    { id: 'file', label: 'File', key: 'f', items: [
+      { label: 'New Note', accel: 'Alt+N', act: function () { newNote(''); } },
+      { label: 'Open .txt…', act: function () { pickFile('txt'); } },
+      SEP,
+      { label: 'Save Now', accel: 'Ctrl+S', act: saveNow },
+      { label: 'Export .txt', accel: 'Ctrl+E', act: exportTxt },
+      { label: 'Export All Notes…', act: exportAll },
+      { label: 'Back Up Everything…', act: backupAll },
+      { label: 'Restore Backup…', act: function () { pickFile('json'); } },
+      { label: 'Print…', accel: 'Ctrl+P', act: printNote },
+      SEP,
+      { label: 'Delete Note', accel: 'Ctrl+D', act: deleteNote }
+    ]},
+    { id: 'edit', label: 'Edit', key: 'e', items: [
+      { label: 'Select All', accel: 'Ctrl+A', act: function () { editor.focus(); editor.select(); } },
+      { label: 'Time/Date', accel: 'F5', act: function () { editor.focus(); insertDateTime(); } },
+      SEP,
+      { label: 'Find', accel: 'Ctrl+F', act: function () { search.focus(); search.select(); } },
+      { label: 'Previous Note', accel: 'Ctrl+[', act: function () { cycleNote(-1); } },
+      { label: 'Next Note', accel: 'Ctrl+]', act: function () { cycleNote(1); } }
+    ]},
+    { id: 'format', label: 'Format', key: 'o', items: [
+      { label: 'Period Correct — Tahoma / Courier New', radio: 'preset', value: 'period',
+        act: function () { setFont('period'); } },
+      { label: 'IBM Plex — sixteen years early', radio: 'preset', value: 'plex',
+        act: function () { setFont('plex'); } },
+      SEP,
+      { label: 'Larger Text', accel: 'Alt+=', act: function () { nudgeSize(1); } },
+      { label: 'Smaller Text', accel: 'Alt+-', act: function () { nudgeSize(-1); } },
+      { label: 'Word Wrap', check: 'wrap', act: toggler('wrap', 'Word wrap') },
+      { label: 'Spell Check', check: 'spellcheck', act: toggler('spellcheck', 'Spell check') },
+      SEP,
+      { label: 'Settings…', accel: 'Ctrl+,', act: openSettings }
+    ]},
+    { id: 'view', label: 'View', key: 'v', items: [
+      { label: 'Keyboard', check: 'deck', act: toggler('deck', 'Keyboard') },
+      { label: 'Note List', check: 'list', act: toggler('list', 'Note list') },
+      { label: 'Status Bar', check: 'statusbar', act: toggler('statusbar', 'Status bar') },
+      { label: 'The Machine', check: 'showCase', act: toggler('showCase', 'Case') },
+      SEP,
+      { label: 'ThinkLight', accel: 'Alt+L', check: 'night', act: toggleThinkLight },
+      { label: 'Screen Glare', check: 'glare', act: toggler('glare', 'Glare') },
+      { label: 'LCD Grain', check: 'grain', act: toggler('grain', 'Grain') },
+      { label: 'Key Click', check: 'sound', act: function () { setVolume(0); } },
+      SEP,
+      { label: 'Settings…', accel: 'Ctrl+,', act: openSettings },
+      { label: 'Standby', act: function () { setStandby(true); } }
+    ]},
+    { id: 'help', label: 'Help', key: 'h', items: [
+      { label: 'Keyboard Shortcuts', act: function () { showHelp('keys'); } },
+      { label: 'The Hardware', act: function () { showHelp('hw'); } },
+      SEP,
+      { label: 'Settings…', accel: 'Ctrl+,', act: openSettings },
+      { label: 'About ThinkPad Notes', act: function () { showHelp('about'); } }
+    ]}
+  ];
+
+  var openMenu = null;
+  function buildMenus() {
+    MENUS.forEach(function (menu) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'menu-top';
+      btn.dataset.menu = menu.id;
+      btn.setAttribute('role', 'menuitem');
+      var i = menu.label.toLowerCase().indexOf(menu.key);
+      btn.innerHTML = menu.label.slice(0, i) + '<u>' + menu.label.charAt(i) + '</u>' + menu.label.slice(i + 1);
+
+      var dd = document.createElement('div');
+      dd.className = 'dropdown';
+      dd.hidden = true;
+      dd.dataset.menu = menu.id;
+
+      menu.items.forEach(function (item) {
+        if (item.sep) {
+          var s = document.createElement('div');
+          s.className = 'msep';
+          dd.appendChild(s);
+          return;
+        }
+        var mi = document.createElement('button');
+        mi.type = 'button';
+        mi.className = 'mi' + (item.radio ? ' radio' : '');
+        mi.dataset.label = item.label;
+        if (item.check) mi.dataset.check = item.check;
+        if (item.radio) { mi.dataset.radio = item.radio; mi.dataset.value = item.value; }
+        var lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = item.label;
+        mi.appendChild(lbl);
+        if (item.accel) {
+          var ac = document.createElement('span'); ac.className = 'accel'; ac.textContent = item.accel;
+          mi.appendChild(ac);
+        }
+        mi.addEventListener('click', function () {
+          closeMenu();
+          if (item.act) item.act();
+        });
+        dd.appendChild(mi);
+      });
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (openMenu === menu.id) closeMenu(); else showMenu(menu.id);
+      });
+      btn.addEventListener('mouseenter', function () {
+        if (openMenu && openMenu !== menu.id) showMenu(menu.id);
+      });
+
+      menubar.appendChild(btn);
+      menubar.appendChild(dd);
+    });
+  }
+
+  function syncMenuState(dd) {
+    $$('.mi', dd).forEach(function (mi) {
+      if (mi.dataset.check) mi.classList.toggle('checked', !!prefs[mi.dataset.check]);
+      if (mi.dataset.radio) mi.classList.toggle('checked', prefs[mi.dataset.radio] === mi.dataset.value);
+    });
+  }
+  function showMenu(id) {
+    closeMenu();
+    var btn = $('.menu-top[data-menu="' + id + '"]', menubar);
+    var dd = $('.dropdown[data-menu="' + id + '"]', menubar);
+    if (!btn || !dd) return;
+    btn.classList.add('open');
+    syncMenuState(dd);
+    dd.hidden = false;
+    dd.style.left = btn.offsetLeft + 'px';
+    var overflow = (btn.offsetLeft + dd.offsetWidth) - menubar.clientWidth;
+    if (overflow > 0) dd.style.left = Math.max(0, btn.offsetLeft - overflow - 2) + 'px';
+    openMenu = id;
+  }
+  function closeMenu() {
+    if (!openMenu) return;
+    $$('.menu-top', menubar).forEach(function (b) { b.classList.remove('open'); });
+    $$('.dropdown', menubar).forEach(function (d) { d.hidden = true; });
+    openMenu = null;
+  }
+  document.addEventListener('click', function (e) {
+    if (openMenu && !menubar.contains(e.target)) closeMenu();
+  });
+
+  /* ---------------------------------------------------------
+     editor + list wiring
+     --------------------------------------------------------- */
+  var listRenderTimer = null;
+  editor.addEventListener('input', function () {
+    var note = active();
+    if (!note) { newNote(editor.value); return; }
+    note.body = editor.value;
+    note.updated = Date.now();
+    updateCounts();
+    updatePos();
+    renderTitle();
+    scheduleSave();
+    if (listRenderTimer) clearTimeout(listRenderTimer);
+    listRenderTimer = setTimeout(renderList, 500);
+  });
+  ['keyup', 'click', 'select', 'focus'].forEach(function (ev) {
+    editor.addEventListener(ev, updatePos);
+  });
+  editor.addEventListener('blur', function () { if (saveTimer) flushSave(); });
+
+  listbox.addEventListener('click', function (e) {
+    var item = e.target.closest ? e.target.closest('.note-item') : null;
+    if (item) selectNote(item.dataset.id);
+  });
+  listbox.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      cycleNote(e.key === 'ArrowDown' ? 1 : -1);
+      listbox.focus();
+    } else if (e.key === 'Enter') {
+      editor.focus();
+    }
+  });
+
+  var searchTimer = null;
+  search.addEventListener('input', function () {
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(function () {
+      renderList();
+      var n = visibleNotes().length;
+      setMsg(search.value.trim() ? n + ' of ' + db.notes.length + ' notes match' : 'Ready', true);
+    }, 120);
+  });
+  search.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') { search.value = ''; renderList(); editor.focus(); }
+    if (e.key === 'Enter') {
+      var first = $('.note-item', listbox);
+      if (first) { selectNote(first.dataset.id); }
+    }
+  });
+
+  $('#btnNew').addEventListener('click', function () { newNote(''); });
+  $('#btnDelete').addEventListener('click', deleteNote);
+  $('#tbMin').addEventListener('click', function () { setStandby(true); });
+  $('#tbClose').addEventListener('click', function () { setStandby(true); });
+  $('#tbMax').addEventListener('click', function () {
+    prefs.list = !prefs.list; applyPrefs();
+  });
+  stFont.addEventListener('click', function () { setFont(prefs.font === 'plex' ? 'period' : 'plex'); });
+
+  var fileMode = 'txt';
+  function pickFile(mode) {
+    fileMode = mode;
+    fileInput.accept = mode === 'json' ? '.json,application/json' : '.txt,.md,text/plain';
+    fileInput.click();
+  }
+  function readFile(f, mode) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var text = String(reader.result || '');
+      if (mode === 'json' || /\.json$/i.test(f.name)) restoreFrom(text);
+      else importText(text, f.name.replace(/\.[^.]+$/, ''));
+    };
+    reader.readAsText(f);
+  }
+  fileInput.addEventListener('change', function () {
+    var f = fileInput.files && fileInput.files[0];
+    if (f) readFile(f, fileMode);
+    fileInput.value = '';
+  });
+
+  /* drag a .txt onto the screen */
+  var dropzone = document.createElement('div');
+  dropzone.className = 'dropzone';
+  dropzone.innerHTML = '<span>Drop a .txt file to open it, or a .json backup to restore</span>';
+  lcd.appendChild(dropzone);
+  ['dragenter', 'dragover'].forEach(function (ev) {
+    lcd.addEventListener(ev, function (e) {
+      if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') !== -1) {
+        e.preventDefault();
+        lcd.classList.add('dragging');
+      }
+    });
+  });
+  ['dragleave', 'drop'].forEach(function (ev) {
+    lcd.addEventListener(ev, function (e) {
+      if (ev === 'drop') e.preventDefault();
+      if (ev === 'dragleave' && lcd.contains(e.relatedTarget)) return;
+      lcd.classList.remove('dragging');
+    });
+  });
+  lcd.addEventListener('drop', function (e) {
+    var f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) readFile(f, /\.json$/i.test(f.name) ? 'json' : 'txt');
+  });
+
+  /* ---------------------------------------------------------
+     splitter
+     --------------------------------------------------------- */
+  (function () {
+    var dragging = false;
+    splitter.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      splitter.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    splitter.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var rect = workspace.getBoundingClientRect();
+      var w = Math.max(110, Math.min(rect.width * 0.6, e.clientX - rect.left));
+      prefs.listWidth = Math.round(w);
+      paneNotes.style.width = prefs.listWidth + 'px';
+    });
+    splitter.addEventListener('pointerup', function (e) {
+      if (!dragging) return;
+      dragging = false;
+      splitter.releasePointerCapture(e.pointerId);
+      savePrefs();
+    });
+  })();
+
+  /* ---------------------------------------------------------
+     hardware wiring
+     --------------------------------------------------------- */
+  $('#thinklightBtn').addEventListener('click', toggleThinkLight);
+  $('#accessBtn').addEventListener('click', function () { showHelp('about'); });
+  $('#powerBtn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    setStandby(!desk.classList.contains('standby'));
+  });
+  $('#volUp').addEventListener('click', function () { setVolume(0.15); });
+  $('#volDown').addEventListener('click', function () { setVolume(-0.15); });
+  $('#volMute').addEventListener('click', function () { setVolume(0); });
+  $('#tpbLeft').addEventListener('click', function () { cycleNote(-1); });
+  $('#tpbRight').addEventListener('click', function () { cycleNote(1); });
+  $('#tpbCenter').addEventListener('click', function () {
+    setMsg('Hold the red nub and push to scroll');
+  });
+
+  /* wake from standby on any interaction */
+  desk.addEventListener('mousedown', function (e) {
+    if (!desk.classList.contains('standby')) return;
+    if (e.target.closest && e.target.closest('#powerBtn')) return; // the button toggles it itself
+    setStandby(false);
+  }, true);
+
+  /* the light thrown by the ThinkLight */
+  var cone = document.createElement('div');
+  cone.className = 'light-cone';
+  cone.setAttribute('aria-hidden', 'true');
+  var spill = document.createElement('div');
+  spill.className = 'screen-spill';
+  spill.setAttribute('aria-hidden', 'true');
+  $('.base').appendChild(spill);
+  $('.base').appendChild(cone);
+
+  /* --- TrackPoint: push to scroll --- */
+  (function () {
+    var dragging = false, originY = 0, velocity = 0, raf = null;
+    function loop() {
+      if (!dragging) { raf = null; return; }
+      if (Math.abs(velocity) > 0.4) editor.scrollTop += velocity;
+      raf = requestAnimationFrame(loop);
+    }
+    trackpoint.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      originY = e.clientY;
+      velocity = 0;
+      trackpoint.classList.add('dragging');
+      trackpoint.setPointerCapture(e.pointerId);
+      e.preventDefault();
+      if (!raf) raf = requestAnimationFrame(loop);
+    });
+    trackpoint.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      var dy = e.clientY - originY;
+      var dead = 2;
+      velocity = Math.abs(dy) < dead ? 0 : (dy - Math.sign(dy) * dead) * 0.28;
+      trackpoint.style.transform = 'translate(-50%,-50%) translateY(' +
+        Math.max(-2, Math.min(2, dy / 12)) + 'px)';
+    });
+    function stop(e) {
+      if (!dragging) return;
+      dragging = false;
+      velocity = 0;
+      trackpoint.classList.remove('dragging');
+      trackpoint.style.transform = 'translate(-50%,-50%)';
+      try { trackpoint.releasePointerCapture(e.pointerId); } catch (err) {}
+    }
+    trackpoint.addEventListener('pointerup', stop);
+    trackpoint.addEventListener('pointercancel', stop);
+    trackpoint.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { editor.scrollTop += 40; e.preventDefault(); }
+      if (e.key === 'ArrowUp') { editor.scrollTop -= 40; e.preventDefault(); }
+    });
+  })();
+
+  /* --- build the keyboard --- */
+  TPKeyboard.build(keyboardEl, function (key, e) {
+    Sound.click(true);
+    if (desk.classList.contains('standby')) return;
+    if (key.code === 'Fn') { toggleThinkLight(); return; }
+    if (key.code === 'CapsLock') { ledCap.classList.toggle('on'); return; }
+    if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
+    if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
+    if (key.code === 'Backspace') {
+      editor.focus();
+      var s = editor.selectionStart, en = editor.selectionEnd;
+      if (s === en && s > 0) editor.setRangeText('', s - 1, s, 'end');
+      else editor.setRangeText('', s, en, 'end');
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (key.ch !== undefined) {
+      editor.focus();
+      var ch = key.ch;
+      if (e.shiftKey || ledCap.classList.contains('on')) {
+        ch = key.sub && e.shiftKey ? key.sub : ch.toUpperCase();
+      }
+      insertAtCaret(ch);
+    }
+  });
+
+  /* --- physical keys light up the caps --- */
+  window.addEventListener('keydown', function (e) {
+    TPKeyboard.press(e.code);
+    if (!e.repeat) Sound.click(true);
+    if (e.getModifierState) {
+      ledCap.classList.toggle('on', e.getModifierState('CapsLock'));
+      ledNum.classList.toggle('on', e.getModifierState('NumLock'));
+    }
+  });
+  window.addEventListener('keyup', function (e) {
+    TPKeyboard.release(e.code);
+    Sound.click(false);
+  });
+  window.addEventListener('blur', function () { TPKeyboard.releaseAll(); });
+
+  /* ---------------------------------------------------------
+     global shortcuts
+     --------------------------------------------------------- */
+  window.addEventListener('keydown', function (e) {
+    if (desk.classList.contains('standby')) {
+      e.preventDefault();
+      setStandby(false);
+      return;
+    }
+    var mod = e.ctrlKey || e.metaKey;
+
+    if (e.key === 'Escape') {
+      if (openDialogEl) { closeDialog(); return; }
+      if (openMenu) { closeMenu(); return; }
+    }
+    if (openDialogEl && e.key === 'Enter') {
+      var b = $('.dlg-foot .btn', openDialogEl);
+      if (b) { b.click(); e.preventDefault(); }
+      return;
+    }
+
+    if (e.altKey && !mod) {
+      var hit = null;
+      MENUS.forEach(function (m) { if (m.key === e.key.toLowerCase()) hit = m.id; });
+      if (hit) { e.preventDefault(); showMenu(hit); return; }
+      if (e.key.toLowerCase() === 'n') { e.preventDefault(); newNote(''); return; }
+      if (e.key.toLowerCase() === 'l') { e.preventDefault(); toggleThinkLight(); return; }
+      if (e.key.toLowerCase() === 'i') { e.preventDefault(); search.focus(); search.select(); return; }
+      if (e.key === '=' || e.key === '+') { e.preventDefault(); nudgeSize(1); return; }
+      if (e.key === '-' || e.key === '_') { e.preventDefault(); nudgeSize(-1); return; }
+    }
+
+    if (e.key === 'F5' && document.activeElement === editor) {
+      e.preventDefault(); insertDateTime(); return;
+    }
+
+    if (!mod) return;
+    var k = e.key.toLowerCase();
+    if (k === 's') { e.preventDefault(); saveNow(); }
+    else if (k === 'd') { e.preventDefault(); deleteNote(); }
+    else if (k === 'f') { e.preventDefault(); search.focus(); search.select(); }
+    else if (k === 'e') { e.preventDefault(); exportTxt(); }
+    else if (k === 'p') { e.preventDefault(); printNote(); }
+    else if (k === ',') { e.preventDefault(); openSettings(); }
+    else if (k === '[') { e.preventDefault(); cycleNote(-1); }
+    else if (k === ']') { e.preventDefault(); cycleNote(1); }
+  });
+
+  /* ---------------------------------------------------------
+     persistence safety nets
+     --------------------------------------------------------- */
+  window.addEventListener('beforeunload', function () { if (saveTimer) flushSave(); });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden' && saveTimer) flushSave();
+  });
+
+  /* ---------------------------------------------------------
+     boot
+     --------------------------------------------------------- */
+  var WELCOME =
+    'Notes\n' +
+    '\n' +
+    'This is a plain text notepad. The first line becomes the title.\n' +
+    '\n' +
+    'It saves as you type, into this browser only — no account, no server,\n' +
+    'no sync. Export anything you would hate to lose (Ctrl+E).\n' +
+    '\n' +
+    'Things worth trying:\n' +
+    '  * Settings — in the Format menu, or Ctrl and the comma key — holds\n' +
+    '    the case finish, panel shape, screen colours and typefaces.\n' +
+    '  * View > Keyboard unfolds the seven-row keyboard. It mirrors what\n' +
+    '    you type, at the cost of some screen.\n' +
+    '  * The lamp above the screen is the ThinkLight (Alt+L).\n' +
+    '  * Push the red TrackPoint to scroll a long note.\n' +
+    '  * Format menu: period-correct Courier New, or the anachronistic\n' +
+    '    IBM Plex that IBM would not draw for another sixteen years.\n' +
+    '  * F5 stamps the time, the way Notepad always has.\n' +
+    '  * Access IBM (the blue button) explains the rest.\n';
+
+  function boot() {
+    buildMenus();
+    lcd.appendChild(modalLayer);
+
+    if (!db.notes.length) {
+      db.notes.push({ id: uid(), body: WELCOME, created: Date.now(), updated: Date.now(), caret: 0 });
+      db.activeId = db.notes[0].id;
+      writeJSON(NOTES_KEY, db);
+    }
+    if (!active()) db.activeId = db.notes[0].id;
+
+    if (prefs.startup === 'new' && String((active() || {}).body || '').trim()) {
+      db.notes.unshift({ id: uid(), body: '', created: Date.now(), updated: Date.now(), caret: 0 });
+      db.activeId = db.notes[0].id;
+    }
+
+    var note = active();
+    editor.value = note ? note.body : '';
+    applyPrefs();
+    fitScreen();
+    renderAll();
+    if (note && note.caret) {
+      var c = Math.min(note.caret, editor.value.length);
+      editor.setSelectionRange(c, c);
+    }
+    editor.focus();
+    setMsg('Ready');
+
+    /* a browser that refuses localStorage entirely */
+    try {
+      localStorage.setItem('thinkpad.probe', '1');
+      localStorage.removeItem('thinkpad.probe');
+    } catch (e) {
+      setMsg('No localStorage — notes will vanish when you close this tab');
+      ledBat.classList.add('amber');
+    }
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

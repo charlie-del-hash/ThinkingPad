@@ -261,7 +261,7 @@ body.no-wrap #editor{white-space:pre;overflow-wrap:normal;overflow-x:auto}
 .statusbar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
 .statusbar .click{cursor:pointer}
 .statusbar .click:hover{background:#cac6be}
-.statusbar .flash{background:#ffffcc}
+.statusbar .flash{background:var(--flash,#ffffcc);color:var(--flash-ink,var(--ink))}
 
 /* ---------- dialogs ---------- */
 .modal-layer{
@@ -282,7 +282,7 @@ body.no-wrap #editor{white-space:pre;overflow-wrap:normal;overflow-x:auto}
   padding:2px;
 }
 .dlg .titlebar{margin:0}
-.dlg-body{padding:11px 12px;overflow:auto;flex:1 1 auto}
+.dlg-body{padding:11px 12px;overflow:auto;flex:1 1 auto;min-height:0}
 .dlg-body p{margin:0 0 8px}
 .dlg-body p:last-child{margin-bottom:0}
 .dlg-body h4{margin:12px 0 5px;font-size:var(--ui-size)}

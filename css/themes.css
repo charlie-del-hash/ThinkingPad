@@ -1,0 +1,223 @@
+/* ============================================================
+   themes.css — the parts you can change
+   Case finishes, desk surfaces, panel colour schemes, the
+   settings form, and the mode with no machine around it.
+   ============================================================ */
+
+/* ---------- case finishes ---------- */
+body[data-case="graphite"]{
+  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;--case-edge:#4d525b;
+  --key-text:#d6d9de;
+}
+body[data-case="titanium"]{
+  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;--case-edge:#b4b9c1;
+  --key-text:#23262b;
+  --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
+}
+body[data-case="graphite"] .lid,
+body[data-case="graphite"] .base{
+  background:linear-gradient(180deg,var(--case-lt),var(--case) 30%,var(--case-dk));
+}
+body[data-case="titanium"] .lid,
+body[data-case="titanium"] .base{
+  background:linear-gradient(180deg,#b0b5bd,#8d9199 34%,#74787f);
+}
+body[data-case="titanium"] .bezel{background:linear-gradient(180deg,#2a2c30,#1c1e21 40%,#191b1e)}
+body[data-case="titanium"] .palmrest{background:linear-gradient(180deg,#9ba0a8,#878b93 55%,#767a81)}
+body[data-case="titanium"] .keyboard{background:linear-gradient(180deg,#3a3d43,#2c2f34)}
+body[data-case="titanium"] .key{
+  background:linear-gradient(180deg,#e6e8ea 0%,#d2d5d9 42%,#b9bdc3 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(0,0,0,.16),0 2px 2px rgba(0,0,0,.35);
+}
+body[data-case="titanium"] .key.down,body[data-case="titanium"] .key:active{
+  background:linear-gradient(180deg,#c3c7cc,#b3b7bd 60%,#a6aab0);
+}
+body[data-case="titanium"] .key.fn{color:#12408f}
+body[data-case="titanium"] .badge-plate{color:#3c4046;background:linear-gradient(180deg,#a9aeb6,#93979f)}
+body[data-case="titanium"] .front-lip{background:linear-gradient(180deg,#6e7279,#4f5259)}
+body[data-case="titanium"] .hinges .hinge{background:linear-gradient(180deg,#a7acb4,#7c8087 60%,#63666c)}
+
+/* ---------- desk surfaces ---------- */
+body[data-desk="office"] .desk{
+  background:radial-gradient(120% 95% at 50% -12%,#8b8d92 0%,#6a6d73 30%,#4a4d53 62%,#2e3035 88%,#212327 100%);
+}
+body[data-desk="office"] .desk.night{
+  background:radial-gradient(120% 90% at 50% 0%,#2a2c30 0%,#1a1c1f 45%,#101113 100%);
+}
+body[data-desk="void"] .desk,
+body[data-desk="void"] .desk.night{background:#000}
+body[data-desk="void"] .desk::after{opacity:.05}
+
+/* ---------- TrackPoint caps ---------- */
+body[data-cap="dome"] .trackpoint::after{
+  background-image:radial-gradient(circle at 38% 32%,rgba(255,255,255,.32),transparent 46%);
+  background-size:auto;opacity:1;
+}
+body[data-cap="eraser"] .trackpoint{
+  border-radius:38%;
+}
+body[data-cap="eraser"] .trackpoint::after{
+  border-radius:38%;
+  background-image:repeating-linear-gradient(90deg,rgba(0,0,0,.28) 0 1px,transparent 1px 3px);
+  background-size:auto;opacity:.8;
+}
+
+/* ---------- panel colour schemes ---------- */
+.lcd[data-theme="paper"]{
+  --face:#ded9cd;--face-lt:#f2eee4;--hi:#fffdf7;--sh:#948d7c;--dk:#4a463d;
+  --ink:#1d1a14;--navy:#4a3a22;--navy-lt:#d8c9a8;
+  --paper:#fbf7ec;--paper-ink:#26221a;
+}
+.lcd[data-theme="midnight"]{
+  --face:#2b2f36;--face-lt:#3a3f48;--hi:rgba(255,255,255,.16);--sh:#171a1f;--dk:#0b0d10;
+  --ink:#ccd2da;--navy:#1d3f73;--navy-lt:#4a7ec0;--paper:#12151a;--paper-ink:#c9d1da;
+  --flash:#2f3a4a;--flash-ink:#dfe6ee;
+}
+.lcd[data-theme="amber"]{
+  --face:#2a2013;--face-lt:#3a2d1b;--hi:rgba(255,190,90,.22);--sh:#180f06;--dk:#0d0803;
+  --ink:#ffc97a;--navy:#7a4a00;--navy-lt:#c98a2a;--paper:#1d1407;--paper-ink:#ffb545;
+  --flash:#4a3208;--flash-ink:#ffd79a;
+}
+.lcd[data-theme="green"]{
+  --face:#16221a;--face-lt:#203126;--hi:rgba(120,255,160,.2);--sh:#0a130d;--dk:#050a07;
+  --ink:#9fffbc;--navy:#12401f;--navy-lt:#2f8f4c;--paper:#08120b;--paper-ink:#65ff92;
+  --flash:#17361f;--flash-ink:#b6ffcd;
+}
+.lcd[data-theme="midnight"] .note-item,
+.lcd[data-theme="amber"] .note-item,
+.lcd[data-theme="green"] .note-item{border-bottom-color:rgba(255,255,255,.08)}
+.lcd[data-theme="midnight"] .note-item .np,
+.lcd[data-theme="amber"] .note-item .np,
+.lcd[data-theme="green"] .note-item .np{color:rgba(255,255,255,.5)}
+.lcd[data-theme="midnight"] .note-item .nd,
+.lcd[data-theme="amber"] .note-item .nd,
+.lcd[data-theme="green"] .note-item .nd{color:rgba(255,255,255,.38)}
+.lcd[data-theme="midnight"] .titlebar,
+.lcd[data-theme="amber"] .titlebar,
+.lcd[data-theme="green"] .titlebar{
+  background:linear-gradient(90deg,var(--navy) 0%,var(--navy-lt) 100%);
+}
+.lcd[data-theme="midnight"] .statusbar .cell,
+.lcd[data-theme="amber"] .statusbar .cell,
+.lcd[data-theme="green"] .statusbar .cell{color:var(--ink)}
+.lcd[data-theme="midnight"] .find label,
+.lcd[data-theme="amber"] .find label,
+.lcd[data-theme="green"] .find label{color:var(--ink)}
+.lcd[data-theme="midnight"] .tb b,
+.lcd[data-theme="amber"] .tb b,
+.lcd[data-theme="green"] .tb b{background:var(--ink)}
+.lcd[data-theme="midnight"] .g-max,
+.lcd[data-theme="amber"] .g-max,
+.lcd[data-theme="green"] .g-max{border-color:var(--ink)}
+.lcd[data-theme="midnight"] .g-close::before,.lcd[data-theme="midnight"] .g-close::after,
+.lcd[data-theme="amber"] .g-close::before,.lcd[data-theme="amber"] .g-close::after,
+.lcd[data-theme="green"] .g-close::before,.lcd[data-theme="green"] .g-close::after{background:var(--ink)}
+.lcd[data-theme="midnight"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="amber"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="green"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="midnight"] #editor::-webkit-scrollbar-track,
+.lcd[data-theme="amber"] #editor::-webkit-scrollbar-track,
+.lcd[data-theme="green"] #editor::-webkit-scrollbar-track{background-color:var(--face-lt);background-image:none}
+.lcd[data-theme="midnight"] .empty,
+.lcd[data-theme="amber"] .empty,
+.lcd[data-theme="green"] .empty{color:var(--paper-ink);opacity:.7}
+
+/* ---------- optional parts of the window ---------- */
+body.no-status .statusbar{display:none}
+body.no-leds .leds{visibility:hidden}
+body.no-tpb .tp-buttons{display:none}
+body.list-right .workspace{flex-direction:row-reverse}
+body.list-right .pane-notes{padding-right:0;padding-left:3px}
+
+/* ---------- no machine at all ---------- */
+body.no-case .desk{padding:0;gap:0}
+body.no-case .footnote{display:none}
+body.no-case .machine{
+  width:100% !important;height:100%;max-height:none;flex:1 1 auto;filter:none;
+}
+body.no-case .lid{padding:0;border-radius:0;background:none;box-shadow:none}
+body.no-case .bezel{padding:0;border-radius:0;background:none;box-shadow:none}
+body.no-case .bezel::after{display:none}
+body.no-case .screen{
+  padding:0;border-radius:0;box-shadow:none;background:none;
+  height:auto !important;flex:1 1 auto !important;
+}
+body.no-case .bezel-top,body.no-case .bezel-foot,body.no-case .hinges,
+body.no-case .base,body.no-case .lid-latches,body.no-case .bumper{display:none}
+body.no-case .lcd-glare,body.no-case .lcd-grain{opacity:0}
+body.no-case .lcd{border-radius:0}
+
+/* ============================================================
+   the settings form
+   ============================================================ */
+.settings{display:flex;flex-direction:column;min-height:0}
+.set-panes{padding:9px 2px 0;min-height:0}
+.set-pane{display:flex;flex-direction:column;gap:7px}
+.set-pane[hidden]{display:none}
+.set-row{
+  display:grid;grid-template-columns:11em 1fr;align-items:center;gap:4px 10px;
+}
+.set-row.is-check{grid-template-columns:11em auto}
+.set-row.is-action{grid-template-columns:1fr;gap:2px}
+.set-label{color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.set-field{display:flex;align-items:center;gap:8px;min-width:0}
+.set-hint{
+  grid-column:1 / -1;color:var(--sh);margin:-2px 0 2px;
+  font-size:calc(var(--ui-size) - .5px);
+}
+.set-row.is-action .btn{justify-self:start;flex:0 0 auto;min-width:190px;height:21px}
+
+/* period-correct checkbox */
+.set-check{
+  appearance:none;margin:0;width:13px;height:13px;cursor:pointer;position:relative;
+  background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+}
+.set-check:checked::after{
+  content:"";position:absolute;left:4px;top:1px;width:4px;height:8px;
+  border:solid var(--paper-ink);border-width:0 2px 2px 0;transform:rotate(42deg);
+}
+.set-check:focus-visible{outline:1px dotted var(--ink);outline-offset:2px}
+
+/* period-correct dropdown */
+.set-select{
+  appearance:none;flex:1;min-width:0;height:19px;padding:0 20px 0 4px;cursor:pointer;
+  background:var(--face);color:var(--ink);border:0;
+  font:400 var(--ui-size)/1 var(--ui-font);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),
+             inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+  background-image:linear-gradient(45deg,transparent 50%,var(--ink) 50%),
+                   linear-gradient(135deg,var(--ink) 50%,transparent 50%);
+  background-position:calc(100% - 12px) 8px,calc(100% - 7px) 8px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+}
+.set-select option{background:var(--face);color:var(--ink)}
+
+/* period-correct slider */
+.set-range{
+  appearance:none;flex:1;min-width:60px;height:16px;background:none;cursor:pointer;margin:0;
+}
+.set-range::-webkit-slider-runnable-track{
+  height:4px;background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+}
+.set-range::-webkit-slider-thumb{
+  appearance:none;width:11px;height:16px;margin-top:-6px;background:var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),
+             inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
+}
+.set-range::-moz-range-track{
+  height:4px;background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset 2px 2px 0 var(--dk);
+}
+.set-range::-moz-range-thumb{
+  width:11px;height:16px;border:0;border-radius:0;background:var(--face);
+  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk);
+}
+.set-out{
+  flex:0 0 auto;min-width:4.2em;text-align:right;color:var(--ink);
+  font-family:var(--mono-font);font-size:calc(var(--ui-size) - .5px);
+}
+
+.dlg.wide{width:min(520px,94%)}
+.dlg.wide .dlg-body{padding-top:0}
