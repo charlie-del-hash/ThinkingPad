@@ -1,0 +1,48 @@
+# Publishes the notepad to GitHub Pages.
+# configure-pages turns Pages on the first time this runs, so there is
+# nothing to switch on by hand in the repository settings.
+name: Pages
+
+on:
+  push:
+    branches: ["claude/thinkpad-notepad-app-k4013w"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Rebuild the single-file copy
+        run: node build.js
+
+      - name: Fail if dist is out of date
+        run: git diff --exit-code -- dist/
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
