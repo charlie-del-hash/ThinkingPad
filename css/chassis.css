@@ -90,7 +90,24 @@ body{
   min-height:0;
   display:flex;
   flex-direction:column;
-  filter:drop-shadow(0 26px 40px rgba(0,0,0,.62));
+  filter:drop-shadow(0 18px 26px rgba(0,0,0,.45));
+}
+/* contact shadow: the dark pool right under the front lip */
+.machine::after{
+  content:"";position:absolute;z-index:-1;pointer-events:none;
+  left:4%;right:4%;bottom:-16px;height:34px;
+  background:radial-gradient(50% 50% at 50% 45%,rgba(0,0,0,.62) 0%,rgba(0,0,0,.3) 45%,transparent 72%);
+  filter:blur(7px);
+  transition:opacity .5s ease;
+}
+.desk.night .machine::after{opacity:.75}
+
+/* The deck lies flat on the desk: its far edge is further from you than
+   the near one, so it foreshortens. The screen stays square to the
+   viewer, which is how you actually look at a laptop. */
+body.deck-flat .base{
+  transform:perspective(1600px) rotateX(4deg);
+  transform-origin:top center;
 }
 
 /* The panel is 4:3, the way every ThinkPad panel was before widescreen.
@@ -215,6 +232,18 @@ body.no-grain .lcd-grain{opacity:0}
   opacity:1;transition:opacity .25s;
 }
 body.no-glare .lcd-glare{opacity:0}
+
+/* Backlight bleed. Screen-blended, so it does nothing on white paper and
+   shows at the corners on a dark one — which is how a real panel leaks. */
+.lcd::after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
+  background:
+    radial-gradient(58% 38% at 0% 100%,rgba(188,214,255,.17),transparent 62%),
+    radial-gradient(50% 34% at 100% 0%,rgba(188,214,255,.14),transparent 62%),
+    radial-gradient(42% 30% at 100% 100%,rgba(200,220,255,.11),transparent 62%),
+    radial-gradient(46% 30% at 0% 0%,rgba(200,220,255,.10),transparent 62%);
+  mix-blend-mode:screen;
+}
 
 /* dimmed / asleep */
 .lcd-dark{

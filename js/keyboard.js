@@ -6,8 +6,6 @@
 (function (global) {
   'use strict';
 
-  var S = null; // spacer marker
-
   function k(code, label, w, opts) {
     var o = opts || {};
     return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls, toggle: o.toggle };

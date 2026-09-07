@@ -34,6 +34,9 @@ export anything you'd hate to lose.
 
 - Note list with find-as-you-type, sorted by last edited
 - Autosave (and `Ctrl+S` if you don't trust autosave — nobody does)
+- Delete is reversible: notes go to a trash for 30 days, with Undo in the status bar
+- Two tabs on the same notes merge instead of overwriting each other
+- A warning when localStorage is running out, rather than a failed save
 - Export one note or all of them as `.txt`; drag a `.txt` in to open it
 - Print (`Ctrl+P`) prints just the text, no chrome
 - `F5` stamps the time and date, the way Notepad always has
@@ -57,10 +60,10 @@ change it.
 
 | Tab | What's in it |
 | --- | --- |
-| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, ThinkLight, screen glare, LCD grain, key click and its volume |
+| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, ThinkLight, screen glare, LCD grain, key click and its volume |
 | **Screen** | Colour scheme (classic grey / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
 | **Notes** | Note list on or off, list on the left or right, list width, sort by last edited / created / title, date format, and whether opening the app resumes your last note or starts a blank one |
-| **Data** | Back up everything to `.json`, restore from a backup, reset every setting, erase all notes — with a live count of notes, words and storage used |
+| **Data** | Back up everything to `.json`, restore from a backup, empty the trash, reset every setting, erase all notes — with a live count of notes, words, storage used and what's in the trash |
 
 Turning the machine off entirely (**Machine > Show the machine**) leaves the
 notepad alone in the window, which is the mode to use when you actually have
@@ -92,6 +95,8 @@ or a system mono for the page — which switches the preset to Custom.
 | Access IBM (blue button) | Help, shortcuts, and how much storage you've used |
 | Volume rocker | Key-click volume. The dot lights when muted — it starts muted, because you're at work |
 | Power button | Standby. Click anywhere to wake |
+| Battery light | Follows this laptop where the browser will say: amber below 20%, pulsing while charging |
+| Drive light | Flickers on every save, and sits amber when storage is nearly full |
 | Keyboard | Mirrors what you actually type; click the caps to type with the mouse |
 | LEDs | Power, battery, sleep, drive (flickers on every save), Num Lock, Caps Lock |
 
@@ -116,6 +121,39 @@ or a system mono for the page — which switches the preset to Custom.
 `Ctrl+N` and `Ctrl+T` belong to the browser and can't be intercepted, which is
 why New is `Alt+N`.
 
+## When something goes wrong
+
+Losing notes is the only unforgivable bug in a notepad, so:
+
+- **Delete is reversible.** A deleted note is tombstoned, not erased. Undo sits
+  in the status bar for 30 seconds; the note stays in the trash for 30 days.
+  Empty it yourself in **Settings > Data**.
+- **Two tabs no longer fight.** They used to overwrite each other silently.
+  Now each tab merges what the other saved — newest edit of each note wins —
+  and a sentence you are halfway through typing is never overwritten.
+- **A full disk says so.** The drive light goes amber past 80%, and a failed
+  save is reported instead of swallowed.
+- **A dead screen explains itself.** If a script fails to load or the app
+  throws on startup, you get a panel saying what happened, a button to reset
+  settings, and a button that dumps your raw notes as text to copy out.
+- **`#reset`** on the end of the URL starts with standard settings, for when a
+  setting makes the app unusable. It does not touch your notes.
+
+## Developing
+
+```
+npm install                       # eslint + playwright
+npx playwright install chromium
+npm run check                     # lint, rebuild dist, run the tests
+```
+
+`npm test` drives a real Chromium against a served copy of the app: typing and
+autosave, the note list, find, the menus and dialogs, every setting, the 4:3
+fitter at five window sizes, and the whole of the safety behaviour above.
+`node tests/run.js core safety` runs named suites. The Pages workflow runs
+lint, build and tests before it will deploy, so a broken build cannot reach
+the live site.
+
 ## Layout
 
 ```
@@ -127,6 +165,7 @@ js/settings.js      the settings spec, its form, and migration of older preferen
 js/keyboard.js      the seven-row keyboard — builds it, mirrors real keystrokes
 js/app.js           notes, storage, menus, dialogs, the 4:3 fitter, working hardware
 build.js            folds all of the above into dist/thinkpad-notes.html
+tests/              a static server, a browser, and five suites
 ```
 
 Storage keys: `thinkpad.notes.v1` (notes) and `thinkpad.prefs.v1` (every

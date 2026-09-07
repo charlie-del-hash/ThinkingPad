@@ -1,15 +1,16 @@
-# Publishes the notepad to GitHub Pages.
+# Checks the notepad, then publishes it to GitHub Pages.
 #
-# It tries to switch Pages on by itself. A workflow token is usually
-# refused that ("Create Pages site: Resource not accessible by
-# integration"), in which case this job says so and stops rather than
-# failing — turn Pages on once at Settings > Pages > Source: GitHub
-# Actions and every run after that deploys.
+# The deploy waits on the test job, so a broken build cannot reach the
+# live site. Pages itself has to be switched on once by hand at
+# Settings > Pages > Source: GitHub Actions — a workflow token is not
+# allowed to do that — and until it is, the deploy job says so and stops
+# rather than failing.
 name: Pages
 
 on:
   push:
     branches: ["claude/thinkpad-notepad-app-k4013w"]
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -22,7 +23,40 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for the tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Rebuild the single-file copy
+        run: npm run build
+
+      - name: Fail if dist is out of date
+        run: git diff --exit-code -- dist/
+
+      - name: Test
+        run: npm test
+
   deploy:
+    name: Deploy
+    needs: test
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -30,12 +64,6 @@ jobs:
     steps:
       - name: Check out
         uses: actions/checkout@v4
-
-      - name: Rebuild the single-file copy
-        run: node build.js
-
-      - name: Fail if dist is out of date
-        run: git diff --exit-code -- dist/
 
       - name: Configure Pages
         id: pages

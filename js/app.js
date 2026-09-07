@@ -10,6 +10,72 @@
 
   var NOTES_KEY = 'thinkpad.notes.v1';
   var PREFS_KEY = 'thinkpad.prefs.v1';
+  var QUOTA_BUDGET = 5 * 1024 * 1024;   /* what browsers usually allow per origin */
+  var TRASH_DAYS = 30;
+
+  /* If anything throws before the app is running — a script that failed
+     to load, a browser that refuses storage — the panel would otherwise
+     just sit there grey. Show what happened and offer a way out. */
+  var booted = false;
+  var failureShown = false;
+
+  function showBootFailure(err) {
+    if (failureShown) return;
+    failureShown = true;
+    var host = document.getElementById('lcdInner') || document.body;
+    host.innerHTML = '';
+    var wrap = document.createElement('div');
+    wrap.setAttribute('style',
+      'position:absolute;inset:0;overflow:auto;padding:22px;background:#d4d0c8;color:#111;' +
+      'font:13px/1.5 Tahoma,Verdana,sans-serif');
+    var h = document.createElement('h1');
+    h.setAttribute('style', 'font:bold 15px Tahoma,sans-serif;margin:0 0 10px');
+    h.textContent = 'ThinkPad Notes did not start';
+    var p1 = document.createElement('p');
+    p1.setAttribute('style', 'margin:0 0 10px');
+    p1.textContent = 'Your notes are still in this browser. Nothing has been erased.';
+    var pre = document.createElement('pre');
+    pre.setAttribute('style',
+      'white-space:pre-wrap;background:#fff;padding:8px;margin:0 0 12px;' +
+      'font:12px/1.4 "Courier New",monospace;border:1px solid #808080');
+    pre.textContent = String((err && (err.stack || err.message)) || err);
+
+    var row = document.createElement('div');
+    row.setAttribute('style', 'display:flex;gap:8px;flex-wrap:wrap');
+    function button(label, act) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = label;
+      b.setAttribute('style',
+        'padding:4px 10px;font:13px Tahoma,sans-serif;background:#d4d0c8;' +
+        'border:2px outset #f0f0f0;cursor:pointer');
+      b.addEventListener('click', act);
+      row.appendChild(b);
+    }
+    button('Reset settings and reload', function () {
+      try { localStorage.removeItem(PREFS_KEY); } catch (e) { /* nothing else to try */ }
+      window.location.reload();
+    });
+    button('Show my notes as text', function () {
+      var ta = document.createElement('textarea');
+      ta.setAttribute('style',
+        'width:100%;height:40vh;margin-top:12px;font:12px "Courier New",monospace');
+      try { ta.value = localStorage.getItem(NOTES_KEY) || '(nothing stored)'; }
+      catch (e) { ta.value = 'localStorage is unavailable in this browser.'; }
+      wrap.appendChild(ta);
+      ta.select();
+    });
+
+    wrap.appendChild(h);
+    wrap.appendChild(p1);
+    wrap.appendChild(pre);
+    wrap.appendChild(row);
+    host.appendChild(wrap);
+  }
+
+  window.addEventListener('error', function (e) {
+    if (!booted) showBootFailure(e.error || new Error(e.message));
+  });
 
   /* ---------------------------------------------------------
      elements
@@ -38,6 +104,13 @@
     catch (e) { return false; }
   }
 
+  /* thinkpad-notes.html#reset starts with standard settings, for when a
+     choice in here makes the app unusable. Notes are left alone. */
+  if (window.location.hash === '#reset') {
+    try { localStorage.removeItem(PREFS_KEY); } catch (e) { /* nothing else to try */ }
+    try { window.history.replaceState(null, '', window.location.pathname); } catch (e) { /* fine */ }
+  }
+
   var prefs = TPSettings.migrate(readJSON(PREFS_KEY, null));
   var db = readJSON(NOTES_KEY, null);
   if (!db || !Array.isArray(db.notes)) db = { notes: [], activeId: null };
@@ -55,9 +128,10 @@
     var ok = writeJSON(NOTES_KEY, db);
     if (ok) {
       blink(ledHdd);
+      checkQuota();
       setMsg('Saved ' + timeStamp(new Date()));
     } else {
-      ledBat.classList.add('amber');
+      ledHdd.classList.add('amber');
       setMsg('Disk full — this note is NOT saved');
       if (!diskFullWarned) {
         diskFullWarned = true;
@@ -81,6 +155,22 @@
      --------------------------------------------------------- */
   function uid() {
     return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+  function liveNotes() {
+    return db.notes.filter(function (n) { return !n.deleted; });
+  }
+  function trashCount() {
+    return db.notes.length - liveNotes().length;
+  }
+  function purgeTrash() {
+    var cutoff = Date.now() - TRASH_DAYS * 864e5;
+    var before = db.notes.length;
+    db.notes = db.notes.filter(function (n) { return !n.deleted || n.deleted > cutoff; });
+    return before - db.notes.length;
+  }
+  function noteById(id) {
+    for (var i = 0; i < db.notes.length; i++) if (db.notes[i].id === id) return db.notes[i];
+    return null;
   }
   function active() {
     for (var i = 0; i < db.notes.length; i++) if (db.notes[i].id === db.activeId) return db.notes[i];
@@ -159,21 +249,71 @@
     if (!note) return;
     dialog({
       title: 'Delete note',
-      bodyHTML: '<p>Delete <b></b> permanently?</p><p class="hint">This cannot be undone — ' +
-                'there is no wastebasket on this machine.</p>',
+      bodyHTML: '<p>Delete <b></b>?</p>' +
+                '<p class="hint">It goes to the trash for ' + TRASH_DAYS + ' days. Undo from the ' +
+                'status bar, or empty the trash yourself in Settings &gt; Data.</p>',
       onBuild: function (bodyEl) { $('b', bodyEl).textContent = titleOf(note); },
       buttons: [
         { label: 'Delete', primary: true, act: function () {
-            var idx = db.notes.indexOf(note);
-            db.notes.splice(idx, 1);
-            var next = db.notes[idx] || db.notes[idx - 1] || null;
-            db.activeId = next ? next.id : null;
-            if (!db.notes.length) { newNote(''); return; }
-            editor.value = next ? next.body : '';
+            var list = visibleNotes();
+            var idx = list.indexOf(note);
+            var next = list[idx + 1] || list[idx - 1] || null;
+            var name = titleOf(note);
+
+            flushSave();                       /* keep whatever is on screen */
+            note.deleted = Date.now();
+            note.updated = Date.now();
+            if (next) {
+              db.activeId = next.id;
+              editor.value = next.body;
+            }
             renderAll();
-            flushSave();
-            editor.focus();
-            setMsg('Deleted');
+            writeJSON(NOTES_KEY, db);
+            if (!liveNotes().length) newNote('');
+            else editor.focus();
+
+            setMsg('Deleted "' + name + '"', {
+              action: { label: 'Undo', act: function () { undoDelete(note.id); } }
+            });
+          } },
+        { label: 'Cancel' }
+      ]
+    });
+  }
+
+  function undoDelete(id) {
+    var note = noteById(id);
+    if (!note || !note.deleted) return;
+    delete note.deleted;
+    note.updated = Date.now();
+
+    /* deleting the last note leaves a blank one behind; drop it again */
+    var current = active();
+    if (current && current.id !== id && !current.body.trim()) {
+      db.notes.splice(db.notes.indexOf(current), 1);
+    }
+    db.activeId = id;
+    editor.value = note.body;
+    renderAll();
+    writeJSON(NOTES_KEY, db);
+    editor.focus();
+    setMsg('Restored "' + titleOf(note) + '"');
+  }
+
+  function emptyTrash() {
+    var n = trashCount();
+    if (!n) { setMsg('The trash is already empty'); return; }
+    dialog({
+      title: 'Empty the trash',
+      bodyHTML: '<p>Permanently remove <b></b> deleted note(s)?</p>' +
+                '<p class="hint">This one really cannot be undone.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(n); },
+      buttons: [
+        { label: 'Empty', primary: true, act: function () {
+            db.notes = liveNotes();
+            writeJSON(NOTES_KEY, db);
+            if (settingsForm) settingsForm.refresh();
+            setMsg('Trash emptied');
           } },
         { label: 'Cancel' }
       ]
@@ -189,7 +329,7 @@
   }
   function visibleNotes() {
     var q = search.value.trim().toLowerCase();
-    var list = db.notes.slice().sort(sortNotes);
+    var list = liveNotes().sort(sortNotes);
     if (!q) return list;
     return list.filter(function (n) {
       return String(n.body || '').toLowerCase().indexOf(q) !== -1;
@@ -199,11 +339,24 @@
   /* ---------------------------------------------------------
      rendering
      --------------------------------------------------------- */
-  var msgTimer = null;
-  function setMsg(text, quiet) {
+  var msgTimer = null, msgExpiry = null;
+  function setMsg(text, opts) {
+    var o = (typeof opts === 'boolean') ? { quiet: opts } : (opts || {});
     stMsg.textContent = text;
     if (msgTimer) clearTimeout(msgTimer);
-    if (!quiet) {
+    if (msgExpiry) { clearTimeout(msgExpiry); msgExpiry = null; }
+
+    if (o.action) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'st-action';
+      b.textContent = o.action.label;
+      b.addEventListener('click', o.action.act);
+      stMsg.appendChild(document.createTextNode(' '));
+      stMsg.appendChild(b);
+      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, o.expires || 30000);
+    }
+    if (!o.quiet) {
       stMsg.classList.add('flash');
       msgTimer = setTimeout(function () { stMsg.classList.remove('flash'); }, 700);
     }
@@ -326,6 +479,8 @@
     body.classList.toggle('no-keyboard', !prefs.deck);
     body.classList.toggle('no-tpb', !prefs.tpButtons);
     body.classList.toggle('no-leds', !prefs.leds);
+    body.classList.toggle('deck-flat', !!prefs.deckTilt);
+    if (batteryRepaint) batteryRepaint();
     body.classList.toggle('no-glare', !prefs.glare);
     body.classList.toggle('no-grain', !prefs.grain);
     body.classList.toggle('muted', !prefs.sound);
@@ -483,6 +638,7 @@
     modalLayer.textContent = '';
     modalLayer.appendChild(dlg);
     modalLayer.hidden = false;
+    body.classList.add('modal');
     openDialogEl = dlg;
     var firstBtn = $('.dlg-foot .btn', dlg);
     if (firstBtn) firstBtn.focus();
@@ -493,6 +649,7 @@
     settingsForm = null;
     modalLayer.hidden = true;
     modalLayer.textContent = '';
+    body.classList.remove('modal');
     openDialogEl = null;
     if (!desk.classList.contains('standby')) editor.focus();
   }
@@ -552,7 +709,7 @@
 
   function exportAll() {
     flushSave();
-    var out = db.notes.slice().sort(sortNotes)
+    var out = liveNotes().sort(sortNotes)
       .map(function (n) {
         return '=== ' + titleOf(n) + ' === (' + friendly(n.updated) + ')\n\n' + n.body;
       }).join('\n\n\n');
@@ -639,19 +796,39 @@
   /* ---------------------------------------------------------
      help / about
      --------------------------------------------------------- */
-  function storageReport() {
-    var bytes = 0;
+  function storageBytes() {
     try {
-      bytes = (localStorage.getItem(NOTES_KEY) || '').length +
-              (localStorage.getItem(PREFS_KEY) || '').length;
-    } catch (e) {}
+      return (localStorage.getItem(NOTES_KEY) || '').length +
+             (localStorage.getItem(PREFS_KEY) || '').length;
+    } catch (e) { return 0; }
+  }
+
+  var quotaWarned = false;
+  function checkQuota() {
+    var ratio = storageBytes() / QUOTA_BUDGET;
+    if (ratio > 0.8) {
+      ledHdd.classList.add('amber');
+      if (!quotaWarned) {
+        quotaWarned = true;
+        setMsg('Storage ' + Math.round(ratio * 100) + '% full — export a few notes and delete them');
+      }
+    } else if (quotaWarned) {
+      quotaWarned = false;
+      ledHdd.classList.remove('amber');
+    }
+  }
+
+  function storageReport() {
+    var live = liveNotes(), trash = trashCount(), bytes = storageBytes();
     var words = 0;
-    db.notes.forEach(function (n) {
+    live.forEach(function (n) {
       var t = String(n.body || '').trim();
       if (t) words += t.split(/\s+/).length;
     });
-    return db.notes.length + ' note' + (db.notes.length === 1 ? '' : 's') + ' · ' +
-           words + ' words · ' + (bytes / 1024).toFixed(1) + ' KB of localStorage';
+    return live.length + ' note' + (live.length === 1 ? '' : 's') + ' · ' +
+           words + ' words · ' + (bytes / 1024).toFixed(1) + ' KB, ' +
+           Math.round((bytes / QUOTA_BUDGET) * 100) + '% of the usual 5 MB' +
+           (trash ? ' · ' + trash + ' in the trash' : '');
   }
 
   /* ---------------------------------------------------------
@@ -663,7 +840,8 @@
       backup: backupAll,
       restore: function () { pickFile('json'); },
       reset: resetSettings,
-      erase: eraseAllNotes
+      erase: eraseAllNotes,
+      trash: emptyTrash
     };
     var form = TPSettings.buildForm(prefs, function (key, value, item) {
       prefs[key] = value;
@@ -688,7 +866,7 @@
     var payload = {
       app: 'thinkpad-notes', version: 1,
       exported: new Date().toISOString(),
-      prefs: prefs, notes: db.notes
+      prefs: prefs, notes: liveNotes()
     };
     saveFile('thinkpad-notes-backup-' + dateStamp(new Date()) + '.json',
              JSON.stringify(payload, null, 2), 'application/json');
@@ -750,9 +928,9 @@
   function eraseAllNotes() {
     dialog({
       title: 'Erase all notes',
-      bodyHTML: '<p>Delete <b></b> note(s) permanently?</p>' +
+      bodyHTML: '<p>Delete <b></b> note(s) permanently, and empty the trash?</p>' +
                 '<p class="hint">Back up first — this cannot be undone.</p>',
-      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(db.notes.length); },
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(liveNotes().length); },
       buttons: [
         { label: 'Erase', primary: true, act: function () {
             db.notes = [];
@@ -815,6 +993,9 @@
         '<dt>Access IBM</dt><dd>This window.</dd>' +
         '<dt>Volume</dt><dd>Key click volume. The dot lights when muted.</dd>' +
         '<dt>Power</dt><dd>Standby. Click anywhere to wake.</dd>' +
+        '<dt>Battery light</dt><dd>Follows this laptop where the browser will say: ' +
+        'amber below 20%, pulsing while charging.</dd>' +
+        '<dt>Drive light</dt><dd>Flickers on every save, and sits amber when storage is nearly full.</dd>' +
         '<dt>Keyboard</dt><dd>Folded away by default. <b>View &gt; Keyboard</b> brings it back — ' +
         'it mirrors what you type, and you can click the caps to type with the mouse.</dd>' +
         '</dl>' +
@@ -1135,6 +1316,38 @@
     setStandby(false);
   }, true);
 
+  /* The BAT light follows this laptop's actual battery where the browser
+     will say (Chrome and Edge); everywhere else it stays the plain green
+     it has always been. */
+  var batteryCell = ledBat.parentNode;
+  function paintBattery(b) {
+    if (!prefs.battery) {
+      ledBat.classList.remove('amber', 'pulse');
+      ledBat.classList.add('on');
+      batteryCell.removeAttribute('title');
+      return;
+    }
+    var pct = Math.round(b.level * 100);
+    var full = b.level >= 0.98;
+    ledBat.classList.remove('amber', 'pulse', 'on');
+    if (b.charging && !full) ledBat.classList.add('amber', 'pulse');  /* taking a charge */
+    else if (!b.charging && b.level <= 0.2) ledBat.classList.add('amber');
+    else ledBat.classList.add('on');                                  /* charged, or plenty left */
+    batteryCell.title = 'Battery ' + pct + '%' +
+      (b.charging ? (full ? ' — charged' : ' — charging') : '');
+  }
+  function wireBattery() {
+    if (!navigator.getBattery) return;
+    navigator.getBattery().then(function (b) {
+      var paint = function () { paintBattery(b); };
+      paint();
+      b.addEventListener('levelchange', paint);
+      b.addEventListener('chargingchange', paint);
+      batteryRepaint = paint;
+    }, function () { /* refused: leave the light alone */ });
+  }
+  var batteryRepaint = null;
+
   /* the light thrown by the ThinkLight */
   var cone = document.createElement('div');
   cone.className = 'light-cone';
@@ -1212,6 +1425,16 @@
     }
   });
 
+  /* Underlines under the menu hotkeys only show while Alt is held —
+     which is exactly how they behaved. */
+  window.addEventListener('keydown', function (e) {
+    if (e.key === 'Alt') body.classList.add('alt-held');
+  });
+  window.addEventListener('keyup', function (e) {
+    if (e.key === 'Alt') body.classList.remove('alt-held');
+  });
+  window.addEventListener('blur', function () { body.classList.remove('alt-held'); });
+
   /* --- physical keys light up the caps --- */
   window.addEventListener('keydown', function (e) {
     TPKeyboard.press(e.code);
@@ -1278,6 +1501,49 @@
   /* ---------------------------------------------------------
      persistence safety nets
      --------------------------------------------------------- */
+  /* Two tabs on the same notes used to mean the last one to save won and
+     the other tab's work vanished. Merge instead: the newest edit of each
+     note wins, and whatever is being typed here is never overwritten. */
+  window.addEventListener('storage', function (e) {
+    if (e.key !== NOTES_KEY || !e.newValue) return;
+    var incoming;
+    try { incoming = JSON.parse(e.newValue); } catch (err) { return; }
+    if (!incoming || !Array.isArray(incoming.notes)) return;
+
+    var typing = !!saveTimer;                 /* unsaved keystrokes in this tab */
+    var changed = 0, activeChanged = false;
+
+    incoming.notes.forEach(function (theirs) {
+      var mine = noteById(theirs.id);
+      if (!mine) {
+        db.notes.push(theirs);
+        changed++;
+        return;
+      }
+      if ((theirs.updated || 0) <= (mine.updated || 0)) return;
+      if (mine.id === db.activeId && typing) return;   /* keep what is being typed */
+      mine.body = theirs.body;
+      mine.updated = theirs.updated;
+      mine.caret = theirs.caret;
+      if (theirs.deleted) mine.deleted = theirs.deleted;
+      else delete mine.deleted;
+      changed++;
+      if (mine.id === db.activeId) activeChanged = true;
+    });
+
+    if (!changed) return;
+    if (activeChanged) {
+      var note = active();
+      if (note) editor.value = note.body;
+    }
+    if (!active() || active().deleted) {
+      var next = liveNotes()[0];
+      if (next) { db.activeId = next.id; editor.value = next.body; }
+    }
+    renderAll();
+    setMsg(changed === 1 ? 'Updated from another tab' : changed + ' notes updated from another tab');
+  });
+
   window.addEventListener('beforeunload', function () { if (saveTimer) flushSave(); });
   document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'hidden' && saveTimer) flushSave();
@@ -1310,12 +1576,16 @@
     buildMenus();
     lcd.appendChild(modalLayer);
 
-    if (!db.notes.length) {
+    var purged = purgeTrash();
+
+    if (!liveNotes().length) {
       db.notes.push({ id: uid(), body: WELCOME, created: Date.now(), updated: Date.now(), caret: 0 });
       db.activeId = db.notes[0].id;
       writeJSON(NOTES_KEY, db);
+    } else if (purged) {
+      writeJSON(NOTES_KEY, db);
     }
-    if (!active()) db.activeId = db.notes[0].id;
+    if (!active() || active().deleted) db.activeId = liveNotes()[0].id;
 
     if (prefs.startup === 'new' && String((active() || {}).body || '').trim()) {
       db.notes.unshift({ id: uid(), body: '', created: Date.now(), updated: Date.now(), caret: 0 });
@@ -1332,7 +1602,10 @@
       editor.setSelectionRange(c, c);
     }
     editor.focus();
+    wireBattery();
+    checkQuota();
     setMsg('Ready');
+    booted = true;
 
     /* a browser that refuses localStorage entirely */
     try {
@@ -1340,9 +1613,13 @@
       localStorage.removeItem('thinkpad.probe');
     } catch (e) {
       setMsg('No localStorage — notes will vanish when you close this tab');
-      ledBat.classList.add('amber');
+      ledHdd.classList.add('amber');
     }
   }
 
-  boot();
+  try {
+    boot();
+  } catch (err) {
+    showBootFailure(err);
+  }
 })();

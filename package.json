@@ -1,0 +1,17 @@
+{
+  "name": "thinkpad-notes",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A skeuomorphic plain-text notepad shaped like an early-2000s IBM ThinkPad",
+  "scripts": {
+    "build": "node build.js && node build.js --fragment",
+    "test": "node tests/run.js",
+    "lint": "eslint .",
+    "check": "npm run lint && npm run build && npm test"
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "playwright": "^1.56.0"
+  },
+  "license": "MIT"
+}

@@ -10,6 +10,7 @@
     /* the machine */
     showCase: true, deck: false, tpButtons: true, leds: true,
     caseFinish: 'black', capStyle: 'tongue', desk: 'studio', aspect: '4:3',
+    deckTilt: true, battery: true,
     night: false, glare: true, grain: true, sound: false, vol: 0.35,
     /* the screen */
     theme: 'classic', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
@@ -60,6 +61,10 @@
         ['studio', 'Studio dark'], ['office', 'Office grey'], ['void', 'Black'] ] },
       { k: 'aspect', t: 'select', label: 'Panel shape', options: [
         ['4:3', '4:3 — period correct'], ['16:10', '16:10'], ['fill', 'Fill the window'] ] },
+      { k: 'deckTilt', t: 'check', label: 'Deck lies flat',
+        hint: 'Tips the keyboard away from you, the way a real one sits' },
+      { k: 'battery', t: 'check', label: 'Battery light is real',
+        hint: 'The BAT light follows this laptop: amber when low, pulsing on charge' },
       { k: 'night', t: 'check', label: 'ThinkLight', hint: 'Alt+L' },
       { k: 'glare', t: 'check', label: 'Screen glare' },
       { k: 'grain', t: 'check', label: 'LCD grain' },
@@ -255,6 +260,7 @@
     [
       ['Back up everything (.json)', 'backup', 'Notes and settings in one file.'],
       ['Restore from a backup…', 'restore', 'Replaces everything currently on this machine.'],
+      ['Empty the trash…', 'trash', 'Deleted notes are kept for 30 days before they go on their own.'],
       ['Reset settings', 'reset', 'Puts every switch on this page back to standard.'],
       ['Erase all notes…', 'erase', 'There is no wastebasket. Back up first.']
     ].forEach(function (spec) {

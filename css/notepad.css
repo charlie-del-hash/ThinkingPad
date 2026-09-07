@@ -68,6 +68,12 @@ body.fs-l{--mono-size:15.5px}
   content:"";position:absolute;left:2px;right:2px;top:3px;height:1px;
   background:#6a6a6a;box-shadow:0 3px 0 #6a6a6a,0 6px 0 #6a6a6a;
 }
+body.modal .win > .titlebar{
+  background:linear-gradient(90deg,#7f7f7f 0%,#9a9a9a 55%,#b8b8b8 100%);
+}
+body.modal .win > .titlebar .title{color:#e6e6e6;text-shadow:0 1px 0 rgba(0,0,0,.28)}
+body.modal .win > .titlebar .app-icon{opacity:.75}
+
 .titlebar .title{
   flex:1;min-width:0;
   font:700 var(--ui-size)/1 var(--ui-font);
@@ -107,7 +113,10 @@ body.fs-l{--mono-size:15.5px}
   padding:0 7px;color:var(--ink);
   font:400 var(--ui-size)/1 var(--ui-font);
 }
-.menu-top u{text-decoration:underline;text-underline-offset:1px}
+.menu-top u,.find label u{text-decoration:none;text-underline-offset:1px}
+body.alt-held .menu-top u,
+body.alt-held .find label u,
+.menu-top.open u{text-decoration:underline}
 .menu-top:hover{background:var(--navy);color:#fff}
 .menu-top.open{background:var(--navy);color:#fff}
 
@@ -262,6 +271,11 @@ body.no-wrap #editor{white-space:pre;overflow-wrap:normal;overflow-x:auto}
 .statusbar .click{cursor:pointer}
 .statusbar .click:hover{background:#cac6be}
 .statusbar .flash{background:var(--flash,#ffffcc);color:var(--flash-ink,var(--ink))}
+.statusbar .st-action{
+  appearance:none;border:0;padding:0 2px;margin:0;cursor:pointer;
+  background:none;color:var(--navy);font:inherit;text-decoration:underline;
+}
+.statusbar .st-action:hover{background:var(--navy);color:#fff;text-decoration:none}
 
 /* ---------- dialogs ---------- */
 .modal-layer{
