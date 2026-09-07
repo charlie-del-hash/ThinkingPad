@@ -8,8 +8,7 @@
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
-  var NOTES_KEY = 'thinkpad.notes.v1';
-  var PREFS_KEY = 'thinkpad.prefs.v1';
+  var store = (window.TP || {}).store;
   var QUOTA_BUDGET = 5 * 1024 * 1024;   /* what browsers usually allow per origin */
   var TRASH_DAYS = 30;
 
@@ -53,15 +52,15 @@
       row.appendChild(b);
     }
     button('Reset settings and reload', function () {
-      try { localStorage.removeItem(PREFS_KEY); } catch (e) { /* nothing else to try */ }
+      if (store) store.clearPrefs();
+      else { try { localStorage.removeItem('thinkpad.prefs.v1'); } catch (e) { /* no luck */ } }
       window.location.reload();
     });
     button('Show my notes as text', function () {
       var ta = document.createElement('textarea');
       ta.setAttribute('style',
         'width:100%;height:40vh;margin-top:12px;font:12px "Courier New",monospace');
-      try { ta.value = localStorage.getItem(NOTES_KEY) || '(nothing stored)'; }
-      catch (e) { ta.value = 'localStorage is unavailable in this browser.'; }
+      ta.value = store ? store.dump() : 'The storage module did not load.';
       wrap.appendChild(ta);
       ta.select();
     });
@@ -80,42 +79,112 @@
   /* ---------------------------------------------------------
      elements
      --------------------------------------------------------- */
-  var desk = $('#desk'), body = document.body;
+  var body = document.body;
   var lcd = $('#lcd'), editor = $('#editor'), listbox = $('#listbox'), search = $('#search');
+  var underlay = $('#editorUnderlay'), findCount = $('#findCount');
   var winTitle = $('#winTitle'), stMsg = $('#stMsg'), stPos = $('#stPos'),
       stCount = $('#stCount'), stFont = $('#stFont');
   var menubar = $('#menubar'), modalLayer = $('#modalLayer'), printSheet = $('#printSheet');
   var paneNotes = $('#paneNotes'), splitter = $('#splitter'), workspace = $('#workspace');
-  var keyboardEl = $('#keyboard'), trackpoint = $('#trackpoint'), fileInput = $('#fileInput');
-  var ledHdd = $('.led-hdd'), ledPwr = $('.led-pwr'), ledSlp = $('.led-slp'),
-      ledCap = $('.led-cap'), ledNum = $('.led-num'), ledBat = $('.led-bat');
+  var fileInput = $('#fileInput');
 
   /* ---------------------------------------------------------
-     storage
+     the window furniture lives in ui.js; keep the short names
      --------------------------------------------------------- */
-  function readJSON(key, fallback) {
-    try {
-      var raw = localStorage.getItem(key);
-      return raw ? JSON.parse(raw) : fallback;
-    } catch (e) { return fallback; }
+  var ui = (window.TP || {}).ui;
+  var settingsForm = null;
+
+  ui.init({
+    modalLayer: modalLayer,
+    menubar: menubar,
+    statusCell: stMsg,
+    refocus: function () { if (!machine.isAsleep()) editor.focus(); },
+    onDialogClose: function () { settingsForm = null; },
+    stateFor: function (key) { return prefs[key]; }
+  });
+
+  var machine = (window.TP || {}).machine;
+
+  machine.init({
+    editor: editor,
+    prefs: function () { return prefs; },
+    setMsg: function (text, opts) { return ui.setMsg(text, opts); },
+    onAccess: function () { showHelp('about'); },
+    onPrevNote: function () { cycleNote(-1); },
+    onNextNote: function () { cycleNote(1); },
+    onSleep: function () { flushSave(); },
+    onPrefsChanged: function () {
+      applyPrefs();
+      if (settingsForm) settingsForm.refresh();
+    },
+    onKeyCap: onKeyCap
+  });
+
+  var leds = machine.leds();
+  var blink = machine.blink;
+  var setStandby = machine.setStandby;
+  var toggleThinkLight = machine.toggleThinkLight;
+  var setVolume = machine.setVolume;
+
+  /* a cap on the deck was clicked: type it */
+  function onKeyCap(key, e) {
+    if (key.code === 'Fn') { toggleThinkLight(); return; }
+    if (key.code === 'CapsLock') { leds.cap.classList.toggle('on'); return; }
+    if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
+    if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
+    if (key.code === 'Backspace') {
+      editor.focus();
+      var start = editor.selectionStart, end = editor.selectionEnd;
+      if (start === end && start > 0) editor.setRangeText('', start - 1, start, 'end');
+      else editor.setRangeText('', start, end, 'end');
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (key.ch !== undefined) {
+      editor.focus();
+      var ch = key.ch;
+      if (e.shiftKey || leds.cap.classList.contains('on')) {
+        ch = key.sub && e.shiftKey ? key.sub : ch.toUpperCase();
+      }
+      insertAtCaret(ch);
+    }
   }
-  function writeJSON(key, value) {
-    try { localStorage.setItem(key, JSON.stringify(value)); return true; }
-    catch (e) { return false; }
-  }
+
+  var setMsg = ui.setMsg;
+  var dialog = ui.dialog;
+  var closeDialog = ui.closeDialog;
+  var confirmDialog = ui.confirm;
+  var closeMenu = ui.closeMenu;
+  var showMenu = ui.showMenu;
+
+  /* ---------------------------------------------------------
+     storage — the shape of it lives in store.js
+     --------------------------------------------------------- */
 
   /* thinkpad-notes.html#reset starts with standard settings, for when a
      choice in here makes the app unusable. Notes are left alone. */
   if (window.location.hash === '#reset') {
-    try { localStorage.removeItem(PREFS_KEY); } catch (e) { /* nothing else to try */ }
+    store.clearPrefs();
     try { window.history.replaceState(null, '', window.location.pathname); } catch (e) { /* fine */ }
   }
 
-  var prefs = TPSettings.migrate(readJSON(PREFS_KEY, null));
-  var db = readJSON(NOTES_KEY, null);
-  if (!db || !Array.isArray(db.notes)) db = { notes: [], activeId: null };
+  var prefs = TPSettings.migrate(store.loadPrefs());
+  var db = store.load();
 
-  function savePrefs() { writeJSON(PREFS_KEY, prefs); }
+  function savePrefs() { store.savePrefs(prefs); }
+
+  /* the whole set, for anything that adds, removes or reorders notes */
+  function persistAll() { return store.saveAll(db); }
+
+  /* swap the library wholesale, dropping keys nothing points at any more */
+  function replaceAll(notes, activeId) {
+    var keep = {};
+    notes.forEach(function (n) { keep[n.id] = true; });
+    db.notes.forEach(function (n) { if (!keep[n.id]) store.dropNote(n.id); });
+    db.notes = notes;
+    db.activeId = activeId;
+    return persistAll();
+  }
 
   var saveTimer = null, diskFullWarned = false;
   function flushSave() {
@@ -125,13 +194,15 @@
       note.body = editor.value;
       note.caret = editor.selectionStart;
     }
-    var ok = writeJSON(NOTES_KEY, db);
+    var ok = true;
+    if (note && !store.saveNote(note)) ok = false;
+    if (!store.saveIndex(db)) ok = false;
     if (ok) {
-      blink(ledHdd);
+      blink(leds.hdd);
       checkQuota();
       setMsg('Saved ' + timeStamp(new Date()));
     } else {
-      ledHdd.classList.add('amber');
+      leds.hdd.classList.add('amber');
       setMsg('Disk full — this note is NOT saved');
       if (!diskFullWarned) {
         diskFullWarned = true;
@@ -164,9 +235,14 @@
   }
   function purgeTrash() {
     var cutoff = Date.now() - TRASH_DAYS * 864e5;
-    var before = db.notes.length;
-    db.notes = db.notes.filter(function (n) { return !n.deleted || n.deleted > cutoff; });
-    return before - db.notes.length;
+    var gone = 0;
+    db.notes = db.notes.filter(function (n) {
+      if (!n.deleted || n.deleted > cutoff) return true;
+      store.dropNote(n.id);
+      gone++;
+      return false;
+    });
+    return gone;
   }
   function noteById(id) {
     for (var i = 0; i < db.notes.length; i++) if (db.notes[i].id === id) return db.notes[i];
@@ -240,21 +316,23 @@
       editor.setSelectionRange(c, c);
     }
     if (keepFocus !== false) editor.focus();
+    find.index = -1;
+    renderFind();
     updatePos();
-    writeJSON(NOTES_KEY, db);
+    persistAll();
   }
 
   function deleteNote() {
     var note = active();
     if (!note) return;
-    dialog({
+    confirmDialog({
       title: 'Delete note',
       bodyHTML: '<p>Delete <b></b>?</p>' +
                 '<p class="hint">It goes to the trash for ' + TRASH_DAYS + ' days. Undo from the ' +
                 'status bar, or empty the trash yourself in Settings &gt; Data.</p>',
       onBuild: function (bodyEl) { $('b', bodyEl).textContent = titleOf(note); },
-      buttons: [
-        { label: 'Delete', primary: true, act: function () {
+      confirmLabel: 'Delete',
+      act: function () {
             var list = visibleNotes();
             var idx = list.indexOf(note);
             var next = list[idx + 1] || list[idx - 1] || null;
@@ -268,16 +346,14 @@
               editor.value = next.body;
             }
             renderAll();
-            writeJSON(NOTES_KEY, db);
+            persistAll();
             if (!liveNotes().length) newNote('');
             else editor.focus();
 
             setMsg('Deleted "' + name + '"', {
               action: { label: 'Undo', act: function () { undoDelete(note.id); } }
             });
-          } },
-        { label: 'Cancel' }
-      ]
+      }
     });
   }
 
@@ -295,7 +371,7 @@
     db.activeId = id;
     editor.value = note.body;
     renderAll();
-    writeJSON(NOTES_KEY, db);
+    persistAll();
     editor.focus();
     setMsg('Restored "' + titleOf(note) + '"');
   }
@@ -303,20 +379,19 @@
   function emptyTrash() {
     var n = trashCount();
     if (!n) { setMsg('The trash is already empty'); return; }
-    dialog({
+    confirmDialog({
       title: 'Empty the trash',
       bodyHTML: '<p>Permanently remove <b></b> deleted note(s)?</p>' +
                 '<p class="hint">This one really cannot be undone.</p>',
       onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(n); },
-      buttons: [
-        { label: 'Empty', primary: true, act: function () {
+      confirmLabel: 'Empty',
+      act: function () {
+            db.notes.forEach(function (n) { if (n.deleted) store.dropNote(n.id); });
             db.notes = liveNotes();
-            writeJSON(NOTES_KEY, db);
+            persistAll();
             if (settingsForm) settingsForm.refresh();
             setMsg('Trash emptied');
-          } },
-        { label: 'Cancel' }
-      ]
+      }
     });
   }
 
@@ -337,37 +412,85 @@
   }
 
   /* ---------------------------------------------------------
+     find — count them, step through them, and show where they are
+     --------------------------------------------------------- */
+  var find = { term: '', hits: [], index: -1 };
+
+  function escapeHTML(text) {
+    return text.replace(/[&<>]/g, function (c) {
+      return c === '&' ? '&amp;' : c === '<' ? '&lt;' : '&gt;';
+    });
+  }
+
+  function matchesIn(text, term) {
+    var hits = [];
+    if (!term) return hits;
+    var haystack = String(text).toLowerCase();
+    var needle = term.toLowerCase();
+    var at = 0;
+    while ((at = haystack.indexOf(needle, at)) !== -1) {
+      hits.push(at);
+      at += needle.length;
+    }
+    return hits;
+  }
+
+  /* the highlight layer has to line up with the textarea exactly, so it
+     borrows its metrics and its scroll position */
+  function syncUnderlay() {
+    underlay.style.width = editor.clientWidth + 'px';
+    underlay.style.height = editor.clientHeight + 'px';
+    underlay.scrollTop = editor.scrollTop;
+    underlay.scrollLeft = editor.scrollLeft;
+  }
+
+  function renderFind() {
+    var term = search.value.trim();
+    find.term = term;
+    if (!term) {
+      find.hits = [];
+      find.index = -1;
+      underlay.textContent = '';
+      findCount.textContent = '';
+      findCount.classList.remove('none');
+      return;
+    }
+    var text = editor.value;
+    find.hits = matchesIn(text, term);
+    if (find.index >= find.hits.length) find.index = find.hits.length - 1;
+    if (find.index < 0 && find.hits.length) find.index = 0;   /* the first one is current */
+
+    var html = '', last = 0;
+    find.hits.forEach(function (start, n) {
+      html += escapeHTML(text.slice(last, start));
+      html += '<mark' + (n === find.index ? ' class="current"' : '') + '>' +
+              escapeHTML(text.substr(start, term.length)) + '</mark>';
+      last = start + term.length;
+    });
+    html += escapeHTML(text.slice(last)) + '\n';
+    underlay.innerHTML = html;
+    syncUnderlay();
+
+    findCount.textContent = find.hits.length
+      ? (find.index + 1) + '/' + find.hits.length
+      : 'none';
+    findCount.classList.toggle('none', !find.hits.length);
+  }
+
+  function stepFind(dir) {
+    if (!find.term) { search.focus(); return; }
+    if (!find.hits.length) { machine.sound.beep(); setMsg('No matches in this note'); return; }
+    find.index = (find.index + dir + find.hits.length) % find.hits.length;
+    var start = find.hits[find.index];
+    editor.focus();
+    editor.setSelectionRange(start, start + find.term.length);
+    renderFind();
+    updatePos();
+  }
+
+  /* ---------------------------------------------------------
      rendering
      --------------------------------------------------------- */
-  var msgTimer = null, msgExpiry = null;
-  function setMsg(text, opts) {
-    var o = (typeof opts === 'boolean') ? { quiet: opts } : (opts || {});
-    stMsg.textContent = text;
-    if (msgTimer) clearTimeout(msgTimer);
-    if (msgExpiry) { clearTimeout(msgExpiry); msgExpiry = null; }
-
-    if (o.action) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'st-action';
-      b.textContent = o.action.label;
-      b.addEventListener('click', o.action.act);
-      stMsg.appendChild(document.createTextNode(' '));
-      stMsg.appendChild(b);
-      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, o.expires || 30000);
-    }
-    if (!o.quiet) {
-      stMsg.classList.add('flash');
-      msgTimer = setTimeout(function () { stMsg.classList.remove('flash'); }, 700);
-    }
-  }
-  function blink(led) {
-    if (!led) return;
-    led.classList.remove('blink');
-    void led.offsetWidth;
-    led.classList.add('blink');
-  }
-
   function renderList() {
     var list = visibleNotes();
     listbox.textContent = '';
@@ -387,6 +510,16 @@
       b.setAttribute('aria-selected', note.id === db.activeId ? 'true' : 'false');
 
       var t = document.createElement('span'); t.className = 'nt'; t.textContent = titleOf(note);
+      var term = search.value.trim();
+      if (term) {
+        var count = matchesIn(note.body, term).length;
+        if (count) {
+          var badge = document.createElement('span');
+          badge.className = 'nb';
+          badge.textContent = count;
+          t.appendChild(badge);
+        }
+      }
       var p = document.createElement('span'); p.className = 'np'; p.textContent = previewOf(note) || ' ';
       var d = document.createElement('span'); d.className = 'nd'; d.textContent = friendly(note.updated);
       b.appendChild(t); b.appendChild(p); b.appendChild(d);
@@ -418,74 +551,9 @@
   }
 
   /* ---------------------------------------------------------
-     panel geometry — a 4:3 screen, and a case that fits the window
-
-     Measure the machine with the panel filling the height, subtract the
-     case from the space available, then hand the panel back a 4:3 box
-     and the case a width to match. Re-run whenever the window resizes
-     or a part of the case appears or disappears.
-     --------------------------------------------------------- */
-  var machine = $('#machine'), screenEl = $('.screen'), MIN_FIT_WIDTH = 820;
-  var ASPECTS = { '4:3': 4 / 3, '16:10': 1.6 };
-
-  function fitScreen() {
-    body.classList.remove('fitted');
-    machine.style.removeProperty('--machine-w');
-    machine.style.removeProperty('--screen-h');
-    if (!prefs.showCase || prefs.aspect === 'fill') return;
-
-    var ratio = ASPECTS[prefs.aspect] || ASPECTS['4:3'];
-    var deskStyle = window.getComputedStyle(desk);
-    var availW = desk.clientWidth -
-      (parseFloat(deskStyle.paddingLeft) || 0) - (parseFloat(deskStyle.paddingRight) || 0);
-    if (availW < MIN_FIT_WIDTH) return;         // phone-shaped window: stay fluid
-
-    var availH = machine.clientHeight;          // what the flex row grants the case
-    var pad = 6;                                // .screen padding, both sides
-    var chromeV = availH - screenEl.offsetHeight;
-    var chromeH = machine.clientWidth - screenEl.offsetWidth;
-
-    var screenH = availH - chromeV;
-    var lcdH = Math.max(180, screenH - pad);
-    var lcdW = lcdH * ratio;
-
-    if (lcdW + pad + chromeH > availW) {        // short and wide: width decides instead
-      lcdW = availW - chromeH - pad;
-      lcdH = lcdW / ratio;
-    }
-
-    machine.style.setProperty('--screen-h', Math.round(lcdH + pad) + 'px');
-    machine.style.setProperty('--machine-w', Math.round(lcdW + pad + chromeH) + 'px');
-    body.classList.add('fitted');
-  }
-
-  var fitPending = false;
-  function scheduleFit() {
-    if (fitPending) return;
-    fitPending = true;
-    requestAnimationFrame(function () { fitPending = false; fitScreen(); });
-  }
-  window.addEventListener('resize', scheduleFit);
-
-  /* ---------------------------------------------------------
      preferences applied to the machine
      --------------------------------------------------------- */
   function applyPrefs() {
-    /* the machine */
-    body.dataset.case = prefs.caseFinish;
-    body.dataset.desk = prefs.desk;
-    body.dataset.cap = prefs.capStyle;
-    body.classList.toggle('no-case', !prefs.showCase);
-    body.classList.toggle('no-keyboard', !prefs.deck);
-    body.classList.toggle('no-tpb', !prefs.tpButtons);
-    body.classList.toggle('no-leds', !prefs.leds);
-    body.classList.toggle('deck-flat', !!prefs.deckTilt);
-    if (batteryRepaint) batteryRepaint();
-    body.classList.toggle('no-glare', !prefs.glare);
-    body.classList.toggle('no-grain', !prefs.grain);
-    body.classList.toggle('muted', !prefs.sound);
-    desk.classList.toggle('night', !!prefs.night);
-
     /* the screen */
     lcd.dataset.theme = prefs.theme;
     body.style.setProperty('--ui-font', TPSettings.UI_FONTS[prefs.uiFont] || TPSettings.UI_FONTS.tahoma);
@@ -508,7 +576,8 @@
       ? 'IBM Plex Mono (2017) — click for the period-correct face'
       : 'Click to switch typeface — Settings for the rest';
     savePrefs();
-    fitScreen();
+    machine.apply();
+    if (find.term) renderFind(); else syncUnderlay();
   }
 
   function applyPreset(name) {
@@ -536,126 +605,6 @@
       if (msg) setMsg(msg + (prefs[key] ? ' on' : ' off'));
     };
   }
-
-  /* ---------------------------------------------------------
-     sound — a synthesised buckling-spring-ish click
-     --------------------------------------------------------- */
-  var Sound = {
-    ctx: null,
-    ensure: function () {
-      if (!this.ctx) {
-        var AC = window.AudioContext || window.webkitAudioContext;
-        if (!AC) return null;
-        this.ctx = new AC();
-      }
-      if (this.ctx.state === 'suspended') this.ctx.resume();
-      return this.ctx;
-    },
-    click: function (down) {
-      if (!prefs.sound) return;
-      var ctx = this.ensure();
-      if (!ctx) return;
-      var now = ctx.currentTime;
-      var len = Math.floor(ctx.sampleRate * 0.03);
-      var buf = ctx.createBuffer(1, len, ctx.sampleRate);
-      var data = buf.getChannelData(0);
-      for (var i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 6);
-      var src = ctx.createBufferSource(); src.buffer = buf;
-      var bp = ctx.createBiquadFilter();
-      bp.type = 'bandpass';
-      bp.frequency.value = down ? 2600 : 3400;
-      bp.Q.value = 1.1;
-      var g = ctx.createGain();
-      g.gain.setValueAtTime(prefs.vol * (down ? 0.9 : 0.5), now);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.035);
-      src.connect(bp); bp.connect(g); g.connect(ctx.destination);
-      src.start(now); src.stop(now + 0.04);
-
-      if (down) { // the low thock of the plunger bottoming out
-        var osc = ctx.createOscillator(), og = ctx.createGain();
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(190, now);
-        osc.frequency.exponentialRampToValueAtTime(90, now + 0.03);
-        og.gain.setValueAtTime(prefs.vol * 0.35, now);
-        og.gain.exponentialRampToValueAtTime(0.0001, now + 0.05);
-        osc.connect(og); og.connect(ctx.destination);
-        osc.start(now); osc.stop(now + 0.06);
-      }
-    },
-    beep: function () {
-      var ctx = this.ensure();
-      if (!ctx || !prefs.sound) return;
-      var now = ctx.currentTime;
-      var osc = ctx.createOscillator(), g = ctx.createGain();
-      osc.type = 'square'; osc.frequency.value = 880;
-      g.gain.setValueAtTime(prefs.vol * 0.18, now);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
-      osc.connect(g); g.connect(ctx.destination);
-      osc.start(now); osc.stop(now + 0.2);
-    }
-  };
-
-  /* ---------------------------------------------------------
-     dialogs
-     --------------------------------------------------------- */
-  var openDialogEl = null, settingsForm = null;
-  function dialog(opts) {
-    closeDialog();
-    var dlg = document.createElement('div');
-    dlg.className = 'dlg' + (opts.wide ? ' wide' : '');
-    dlg.setAttribute('role', 'dialog');
-    dlg.setAttribute('aria-modal', 'true');
-
-    var bar = document.createElement('div');
-    bar.className = 'titlebar';
-    bar.innerHTML = '<span class="app-icon"></span><span class="title"></span>' +
-                    '<span class="tb-buttons"><button type="button" class="tb" aria-label="Close">' +
-                    '<b class="g-close"></b></button></span>';
-    $('.title', bar).textContent = opts.title || 'ThinkPad Notes';
-    $('.tb', bar).addEventListener('click', closeDialog);
-
-    var bodyEl = document.createElement('div');
-    bodyEl.className = 'dlg-body';
-    bodyEl.innerHTML = opts.bodyHTML || '';
-    if (opts.onBuild) opts.onBuild(bodyEl);
-
-    var foot = document.createElement('div');
-    foot.className = 'dlg-foot';
-    var buttons = opts.buttons || [{ label: 'OK', primary: true }];
-    buttons.forEach(function (spec) {
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'btn' + (spec.primary ? ' primary' : '');
-      b.textContent = spec.label;
-      b.addEventListener('click', function () {
-        closeDialog();
-        if (spec.act) spec.act();
-      });
-      foot.appendChild(b);
-    });
-
-    dlg.appendChild(bar); dlg.appendChild(bodyEl); dlg.appendChild(foot);
-    modalLayer.textContent = '';
-    modalLayer.appendChild(dlg);
-    modalLayer.hidden = false;
-    body.classList.add('modal');
-    openDialogEl = dlg;
-    var firstBtn = $('.dlg-foot .btn', dlg);
-    if (firstBtn) firstBtn.focus();
-    return dlg;
-  }
-  function closeDialog() {
-    if (!openDialogEl) return;
-    settingsForm = null;
-    modalLayer.hidden = true;
-    modalLayer.textContent = '';
-    body.classList.remove('modal');
-    openDialogEl = null;
-    if (!desk.classList.contains('standby')) editor.focus();
-  }
-  modalLayer.addEventListener('mousedown', function (e) {
-    if (e.target === modalLayer) closeDialog();
-  });
 
   /* ---------------------------------------------------------
      commands
@@ -757,64 +706,23 @@
     setMsg(titleOf(next));
   }
 
-  function setStandby(on) {
-    desk.classList.toggle('standby', on);
-    if (on) {
-      flushSave();
-      editor.blur();
-      ledPwr.classList.remove('on');
-      ledSlp.classList.add('pulse');
-      TPKeyboard.releaseAll();
-      setMsg('Standby');
-    } else {
-      ledPwr.classList.add('on');
-      ledSlp.classList.remove('pulse');
-      editor.focus();
-      setMsg('Resumed');
-    }
-  }
-  function toggleThinkLight() {
-    prefs.night = !prefs.night;
-    applyPrefs();
-    setMsg(prefs.night ? 'ThinkLight on' : 'ThinkLight off');
-  }
-  function setVolume(delta) {
-    if (delta === 0) {
-      prefs.sound = !prefs.sound;
-      applyPrefs();
-      if (prefs.sound) Sound.click(true);
-      setMsg(prefs.sound ? 'Key click on' : 'Key click muted');
-      return;
-    }
-    prefs.sound = true;
-    prefs.vol = Math.max(0.05, Math.min(1, prefs.vol + delta));
-    applyPrefs();
-    Sound.click(true);
-    setMsg('Key click ' + Math.round(prefs.vol * 100) + '%');
-  }
-
   /* ---------------------------------------------------------
      help / about
      --------------------------------------------------------- */
-  function storageBytes() {
-    try {
-      return (localStorage.getItem(NOTES_KEY) || '').length +
-             (localStorage.getItem(PREFS_KEY) || '').length;
-    } catch (e) { return 0; }
-  }
+  function storageBytes() { return store.bytes(); }
 
   var quotaWarned = false;
   function checkQuota() {
     var ratio = storageBytes() / QUOTA_BUDGET;
     if (ratio > 0.8) {
-      ledHdd.classList.add('amber');
+      leds.hdd.classList.add('amber');
       if (!quotaWarned) {
         quotaWarned = true;
         setMsg('Storage ' + Math.round(ratio * 100) + '% full — export a few notes and delete them');
       }
     } else if (quotaWarned) {
       quotaWarned = false;
-      ledHdd.classList.remove('amber');
+      leds.hdd.classList.remove('amber');
     }
   }
 
@@ -876,18 +784,19 @@
     var data;
     try { data = JSON.parse(text); } catch (e) { data = null; }
     if (!data || !Array.isArray(data.notes)) {
-      Sound.beep();
+      machine.sound.beep();
       dialog({ title: 'Restore', bodyHTML: '<p>That is not a ThinkPad Notes backup.</p>' });
       return;
     }
-    dialog({
+    confirmDialog({
       title: 'Restore backup',
       bodyHTML: '<p>Replace everything on this machine with <b></b> note(s) from the backup?</p>' +
                 '<p class="hint">What is here now is overwritten and cannot be recovered.</p>',
       onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(data.notes.length); },
-      buttons: [
-        { label: 'Restore', primary: true, act: function () {
-            db.notes = data.notes.filter(function (n) { return n && typeof n.body === 'string'; })
+      confirmLabel: 'Restore',
+      act: function () {
+            var restored = data.notes
+              .filter(function (n) { return n && typeof n.body === 'string'; })
               .map(function (n) {
                 return {
                   id: n.id || uid(), body: n.body,
@@ -895,52 +804,48 @@
                   caret: n.caret || 0
                 };
               });
+            if (!restored.length) {
+              restored.push({ id: uid(), body: '', created: Date.now(), updated: Date.now() });
+            }
             if (data.prefs) { prefs = TPSettings.migrate(data.prefs); }
-            if (!db.notes.length) db.notes.push({ id: uid(), body: '', created: Date.now(), updated: Date.now() });
-            db.activeId = db.notes[0].id;
-            editor.value = db.notes[0].body;
+            replaceAll(restored, restored[0].id);
+            editor.value = restored[0].body;
             applyPrefs();
             renderAll();
-            flushSave();
             setMsg('Restored ' + db.notes.length + ' notes');
-          } },
-        { label: 'Cancel' }
-      ]
+      }
     });
   }
 
   function resetSettings() {
-    dialog({
+    confirmDialog({
       title: 'Reset settings',
       bodyHTML: '<p>Put every switch back to standard? Your notes are not touched.</p>',
-      buttons: [
-        { label: 'Reset', primary: true, act: function () {
+      confirmLabel: 'Reset',
+      act: function () {
             prefs = TPSettings.migrate(null);
             applyPrefs();
             renderAll();
             setMsg('Settings reset');
-          } },
-        { label: 'Cancel' }
-      ]
+      }
     });
   }
 
   function eraseAllNotes() {
-    dialog({
+    confirmDialog({
       title: 'Erase all notes',
       bodyHTML: '<p>Delete <b></b> note(s) permanently, and empty the trash?</p>' +
                 '<p class="hint">Back up first — this cannot be undone.</p>',
       onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(liveNotes().length); },
-      buttons: [
-        { label: 'Erase', primary: true, act: function () {
+      confirmLabel: 'Erase',
+      act: function () {
+            store.eraseNotes(db);
             db.notes = [];
             db.activeId = null;
             editor.value = '';
             newNote('');
             setMsg('All notes erased');
-          } },
-        { label: 'Cancel' }
-      ]
+      }
     });
   }
 
@@ -973,6 +878,7 @@
         '<dt>Alt+N</dt><dd>New note</dd>' +
         '<dt>Ctrl+S</dt><dd>Save now (it also autosaves)</dd>' +
         '<dt>Ctrl+F / Alt+I</dt><dd>Find</dd>' +
+        '<dt>F3 / Shift+F3</dt><dd>Next / previous match</dd>' +
         '<dt>Ctrl+D</dt><dd>Delete note</dd>' +
         '<dt>Ctrl+[ / ]</dt><dd>Previous / next note</dd>' +
         '<dt>Ctrl+E</dt><dd>Export .txt</dd>' +
@@ -1036,6 +942,8 @@
       { label: 'Time/Date', accel: 'F5', act: function () { editor.focus(); insertDateTime(); } },
       SEP,
       { label: 'Find', accel: 'Ctrl+F', act: function () { search.focus(); search.select(); } },
+      { label: 'Find Next', accel: 'F3', act: function () { stepFind(1); } },
+      { label: 'Find Previous', accel: 'Shift+F3', act: function () { stepFind(-1); } },
       { label: 'Previous Note', accel: 'Ctrl+[', act: function () { cycleNote(-1); } },
       { label: 'Next Note', accel: 'Ctrl+]', act: function () { cycleNote(1); } }
     ]},
@@ -1075,90 +983,6 @@
     ]}
   ];
 
-  var openMenu = null;
-  function buildMenus() {
-    MENUS.forEach(function (menu) {
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'menu-top';
-      btn.dataset.menu = menu.id;
-      btn.setAttribute('role', 'menuitem');
-      var i = menu.label.toLowerCase().indexOf(menu.key);
-      btn.innerHTML = menu.label.slice(0, i) + '<u>' + menu.label.charAt(i) + '</u>' + menu.label.slice(i + 1);
-
-      var dd = document.createElement('div');
-      dd.className = 'dropdown';
-      dd.hidden = true;
-      dd.dataset.menu = menu.id;
-
-      menu.items.forEach(function (item) {
-        if (item.sep) {
-          var s = document.createElement('div');
-          s.className = 'msep';
-          dd.appendChild(s);
-          return;
-        }
-        var mi = document.createElement('button');
-        mi.type = 'button';
-        mi.className = 'mi' + (item.radio ? ' radio' : '');
-        mi.dataset.label = item.label;
-        if (item.check) mi.dataset.check = item.check;
-        if (item.radio) { mi.dataset.radio = item.radio; mi.dataset.value = item.value; }
-        var lbl = document.createElement('span'); lbl.className = 'lbl'; lbl.textContent = item.label;
-        mi.appendChild(lbl);
-        if (item.accel) {
-          var ac = document.createElement('span'); ac.className = 'accel'; ac.textContent = item.accel;
-          mi.appendChild(ac);
-        }
-        mi.addEventListener('click', function () {
-          closeMenu();
-          if (item.act) item.act();
-        });
-        dd.appendChild(mi);
-      });
-
-      btn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        if (openMenu === menu.id) closeMenu(); else showMenu(menu.id);
-      });
-      btn.addEventListener('mouseenter', function () {
-        if (openMenu && openMenu !== menu.id) showMenu(menu.id);
-      });
-
-      menubar.appendChild(btn);
-      menubar.appendChild(dd);
-    });
-  }
-
-  function syncMenuState(dd) {
-    $$('.mi', dd).forEach(function (mi) {
-      if (mi.dataset.check) mi.classList.toggle('checked', !!prefs[mi.dataset.check]);
-      if (mi.dataset.radio) mi.classList.toggle('checked', prefs[mi.dataset.radio] === mi.dataset.value);
-    });
-  }
-  function showMenu(id) {
-    closeMenu();
-    var btn = $('.menu-top[data-menu="' + id + '"]', menubar);
-    var dd = $('.dropdown[data-menu="' + id + '"]', menubar);
-    if (!btn || !dd) return;
-    btn.classList.add('open');
-    syncMenuState(dd);
-    dd.hidden = false;
-    dd.style.left = btn.offsetLeft + 'px';
-    var overflow = (btn.offsetLeft + dd.offsetWidth) - menubar.clientWidth;
-    if (overflow > 0) dd.style.left = Math.max(0, btn.offsetLeft - overflow - 2) + 'px';
-    openMenu = id;
-  }
-  function closeMenu() {
-    if (!openMenu) return;
-    $$('.menu-top', menubar).forEach(function (b) { b.classList.remove('open'); });
-    $$('.dropdown', menubar).forEach(function (d) { d.hidden = true; });
-    openMenu = null;
-  }
-  document.addEventListener('click', function (e) {
-    if (openMenu && !menubar.contains(e.target)) closeMenu();
-  });
-
   /* ---------------------------------------------------------
      editor + list wiring
      --------------------------------------------------------- */
@@ -1171,6 +995,7 @@
     updateCounts();
     updatePos();
     renderTitle();
+    if (find.term) renderFind();
     scheduleSave();
     if (listRenderTimer) clearTimeout(listRenderTimer);
     listRenderTimer = setTimeout(renderList, 500);
@@ -1178,6 +1003,7 @@
   ['keyup', 'click', 'select', 'focus'].forEach(function (ev) {
     editor.addEventListener(ev, updatePos);
   });
+  editor.addEventListener('scroll', syncUnderlay);
   editor.addEventListener('blur', function () { if (saveTimer) flushSave(); });
 
   listbox.addEventListener('click', function (e) {
@@ -1198,16 +1024,26 @@
   search.addEventListener('input', function () {
     if (searchTimer) clearTimeout(searchTimer);
     searchTimer = setTimeout(function () {
+      find.index = -1;
       renderList();
+      renderFind();
+      var term = search.value.trim();
       var n = visibleNotes().length;
-      setMsg(search.value.trim() ? n + ' of ' + db.notes.length + ' notes match' : 'Ready', true);
+      setMsg(term ? n + ' of ' + liveNotes().length + ' notes match' : 'Ready', true);
     }, 120);
   });
   search.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape') { search.value = ''; renderList(); editor.focus(); }
+    if (e.key === 'Escape') {
+      search.value = '';
+      renderList();
+      renderFind();
+      editor.focus();
+    }
     if (e.key === 'Enter') {
+      e.preventDefault();
+      if (find.hits.length) { stepFind(e.shiftKey ? -1 : 1); return; }
       var first = $('.note-item', listbox);
-      if (first) { selectNote(first.dataset.id); }
+      if (first) selectNote(first.dataset.id);
     }
   });
 
@@ -1292,184 +1128,15 @@
   })();
 
   /* ---------------------------------------------------------
-     hardware wiring
-     --------------------------------------------------------- */
-  $('#thinklightBtn').addEventListener('click', toggleThinkLight);
-  $('#accessBtn').addEventListener('click', function () { showHelp('about'); });
-  $('#powerBtn').addEventListener('click', function (e) {
-    e.stopPropagation();
-    setStandby(!desk.classList.contains('standby'));
-  });
-  $('#volUp').addEventListener('click', function () { setVolume(0.15); });
-  $('#volDown').addEventListener('click', function () { setVolume(-0.15); });
-  $('#volMute').addEventListener('click', function () { setVolume(0); });
-  $('#tpbLeft').addEventListener('click', function () { cycleNote(-1); });
-  $('#tpbRight').addEventListener('click', function () { cycleNote(1); });
-  $('#tpbCenter').addEventListener('click', function () {
-    setMsg('Hold the red nub and push to scroll');
-  });
-
-  /* wake from standby on any interaction */
-  desk.addEventListener('mousedown', function (e) {
-    if (!desk.classList.contains('standby')) return;
-    if (e.target.closest && e.target.closest('#powerBtn')) return; // the button toggles it itself
-    setStandby(false);
-  }, true);
-
-  /* The BAT light follows this laptop's actual battery where the browser
-     will say (Chrome and Edge); everywhere else it stays the plain green
-     it has always been. */
-  var batteryCell = ledBat.parentNode;
-  function paintBattery(b) {
-    if (!prefs.battery) {
-      ledBat.classList.remove('amber', 'pulse');
-      ledBat.classList.add('on');
-      batteryCell.removeAttribute('title');
-      return;
-    }
-    var pct = Math.round(b.level * 100);
-    var full = b.level >= 0.98;
-    ledBat.classList.remove('amber', 'pulse', 'on');
-    if (b.charging && !full) ledBat.classList.add('amber', 'pulse');  /* taking a charge */
-    else if (!b.charging && b.level <= 0.2) ledBat.classList.add('amber');
-    else ledBat.classList.add('on');                                  /* charged, or plenty left */
-    batteryCell.title = 'Battery ' + pct + '%' +
-      (b.charging ? (full ? ' — charged' : ' — charging') : '');
-  }
-  function wireBattery() {
-    if (!navigator.getBattery) return;
-    navigator.getBattery().then(function (b) {
-      var paint = function () { paintBattery(b); };
-      paint();
-      b.addEventListener('levelchange', paint);
-      b.addEventListener('chargingchange', paint);
-      batteryRepaint = paint;
-    }, function () { /* refused: leave the light alone */ });
-  }
-  var batteryRepaint = null;
-
-  /* the light thrown by the ThinkLight */
-  var cone = document.createElement('div');
-  cone.className = 'light-cone';
-  cone.setAttribute('aria-hidden', 'true');
-  var spill = document.createElement('div');
-  spill.className = 'screen-spill';
-  spill.setAttribute('aria-hidden', 'true');
-  $('.base').appendChild(spill);
-  $('.base').appendChild(cone);
-
-  /* --- TrackPoint: push to scroll --- */
-  (function () {
-    var dragging = false, originY = 0, velocity = 0, raf = null;
-    function loop() {
-      if (!dragging) { raf = null; return; }
-      if (Math.abs(velocity) > 0.4) editor.scrollTop += velocity;
-      raf = requestAnimationFrame(loop);
-    }
-    trackpoint.addEventListener('pointerdown', function (e) {
-      dragging = true;
-      originY = e.clientY;
-      velocity = 0;
-      trackpoint.classList.add('dragging');
-      trackpoint.setPointerCapture(e.pointerId);
-      e.preventDefault();
-      if (!raf) raf = requestAnimationFrame(loop);
-    });
-    trackpoint.addEventListener('pointermove', function (e) {
-      if (!dragging) return;
-      var dy = e.clientY - originY;
-      var dead = 2;
-      velocity = Math.abs(dy) < dead ? 0 : (dy - Math.sign(dy) * dead) * 0.28;
-      trackpoint.style.transform = 'translate(-50%,-50%) translateY(' +
-        Math.max(-2, Math.min(2, dy / 12)) + 'px)';
-    });
-    function stop(e) {
-      if (!dragging) return;
-      dragging = false;
-      velocity = 0;
-      trackpoint.classList.remove('dragging');
-      trackpoint.style.transform = 'translate(-50%,-50%)';
-      try { trackpoint.releasePointerCapture(e.pointerId); } catch (err) {}
-    }
-    trackpoint.addEventListener('pointerup', stop);
-    trackpoint.addEventListener('pointercancel', stop);
-    trackpoint.addEventListener('keydown', function (e) {
-      if (e.key === 'ArrowDown') { editor.scrollTop += 40; e.preventDefault(); }
-      if (e.key === 'ArrowUp') { editor.scrollTop -= 40; e.preventDefault(); }
-    });
-  })();
-
-  /* --- build the keyboard --- */
-  TPKeyboard.build(keyboardEl, function (key, e) {
-    Sound.click(true);
-    if (desk.classList.contains('standby')) return;
-    if (key.code === 'Fn') { toggleThinkLight(); return; }
-    if (key.code === 'CapsLock') { ledCap.classList.toggle('on'); return; }
-    if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
-    if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
-    if (key.code === 'Backspace') {
-      editor.focus();
-      var s = editor.selectionStart, en = editor.selectionEnd;
-      if (s === en && s > 0) editor.setRangeText('', s - 1, s, 'end');
-      else editor.setRangeText('', s, en, 'end');
-      editor.dispatchEvent(new Event('input', { bubbles: true }));
-      return;
-    }
-    if (key.ch !== undefined) {
-      editor.focus();
-      var ch = key.ch;
-      if (e.shiftKey || ledCap.classList.contains('on')) {
-        ch = key.sub && e.shiftKey ? key.sub : ch.toUpperCase();
-      }
-      insertAtCaret(ch);
-    }
-  });
-
-  /* Underlines under the menu hotkeys only show while Alt is held —
-     which is exactly how they behaved. */
-  window.addEventListener('keydown', function (e) {
-    if (e.key === 'Alt') body.classList.add('alt-held');
-  });
-  window.addEventListener('keyup', function (e) {
-    if (e.key === 'Alt') body.classList.remove('alt-held');
-  });
-  window.addEventListener('blur', function () { body.classList.remove('alt-held'); });
-
-  /* --- physical keys light up the caps --- */
-  window.addEventListener('keydown', function (e) {
-    TPKeyboard.press(e.code);
-    if (!e.repeat) Sound.click(true);
-    if (e.getModifierState) {
-      ledCap.classList.toggle('on', e.getModifierState('CapsLock'));
-      ledNum.classList.toggle('on', e.getModifierState('NumLock'));
-    }
-  });
-  window.addEventListener('keyup', function (e) {
-    TPKeyboard.release(e.code);
-    Sound.click(false);
-  });
-  window.addEventListener('blur', function () { TPKeyboard.releaseAll(); });
-
-  /* ---------------------------------------------------------
      global shortcuts
      --------------------------------------------------------- */
   window.addEventListener('keydown', function (e) {
-    if (desk.classList.contains('standby')) {
+    if (machine.isAsleep()) {
       e.preventDefault();
       setStandby(false);
       return;
     }
     var mod = e.ctrlKey || e.metaKey;
-
-    if (e.key === 'Escape') {
-      if (openDialogEl) { closeDialog(); return; }
-      if (openMenu) { closeMenu(); return; }
-    }
-    if (openDialogEl && e.key === 'Enter') {
-      var b = $('.dlg-foot .btn', openDialogEl);
-      if (b) { b.click(); e.preventDefault(); }
-      return;
-    }
 
     if (e.altKey && !mod) {
       var hit = null;
@@ -1482,6 +1149,11 @@
       if (e.key === '-' || e.key === '_') { e.preventDefault(); nudgeSize(-1); return; }
     }
 
+    if (e.key === 'F3') {
+      e.preventDefault();
+      stepFind(e.shiftKey ? -1 : 1);
+      return;
+    }
     if (e.key === 'F5' && document.activeElement === editor) {
       e.preventDefault(); insertDateTime(); return;
     }
@@ -1505,31 +1177,35 @@
      the other tab's work vanished. Merge instead: the newest edit of each
      note wins, and whatever is being typed here is never overwritten. */
   window.addEventListener('storage', function (e) {
-    if (e.key !== NOTES_KEY || !e.newValue) return;
-    var incoming;
-    try { incoming = JSON.parse(e.newValue); } catch (err) { return; }
-    if (!incoming || !Array.isArray(incoming.notes)) return;
+    var change = store.classify(e);
+    if (!change) return;
 
     var typing = !!saveTimer;                 /* unsaved keystrokes in this tab */
     var changed = 0, activeChanged = false;
 
-    incoming.notes.forEach(function (theirs) {
+    if (change.kind === 'note') {
+      var theirs = change.note;
       var mine = noteById(theirs.id);
       if (!mine) {
         db.notes.push(theirs);
         changed++;
-        return;
+      } else if ((theirs.updated || 0) > (mine.updated || 0) &&
+                 !(mine.id === db.activeId && typing)) {
+        mine.body = theirs.body;
+        mine.updated = theirs.updated;
+        mine.caret = theirs.caret;
+        if (theirs.deleted) mine.deleted = theirs.deleted;
+        else delete mine.deleted;
+        changed++;
+        if (mine.id === db.activeId) activeChanged = true;
       }
-      if ((theirs.updated || 0) <= (mine.updated || 0)) return;
-      if (mine.id === db.activeId && typing) return;   /* keep what is being typed */
-      mine.body = theirs.body;
-      mine.updated = theirs.updated;
-      mine.caret = theirs.caret;
-      if (theirs.deleted) mine.deleted = theirs.deleted;
-      else delete mine.deleted;
-      changed++;
-      if (mine.id === db.activeId) activeChanged = true;
-    });
+    } else if (change.kind === 'index') {
+      change.ids.forEach(function (id) {
+        if (noteById(id)) return;
+        var note = store.loadNote(id);
+        if (note) { db.notes.push(note); changed++; }
+      });
+    }
 
     if (!changed) return;
     if (activeChanged) {
@@ -1573,7 +1249,7 @@
     '  * Access IBM (the blue button) explains the rest.\n';
 
   function boot() {
-    buildMenus();
+    ui.buildMenus(MENUS);
     lcd.appendChild(modalLayer);
 
     var purged = purgeTrash();
@@ -1581,9 +1257,9 @@
     if (!liveNotes().length) {
       db.notes.push({ id: uid(), body: WELCOME, created: Date.now(), updated: Date.now(), caret: 0 });
       db.activeId = db.notes[0].id;
-      writeJSON(NOTES_KEY, db);
+      persistAll();
     } else if (purged) {
-      writeJSON(NOTES_KEY, db);
+      persistAll();
     }
     if (!active() || active().deleted) db.activeId = liveNotes()[0].id;
 
@@ -1595,14 +1271,14 @@
     var note = active();
     editor.value = note ? note.body : '';
     applyPrefs();
-    fitScreen();
+    machine.fit();
     renderAll();
     if (note && note.caret) {
       var c = Math.min(note.caret, editor.value.length);
       editor.setSelectionRange(c, c);
     }
     editor.focus();
-    wireBattery();
+    machine.watchBattery();
     checkQuota();
     setMsg('Ready');
     booted = true;
@@ -1613,7 +1289,7 @@
       localStorage.removeItem('thinkpad.probe');
     } catch (e) {
       setMsg('No localStorage — notes will vanish when you close this tab');
-      ledHdd.classList.add('amber');
+      leds.hdd.classList.add('amber');
     }
   }
 

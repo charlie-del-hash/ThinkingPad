@@ -192,6 +192,11 @@ body.no-list .pane-notes,body.no-list .splitter{display:none}
 .note-item .nt{
   display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
+.note-item .nb{
+  display:inline-block;margin-left:5px;padding:0 4px;border-radius:7px;
+  background:var(--navy);color:#fff;font-size:calc(var(--ui-size) - 2px);font-weight:400;
+}
+.note-item.sel .nb{background:#fff;color:var(--navy)}
 .note-item .np{
   display:block;color:#5a5a5a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   font-size:calc(var(--ui-size) - .5px);
@@ -219,17 +224,40 @@ body.no-list .pane-notes,body.no-list .splitter{display:none}
 .splitter:hover{background:#c8c4bc}
 
 /* ---------- the paper ---------- */
+.editor-wrap{
+  position:relative;flex:1 1 auto;min-height:0;display:flex;
+  background:var(--paper);
+  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
+}
 #editor{
   flex:1 1 auto;width:100%;min-height:0;resize:none;
   padding:4px 5px;border:0;outline:0;
-  background:var(--paper);color:var(--paper-ink);
+  background:transparent;color:var(--paper-ink);
   font:400 var(--mono-size)/var(--mono-lh) var(--mono-font);
-  box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),inset 2px 2px 0 var(--dk);
   white-space:pre-wrap;overflow-wrap:break-word;
   tab-size:8;
+  position:relative;z-index:1;
 }
 body.no-wrap #editor{white-space:pre;overflow-wrap:normal;overflow-x:auto}
 #editor::selection{background:var(--navy);color:#fff}
+
+/* what Find paints behind the text: same metrics, invisible ink */
+.editor-underlay{
+  position:absolute;left:0;top:0;z-index:0;overflow:hidden;pointer-events:none;
+  padding:4px 5px;
+  font:400 var(--mono-size)/var(--mono-lh) var(--mono-font);
+  white-space:pre-wrap;overflow-wrap:break-word;
+  tab-size:8;color:transparent;
+}
+body.no-wrap .editor-underlay{white-space:pre;overflow-wrap:normal}
+.editor-underlay mark{background:var(--find-hit,#ffe86a);color:transparent}
+.editor-underlay mark.current{background:var(--find-now,#ff9d2e)}
+
+.find-count{
+  flex:0 0 auto;min-width:3.4em;text-align:right;color:#3a3a3a;
+  font-family:var(--mono-font);font-size:calc(var(--ui-size) - 1px);
+}
+.find-count.none{color:#a11}
 
 /* ---------- period scrollbars ---------- */
 .listbox::-webkit-scrollbar,#editor::-webkit-scrollbar,.dlg-body::-webkit-scrollbar{
@@ -339,3 +367,31 @@ kbd{
   .pane-notes{width:150px}
   .statusbar .cell:nth-child(2){display:none}
 }
+
+
+/* ============================================================
+   where the keyboard is
+   A dotted rectangle inside the control, which is what focus
+   looked like on this machine.
+   ============================================================ */
+.btn:focus-visible,
+.tb:focus-visible,
+.dlg-tab:focus-visible,
+.menu-top:focus-visible,
+.note-item:focus-visible,
+.st-action:focus-visible,
+.set-select:focus-visible,
+.set-range:focus-visible{
+  outline:1px dotted var(--ink);
+  outline-offset:-3px;
+}
+.mi:focus-visible,
+.mi.focus{
+  background:var(--navy);
+  color:#fff;
+  outline:1px dotted #fff;
+  outline-offset:-3px;
+}
+.listbox:focus-visible{outline:1px dotted var(--ink);outline-offset:-3px}
+#search:focus-visible{box-shadow:inset 1px 1px 0 var(--sh),inset -1px -1px 0 var(--hi),
+  inset 2px 2px 0 var(--dk),0 0 0 1px var(--navy)}

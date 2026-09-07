@@ -61,6 +61,58 @@ module.exports = {
     await page.waitForTimeout(100);
     t.eq(await underline(), 'none', 'and letting go hides them again');
 
+    /* ---------- reachable without a mouse ---------- */
+    await page.keyboard.press('Control+,');
+    await page.waitForTimeout(200);
+    const trapped = await page.evaluate(() => {
+      const dlg = document.querySelector('.dlg');
+      const stops = dlg.querySelectorAll('button, input, select, textarea');
+      stops[stops.length - 1].focus();
+      return dlg.contains(document.activeElement);
+    });
+    t.ok(trapped, 'a dialog can be tabbed through');
+    await page.keyboard.press('Tab');
+    t.ok(await page.evaluate(() => document.querySelector('.dlg').contains(document.activeElement)),
+      'and Tab off the end comes back round instead of escaping behind it');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+    t.ok(await page.evaluate(() => document.activeElement === document.querySelector('#editor')),
+      'closing it hands focus back to the page');
+
+    await page.click('.menu-top[data-menu="file"]');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowDown');
+    t.eq(await page.textContent('.mi.focus .lbl'), 'Open .txt…',
+      'the arrow keys walk down an open menu');
+    await page.keyboard.press('ArrowUp');
+    t.eq(await page.textContent('.mi.focus .lbl'), 'New Note', 'and back up it');
+    await page.keyboard.press('ArrowRight');
+    t.ok(await page.isVisible('.dropdown[data-menu="edit"]'), 'and across to the next menu');
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(150);
+
+    t.eq(await page.getAttribute('#stMsg', 'aria-live'), 'polite',
+      'the status bar announces itself to a screen reader');
+
+    /* ---------- every colour scheme stays readable ---------- */
+    for (const theme of ['classic', 'paper', 'midnight', 'amber', 'green']) {
+      const ratio = await page.evaluate((name) => {
+        document.querySelector('#lcd').dataset.theme = name;
+        const fg = getComputedStyle(document.querySelector('#editor')).color;
+        const bg = getComputedStyle(document.querySelector('.editor-wrap')).backgroundColor;
+        const parse = (s) => s.match(/\d+/g).slice(0, 3).map(Number);
+        const lum = (rgb) => {
+          const c = rgb.map((v) => v / 255)
+            .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+          return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        };
+        const a = lum(parse(fg)), b = lum(parse(bg));
+        return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+      }, theme);
+      t.ok(ratio >= 4.5, theme + ' text on paper is readable (' + ratio.toFixed(1) + ':1)');
+    }
+    await page.evaluate(() => { document.querySelector('#lcd').dataset.theme = 'classic'; });
+
     /* the battery light */
     const bat = await page.evaluate(() => {
       const led = document.querySelector('.led-bat');

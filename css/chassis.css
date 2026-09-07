@@ -584,3 +584,33 @@ body.no-keyboard .keyboard{display:none}
 @media (max-height:760px){
   .key.dual .sub{display:none}
 }
+
+
+/* ---------- keyboard focus on the machine itself ---------- */
+.key:focus-visible,
+.thinklight:focus-visible,
+.access-ibm:focus-visible,
+.hwb:focus-visible,
+.power:focus-visible,
+.tpb:focus-visible{
+  outline:2px solid var(--ibm-blue-lt);
+  outline-offset:1px;
+}
+.trackpoint:focus-visible{
+  outline:2px solid var(--ibm-blue-lt);
+  outline-offset:3px;
+}
+
+/* ---------- people who would rather things held still ---------- */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{
+    animation-duration:.001ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.001ms !important;
+  }
+  /* the sleep light still has to read as "asleep", just without the pulse */
+  .led.pulse{
+    background:var(--led-amber);
+    box-shadow:0 0 5px rgba(255,182,61,.7);
+  }
+}

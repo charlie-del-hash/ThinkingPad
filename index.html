@@ -57,7 +57,9 @@
                   <div class="pane pane-notes" id="paneNotes">
                     <div class="find">
                       <label for="search">F<u>i</u>nd:</label>
-                      <input type="text" id="search" spellcheck="false" autocomplete="off" placeholder="">
+                      <input type="text" id="search" spellcheck="false" autocomplete="off"
+                             placeholder="" aria-describedby="findCount">
+                      <span class="find-count" id="findCount" aria-live="polite"></span>
                     </div>
                     <div class="listbox" id="listbox" role="listbox" tabindex="0" aria-label="Notes"></div>
                     <div class="pane-foot">
@@ -69,13 +71,16 @@
                   <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" title="Drag to resize"></div>
 
                   <div class="pane pane-editor">
-                    <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
-                              aria-label="Note text" placeholder=""></textarea>
+                    <div class="editor-wrap">
+                      <div class="editor-underlay" id="editorUnderlay" aria-hidden="true"></div>
+                      <textarea id="editor" spellcheck="false" autocomplete="off" autocapitalize="off"
+                                aria-label="Note text" placeholder=""></textarea>
+                    </div>
                   </div>
                 </div>
 
                 <div class="statusbar">
-                  <span class="cell grow" id="stMsg">Ready</span>
+                  <span class="cell grow" id="stMsg" role="status" aria-live="polite">Ready</span>
                   <span class="cell" id="stPos">Ln 1, Col 1</span>
                   <span class="cell" id="stCount">0 words</span>
                   <span class="cell click" id="stFont" title="Click to switch typeface">Courier New</span>
@@ -153,8 +158,11 @@
 <div class="print-sheet" id="printSheet" aria-hidden="true"></div>
 <input type="file" id="fileInput" accept=".txt,.md,.json,text/plain,application/json" hidden>
 
+<script src="js/store.js"></script>
+<script src="js/ui.js"></script>
 <script src="js/settings.js"></script>
 <script src="js/keyboard.js"></script>
+<script src="js/machine.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

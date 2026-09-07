@@ -18,7 +18,7 @@ module.exports = {
     await page.keyboard.type('Standup notes\n\nblocked on the printer again');
     await page.waitForTimeout(700);
 
-    const db = await page.evaluate(() => JSON.parse(localStorage.getItem('thinkpad.notes.v1')));
+    const db = await t.notes(page);
     t.ok(db.notes[0].body.startsWith('Standup notes'), 'typing autosaves to localStorage');
     t.ok((await page.textContent('#winTitle')).startsWith('Standup notes'), 'title bar follows the first line');
     t.eq(await page.textContent('.note-item .nt'), 'Standup notes', 'list row title follows the first line');

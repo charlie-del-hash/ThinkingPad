@@ -19,10 +19,8 @@ module.exports = {
     await page.waitForTimeout(300);
     t.eq((await page.$$('.note-item')).length, 1, 'a deleted note leaves the list');
     t.ok(await page.isVisible('.statusbar .st-action'), 'and the status bar offers Undo');
-    t.ok(await page.evaluate(() => {
-      const db = JSON.parse(localStorage.getItem('thinkpad.notes.v1'));
-      return db.notes.some((n) => n.deleted && n.body.indexOf('Throw me away') === 0);
-    }), 'it is kept as a tombstone rather than erased');
+    t.ok((await t.notes(page)).notes.some((n) => n.deleted && n.body.indexOf('Throw me away') === 0),
+      'it is kept as a tombstone rather than erased');
 
     await page.click('.statusbar .st-action');
     await page.waitForTimeout(300);
@@ -41,10 +39,18 @@ module.exports = {
     await page.waitForTimeout(200);
     await page.click('.dlg-foot .btn');
     await page.waitForTimeout(300);
+    t.ok((await t.notes(page)).notes.every((n) => !n.deleted),
+      'emptying the trash removes the tombstones for good');
     t.ok(await page.evaluate(() => {
-      const db = JSON.parse(localStorage.getItem('thinkpad.notes.v1'));
-      return db.notes.every((n) => !n.deleted);
-    }), 'emptying the trash removes the tombstones for good');
+      let orphans = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.indexOf('thinkpad.note.') !== 0) continue;
+        const index = JSON.parse(localStorage.getItem('thinkpad.index.v2'));
+        if (index.ids.indexOf(key.slice('thinkpad.note.'.length)) < 0) orphans++;
+      }
+      return orphans === 0;
+    }), 'and leaves no orphaned keys behind');
 
     /* ---------- two tabs ---------- */
     page = await t.open();
@@ -67,13 +73,13 @@ module.exports = {
       ed.value = 'HALF-TYPED SENTENCE';
       ed.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    const activeId = await page.evaluate(() => JSON.parse(localStorage.getItem('thinkpad.notes.v1')).activeId);
+    const activeId = (await t.notes(page)).activeId;
     await other.evaluate((id) => {
-      const db = JSON.parse(localStorage.getItem('thinkpad.notes.v1'));
-      const n = db.notes.find((x) => x.id === id);
-      n.body = 'CLOBBERED BY THE OTHER TAB';
-      n.updated = Date.now() + 5000;
-      localStorage.setItem('thinkpad.notes.v1', JSON.stringify(db));
+      const key = 'thinkpad.note.' + id;
+      const note = JSON.parse(localStorage.getItem(key));
+      note.body = 'CLOBBERED BY THE OTHER TAB';
+      note.updated = Date.now() + 5000;
+      localStorage.setItem(key, JSON.stringify(note));
     }, activeId);
     await page.waitForTimeout(300);
     t.eq(await page.inputValue('#editor'), 'HALF-TYPED SENTENCE',
@@ -84,7 +90,7 @@ module.exports = {
     await page.addInitScript(() => {
       const real = localStorage.setItem.bind(localStorage);
       localStorage.setItem = function (k, v) {
-        if (k === 'thinkpad.notes.v1') {
+        if (k.indexOf('thinkpad.note.') === 0 || k === 'thinkpad.index.v2') {
           const e = new Error('quota');
           e.name = 'QuotaExceededError';
           throw e;
@@ -127,9 +133,28 @@ module.exports = {
       '#reset starts again with standard settings');
     t.eq(await page.evaluate(() => window.location.hash + window.location.search), '',
       'and tidies the hash away');
-    t.ok(await page.evaluate(() => {
-      const db = JSON.parse(localStorage.getItem('thinkpad.notes.v1'));
-      return db && db.notes.length > 0;
-    }), 'without touching the notes');
+    t.ok((await t.notes(page)).notes.length > 0, 'without touching the notes');
+
+    /* ---------- notes saved by the old single-blob version ---------- */
+    page = await t.open();
+    await page.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem('thinkpad.notes.v1', JSON.stringify({
+        activeId: 'old2',
+        notes: [
+          { id: 'old1', body: 'An older note', created: 1, updated: 2, caret: 0 },
+          { id: 'old2', body: 'The one that was open', created: 3, updated: 4, caret: 0 }
+        ]
+      }));
+    });
+    await page.reload();
+    await page.waitForTimeout(500);
+    const migrated = await t.notes(page);
+    t.eq(migrated.notes.length, 2, 'notes from the old storage shape are carried over');
+    t.eq(migrated.activeId, 'old2', 'along with which one was open');
+    t.eq(await page.inputValue('#editor'), 'The one that was open', 'and it opens where you left off');
+    t.ok(await page.evaluate(() => localStorage.getItem('thinkpad.notes.v1') === null),
+      'the old blob is only dropped once the new copy is verified');
+    t.eq((await page.$$('.note-item')).length, 2, 'both show up in the list');
   }
 };

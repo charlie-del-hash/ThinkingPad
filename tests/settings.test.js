@@ -36,7 +36,7 @@ module.exports = {
     t.eq(await page.evaluate(() => document.querySelector('#lcd').dataset.theme), 'midnight',
       'screen colours apply');
     const paper = await page.evaluate(
-      () => getComputedStyle(document.querySelector('#editor')).backgroundColor);
+      () => getComputedStyle(document.querySelector('.editor-wrap')).backgroundColor);
     t.ok(/rgb\(1[0-9], 2[01], 2[0-9]\)/.test(paper), 'midnight repaints the paper (' + paper + ')');
 
     /* slider */

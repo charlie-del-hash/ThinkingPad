@@ -105,6 +105,20 @@ function makeContext(browser, origin, results) {
       });
     },
 
+    /* what is actually on disk, in the app's own storage shape */
+    async notes(page) {
+      return page.evaluate(() => {
+        const index = JSON.parse(localStorage.getItem('thinkpad.index.v2') || 'null');
+        if (!index) return null;
+        return {
+          activeId: index.activeId,
+          notes: index.ids
+            .map((id) => JSON.parse(localStorage.getItem('thinkpad.note.' + id) || 'null'))
+            .filter(Boolean)
+        };
+      });
+    },
+
     ok(cond, label) {
       results.push({ ok: !!cond, label: label });
       return !!cond;

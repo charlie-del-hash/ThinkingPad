@@ -32,7 +32,7 @@ It saves as you type into `localStorage` — **this browser, this machine, no
 account, no sync, no network**. Clearing site data erases everything, so
 export anything you'd hate to lose.
 
-- Note list with find-as-you-type, sorted by last edited
+- Find with match counts, highlighting behind the text, and `F3` to step through
 - Autosave (and `Ctrl+S` if you don't trust autosave — nobody does)
 - Delete is reversible: notes go to a trash for 30 days, with Undo in the status bar
 - Two tabs on the same notes merge instead of overwriting each other
@@ -121,6 +121,13 @@ or a system mono for the page — which switches the preset to Custom.
 `Ctrl+N` and `Ctrl+T` belong to the browser and can't be intercepted, which is
 why New is `Alt+N`.
 
+## Find
+
+Type in the **Find** box and every match lights up behind the text in the
+editor, the counter shows `3/12`, and each note in the list carries a badge
+with how many matches it holds. `F3` and `Shift+F3` step through them,
+wrapping around the ends; `Enter` in the Find box does the same.
+
 ## When something goes wrong
 
 Losing notes is the only unforgivable bug in a notepad, so:
@@ -161,20 +168,39 @@ index.html          markup for the machine and the window on its screen
 css/chassis.css     the hardware: case, bezel, LEDs, keys, TrackPoint, ThinkLight
 css/notepad.css     the software: bevelled chrome, menus, listbox, dialogs, print
 css/themes.css      case finishes, desk surfaces, panel colours, the settings form
-js/settings.js      the settings spec, its form, and migration of older preferences
+js/store.js         where notes live: per-note keys, the index, migration
+js/ui.js            dialogs, menus and the status bar — no knowledge of notes
+js/machine.js       the case: panel geometry, lights, ThinkLight, TrackPoint, sound
 js/keyboard.js      the seven-row keyboard — builds it, mirrors real keystrokes
-js/app.js           notes, storage, menus, dialogs, the 4:3 fitter, working hardware
+js/settings.js      the settings spec, its form, and migration of older preferences
+js/app.js           the notes themselves, and what the commands do
 build.js            folds all of the above into dist/thinkpad-notes.html
-tests/              a static server, a browser, and five suites
+tests/              a static server, a browser, and six suites
 ```
 
-Storage keys: `thinkpad.notes.v1` (notes) and `thinkpad.prefs.v1` (every
-setting). Preferences saved by an older version are migrated on load rather
-than discarded.
+Load order matters and is fixed in `index.html`: `store`, `ui`, `settings`,
+`keyboard`, `machine`, `app`. These are plain scripts on purpose — ES modules
+cannot load over `file://`, and double-clicking the file has to keep working.
+
+Each note is its own key, `thinkpad.note.<id>`, listed by `thinkpad.index.v2`;
+settings live in `thinkpad.prefs.v1`. Saving a keystroke rewrites one note
+rather than all of them. Notes and preferences written by older versions are
+migrated on load — the old single-blob key is only dropped once the new copy
+reads back correctly.
 
 Exports use a plain download link when the page is opened from a file or a
 server. When it runs somewhere that mediates saves — a sandboxed host — it
 asks that host instead, so Export and Back Up work in both places.
+
+## Reaching it from the keyboard
+
+Every control takes focus and shows it. Menus open with `Alt`+their letter and
+walk with the arrow keys — up and down the items, left and right between
+menus, `Enter` to choose, `Esc` to leave. Dialogs keep Tab inside themselves
+and hand focus back where it came from when they close. The status bar is an
+`aria-live` region, so what it says is announced. All five colour schemes are
+checked for contrast by the test suite, and `prefers-reduced-motion` stills
+the pulsing lights.
 
 ## Not affiliated with anyone
 
