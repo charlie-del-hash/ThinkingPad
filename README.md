@@ -131,7 +131,7 @@ wrapping around the ends; `Enter` in the Find box does the same.
 
 ## Three things it does for the era rather than for you
 
-All three live in **Settings > Machine**; the first two are off by default.
+All three live in **Settings > Machine**, and all three are off by default.
 
 **Power-on self test.** Switch it on and the machine posts before it hands
 over: the striped IBM logo, the memory counted out to 262144 KB, the ThinkPad
@@ -139,13 +139,13 @@ line, and a note about the setup utility nobody ever pressed in time. About
 two and a half seconds, and any key skips it — that key is swallowed rather
 than typed into your note.
 
-**Wear and tear.** On by default, because this is a homage to a machine
-somebody actually used: the home row and the letters English leans on carry a
-shine, the space bar wears to the right of centre where the thumb sits, the
-palm rest has two faint patches where wrists rested, and the TrackPoint cap
-has gone smooth in the middle. Switch it off in **Settings > Machine** for a
-factory-fresh one. On the titanium case the same wear reads as a darker
-patch rather than a shine, because that is what grease does to light plastic.
+**Wear and tear.** Off by default — it leaves the factory unmarked. Switch it
+on and it becomes a machine somebody actually used: the home row and the
+letters English leans on carry a shine, the space bar wears to the right of
+centre where the thumb sits, the palm rest has two faint patches where wrists
+rested, and the TrackPoint cap has gone smooth in the middle. On the titanium
+case the same wear reads as a darker patch rather than a shine, because that
+is what grease does to light plastic.
 
 **Screensaver.** A starfield, because it was always a starfield. Off, or after
 1, 5 or 15 minutes idle. Anything wakes it, and the key that wakes it doesn't

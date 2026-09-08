@@ -78,24 +78,29 @@ module.exports = {
     await page.keyboard.press('Control+,');
     await page.check('#set-deck');
     await page.waitForTimeout(300);
+    t.ok(await page.evaluate(() => !document.body.classList.contains('worn')),
+      'the machine arrives factory fresh');
+    t.ok(await page.evaluate(() => {
+      const s = getComputedStyle(document.querySelector('.key[data-code="KeyF"]'), '::after');
+      return s.backgroundImage === 'none' || s.content === 'none';
+    }), 'with no shine on any of the caps');
+
+    await page.check('#set-wear');
+    await page.waitForTimeout(200);
     t.ok(await page.evaluate(() => document.body.classList.contains('worn')),
-      'the machine shows its age by default');
+      'and Wear and tear ages it on request');
     t.eq(await page.getAttribute('.key[data-code="KeyF"]', 'data-wear'), '2',
-      'the home row took the worst of it');
+      'the home row takes the worst of it');
     t.eq(await page.getAttribute('.key[data-code="KeyE"]', 'data-wear'), '2',
       'along with the letters English leans on');
     t.eq(await page.getAttribute('.key[data-code="F7"]', 'data-wear'), null,
-      'while F7 is as good as the day it left Yamato');
+      'while F7 stays as good as the day it left Yamato');
     t.ok(await page.evaluate(() => {
       const s = getComputedStyle(document.querySelector('.key[data-code="KeyF"]'), '::after');
       return s.backgroundImage.indexOf('radial-gradient') >= 0;
     }), 'and the shine is actually painted on the cap');
 
     await page.uncheck('#set-wear');
-    await page.waitForTimeout(200);
-    t.ok(await page.evaluate(() => !document.body.classList.contains('worn')),
-      'or it can be had factory fresh');
-    await page.check('#set-wear');
     await page.click('.dlg-foot .btn');
     await page.waitForTimeout(200);
 
