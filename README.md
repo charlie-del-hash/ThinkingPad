@@ -60,7 +60,7 @@ change it.
 
 | Tab | What's in it |
 | --- | --- |
-| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, power-on self test, screensaver delay, ThinkLight, screen glare, LCD grain, key click and its volume |
+| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, wear and tear, power-on self test, screensaver delay, ThinkLight, screen glare, LCD grain, key click and its volume |
 | **Screen** | Colour scheme (classic grey / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
 | **Notes** | Note list on or off, list on the left or right, list width, sort by last edited / created / title, date format, and whether opening the app resumes your last note or starts a blank one |
 | **Data** | Back up everything to `.json`, restore from a backup, empty the trash, reset every setting, erase all notes — with a live count of notes, words, storage used and what's in the trash |
@@ -97,6 +97,7 @@ or a system mono for the page — which switches the preset to Custom.
 | Power button | Standby. Click anywhere to wake |
 | Battery light | Follows this laptop where the browser will say: amber below 20%, pulsing while charging |
 | Drive light | Flickers on every save, and sits amber when storage is nearly full |
+| Indicators | Six lights under drawn marks — power, battery, standby, drive, num lock, caps lock — not text labels |
 | Keyboard | Mirrors what you actually type; click the caps to type with the mouse |
 | LEDs | Power, battery, sleep, drive (flickers on every save), Num Lock, Caps Lock |
 
@@ -128,15 +129,23 @@ editor, the counter shows `3/12`, and each note in the list carries a badge
 with how many matches it holds. `F3` and `Shift+F3` step through them,
 wrapping around the ends; `Enter` in the Find box does the same.
 
-## Two things it does for the era rather than for you
+## Three things it does for the era rather than for you
 
-Both off by default, both in **Settings > Machine**.
+All three live in **Settings > Machine**; the first two are off by default.
 
 **Power-on self test.** Switch it on and the machine posts before it hands
 over: the striped IBM logo, the memory counted out to 262144 KB, the ThinkPad
 line, and a note about the setup utility nobody ever pressed in time. About
 two and a half seconds, and any key skips it — that key is swallowed rather
 than typed into your note.
+
+**Wear and tear.** On by default, because this is a homage to a machine
+somebody actually used: the home row and the letters English leans on carry a
+shine, the space bar wears to the right of centre where the thumb sits, the
+palm rest has two faint patches where wrists rested, and the TrackPoint cap
+has gone smooth in the middle. Switch it off in **Settings > Machine** for a
+factory-fresh one. On the titanium case the same wear reads as a darker
+patch rather than a shine, because that is what grease does to light plastic.
 
 **Screensaver.** A starfield, because it was always a starfield. Off, or after
 1, 5 or 15 minutes idle. Anything wakes it, and the key that wakes it doesn't

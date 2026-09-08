@@ -298,11 +298,19 @@ body.no-glare .lcd-glare{opacity:0}
   box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
   transition:background .12s,box-shadow .12s;
 }
-.led em{font-style:normal}
-.led-cell em{
-  font:400 clamp(5px,.72vh,7px)/1 Tahoma,Verdana,sans-serif;
-  letter-spacing:.06em;color:#575c64;
+/* silk-screened marks under each light, the way the bezel had them */
+.led-cell .ico{
+  width:clamp(8px,1.15vh,11px);
+  height:clamp(8px,1.15vh,11px);
+  fill:none;
+  stroke:#5f646c;
+  stroke-width:1.1;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
 }
+.led-cell .ico ellipse,.led-cell .ico rect{fill:none}
+body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
 .led.on{background:var(--led-green);box-shadow:0 0 5px rgba(99,255,134,.75),inset 0 0 2px rgba(255,255,255,.7)}
 .led.amber{background:var(--led-amber);box-shadow:0 0 5px rgba(255,182,61,.7),inset 0 0 2px rgba(255,255,255,.6)}
 .led.blink{animation:ledblink .16s steps(1) 2}
@@ -439,6 +447,7 @@ body.no-keyboard .keyboard{display:none}
   padding:0 1px;cursor:pointer;user-select:none;
   transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
   overflow:hidden;text-overflow:clip;white-space:nowrap;
+  position:relative;
 }
 .key.wide-label{font-size:clamp(5px,.82vh,8px)}
 .key.fn{color:var(--ibm-blue-lt)}
@@ -664,6 +673,61 @@ body.no-keyboard .keyboard{display:none}
 
 @media (prefers-reduced-motion:reduce){
   .post-ibm{animation:none}
+}
+
+
+/* ============================================================
+   signs of use
+   Ten years of fingers polish the caps they land on. The shine
+   is brightest on the home row and the letters English leans on,
+   and the space bar wears to the right of centre, where the
+   thumb actually sits.
+   ============================================================ */
+body.worn .key[data-wear]::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(58% 46% at 50% 42%,rgba(255,255,255,.055),transparent 72%);
+}
+body.worn .key[data-wear="2"]::after{
+  background:radial-gradient(64% 54% at 50% 42%,rgba(255,255,255,.11),transparent 74%);
+}
+body.worn .key[data-wear="2"]{color:#b7babf}
+body.worn .key[data-code="Space"]::after{
+  background:radial-gradient(24% 56% at 60% 48%,rgba(255,255,255,.10),transparent 72%);
+}
+
+/* on a light case the same wear reads as a darker, greasier patch */
+body.worn[data-case="titanium"] .key[data-wear]::after{
+  background:radial-gradient(58% 46% at 50% 42%,rgba(0,0,0,.055),transparent 72%);
+}
+body.worn[data-case="titanium"] .key[data-wear="2"]::after{
+  background:radial-gradient(64% 54% at 50% 42%,rgba(0,0,0,.10),transparent 74%);
+}
+body.worn[data-case="titanium"] .key[data-wear="2"]{color:#31343a}
+body.worn[data-case="titanium"] .key[data-code="Space"]::after{
+  background:radial-gradient(24% 56% at 60% 48%,rgba(0,0,0,.09),transparent 72%);
+}
+
+/* where wrists have rested */
+body.worn .palmrest::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:
+    radial-gradient(20% 54% at 26% 64%,rgba(255,255,255,.05),transparent 72%),
+    radial-gradient(20% 54% at 74% 64%,rgba(255,255,255,.05),transparent 72%);
+}
+body.worn[data-case="titanium"] .palmrest::after{
+  background:
+    radial-gradient(20% 54% at 26% 64%,rgba(0,0,0,.05),transparent 72%),
+    radial-gradient(20% 54% at 74% 64%,rgba(0,0,0,.05),transparent 72%);
+}
+
+/* the cap's texture goes smooth in the middle, and picks up a sheen */
+body.worn .trackpoint{
+  background:radial-gradient(circle at 34% 26%,#f2536a,var(--tp-red) 45%,var(--tp-red-dk) 100%);
+}
+body.worn .trackpoint::after{
+  opacity:.38;
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,transparent 18%,#000 62%);
+  mask-image:radial-gradient(circle at 50% 50%,transparent 18%,#000 62%);
 }
 </style>
 <style>
@@ -1375,13 +1439,48 @@ body.no-case .lcd{border-radius:0}
 
         <div class="bezel-foot">
           <div class="ibm-logo" aria-label="IBM"><span>IBM</span></div>
-          <div class="leds" id="leds" aria-hidden="true">
-            <span class="led-cell"><i class="led led-pwr on"></i><em>PWR</em></span>
-            <span class="led-cell"><i class="led led-bat on"></i><em>BAT</em></span>
-            <span class="led-cell"><i class="led led-slp"></i><em>SLP</em></span>
-            <span class="led-cell"><i class="led led-hdd"></i><em>HDD</em></span>
-            <span class="led-cell"><i class="led led-num"></i><em>NUM</em></span>
-            <span class="led-cell"><i class="led led-cap"></i><em>CAP</em></span>
+          <div class="leds" id="leds">
+            <span class="led-cell" title="Power">
+              <i class="led led-pwr on"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Power">
+                <path d="M3.6 3.1a4 4 0 1 0 4.8 0"/><path d="M6 1v4.2"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Battery">
+              <i class="led led-bat on"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Battery">
+                <rect x="1" y="3.6" width="8.6" height="4.8" rx=".7"/>
+                <path d="M10.4 5.1v1.8" stroke-width="1.6"/>
+                <path d="M2.6 6h3.2" stroke-width="1.6"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Standby">
+              <i class="led led-slp"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Standby">
+                <path d="M8.9 7.7A4.1 4.1 0 1 1 6.1 1.4a3.3 3.3 0 0 0 2.8 6.3z"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Drive in use">
+              <i class="led led-hdd"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Drive in use">
+                <path d="M2.2 3.4v5.2c0 .8 1.7 1.4 3.8 1.4s3.8-.6 3.8-1.4V3.4"/>
+                <ellipse cx="6" cy="3.4" rx="3.8" ry="1.4"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Num Lock">
+              <i class="led led-num"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Num Lock">
+                <rect x="1.4" y="1.8" width="9.2" height="8.4" rx="1.2"/>
+                <path d="M5.1 4.9 6.2 4v4.1"/><path d="M4.9 8.1h2.6"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Caps Lock">
+              <i class="led led-cap"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Caps Lock">
+                <rect x="1.4" y="1.8" width="9.2" height="8.4" rx="1.2"/>
+                <path d="M4.3 8.4 6 3.7l1.7 4.7"/><path d="M4.9 6.9h2.2"/>
+              </svg>
+            </span>
           </div>
           <div class="tp-logo" aria-label="ThinkPad">Th<span class="i">ı<b></b></span>nkPad</div>
         </div>
@@ -1966,7 +2065,7 @@ body.no-case .lcd{border-radius:0}
     /* the machine */
     showCase: true, deck: false, tpButtons: true, leds: true,
     caseFinish: 'black', capStyle: 'tongue', desk: 'studio', aspect: '4:3',
-    deckTilt: true, battery: true, bootScreen: false, screensaver: 0,
+    deckTilt: true, battery: true, wear: true, bootScreen: false, screensaver: 0,
     night: false, glare: true, grain: true, sound: false, vol: 0.35,
     /* the screen */
     theme: 'classic', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
@@ -2021,6 +2120,8 @@ body.no-case .lcd{border-radius:0}
         hint: 'Tips the keyboard away from you, the way a real one sits' },
       { k: 'battery', t: 'check', label: 'Battery light is real',
         hint: 'The BAT light follows this laptop: amber when low, pulsing on charge' },
+      { k: 'wear', t: 'check', label: 'Wear and tear',
+        hint: 'Shine on the keys you would have worn down, and on the palm rest' },
       { k: 'bootScreen', t: 'check', label: 'Power-on self test',
         hint: 'Counts the memory before it lets you type. Any key skips it' },
       { k: 'screensaver', t: 'select', num: true, label: 'Screensaver', options: [
@@ -2339,6 +2440,19 @@ body.no-case .lcd{border-radius:0}
     ]}
   ];
 
+  /* Where the shine ends up on a keyboard someone actually used: the
+     home row and the letters English leans on, the space bar, and the
+     two keys every hand reaches for without looking. */
+  var WEAR = {
+    KeyA: 2, KeyS: 2, KeyD: 2, KeyF: 2, KeyJ: 2, KeyE: 2, KeyR: 2, KeyT: 2,
+    KeyN: 2, KeyI: 2, KeyO: 2, Space: 2, Backspace: 2, Enter: 2,
+    ShiftLeft: 2, ControlLeft: 2,
+    KeyQ: 1, KeyW: 1, KeyY: 1, KeyU: 1, KeyP: 1, KeyG: 1, KeyH: 1, KeyK: 1,
+    KeyL: 1, KeyZ: 1, KeyC: 1, KeyV: 1, KeyB: 1, KeyM: 1, Comma: 1, Period: 1,
+    Tab: 1, CapsLock: 1, Fn: 1, AltLeft: 1, ShiftRight: 1, Escape: 1, Delete: 1,
+    ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1
+  };
+
   var byCode = Object.create(null);
 
   function build(root, onKeyClick) {
@@ -2357,6 +2471,7 @@ body.no-case .lcd{border-radius:0}
           el.type = 'button';
           el.className = 'key' + (key.cls ? ' ' + key.cls : '');
           el.dataset.code = key.code;
+          if (WEAR[key.code]) el.dataset.wear = WEAR[key.code];
           if (key.ch !== undefined) el.dataset.ch = key.ch;
           if (key.sub) {
             el.classList.add('dual');
@@ -2524,6 +2639,7 @@ body.no-case .lcd{border-radius:0}
     body.classList.toggle('no-grain', !p.grain);
     body.classList.toggle('muted', !p.sound);
     body.classList.toggle('deck-flat', !!p.deckTilt);
+    body.classList.toggle('worn', !!p.wear);
     desk.classList.toggle('night', !!p.night);
     if (batteryRepaint) batteryRepaint();
     if (p.deck) buildKeyboardOnce();

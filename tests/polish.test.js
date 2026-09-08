@@ -61,6 +61,44 @@ module.exports = {
     await page.waitForTimeout(100);
     t.eq(await underline(), 'none', 'and letting go hides them again');
 
+    /* ---------- the marks under the lights ---------- */
+    const icons = await page.$$eval('.led-cell', (cells) => cells.map((c) => {
+      const svg = c.querySelector('svg.ico');
+      return { label: svg && svg.getAttribute('aria-label'), title: c.getAttribute('title') };
+    }));
+    t.eq(icons.length, 6, 'six indicators on the bezel');
+    t.eq(icons.map((i) => i.label).join(', '),
+      'Power, Battery, Standby, Drive in use, Num Lock, Caps Lock',
+      'each one a drawn mark rather than a word, and named for a screen reader');
+    t.ok(icons.every((i) => i.title), 'and titled, so hovering says which is which');
+    t.eq(await page.$$eval('.led-cell em', (els) => els.length), 0,
+      'the old text labels are gone');
+
+    /* ---------- ten years of fingers ---------- */
+    await page.keyboard.press('Control+,');
+    await page.check('#set-deck');
+    await page.waitForTimeout(300);
+    t.ok(await page.evaluate(() => document.body.classList.contains('worn')),
+      'the machine shows its age by default');
+    t.eq(await page.getAttribute('.key[data-code="KeyF"]', 'data-wear'), '2',
+      'the home row took the worst of it');
+    t.eq(await page.getAttribute('.key[data-code="KeyE"]', 'data-wear'), '2',
+      'along with the letters English leans on');
+    t.eq(await page.getAttribute('.key[data-code="F7"]', 'data-wear'), null,
+      'while F7 is as good as the day it left Yamato');
+    t.ok(await page.evaluate(() => {
+      const s = getComputedStyle(document.querySelector('.key[data-code="KeyF"]'), '::after');
+      return s.backgroundImage.indexOf('radial-gradient') >= 0;
+    }), 'and the shine is actually painted on the cap');
+
+    await page.uncheck('#set-wear');
+    await page.waitForTimeout(200);
+    t.ok(await page.evaluate(() => !document.body.classList.contains('worn')),
+      'or it can be had factory fresh');
+    await page.check('#set-wear');
+    await page.click('.dlg-foot .btn');
+    await page.waitForTimeout(200);
+
     /* ---------- reachable without a mouse ---------- */
     await page.keyboard.press('Control+,');
     await page.waitForTimeout(200);

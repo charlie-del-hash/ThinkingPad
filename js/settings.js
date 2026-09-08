@@ -10,7 +10,7 @@
     /* the machine */
     showCase: true, deck: false, tpButtons: true, leds: true,
     caseFinish: 'black', capStyle: 'tongue', desk: 'studio', aspect: '4:3',
-    deckTilt: true, battery: true, bootScreen: false, screensaver: 0,
+    deckTilt: true, battery: true, wear: true, bootScreen: false, screensaver: 0,
     night: false, glare: true, grain: true, sound: false, vol: 0.35,
     /* the screen */
     theme: 'classic', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
@@ -65,6 +65,8 @@
         hint: 'Tips the keyboard away from you, the way a real one sits' },
       { k: 'battery', t: 'check', label: 'Battery light is real',
         hint: 'The BAT light follows this laptop: amber when low, pulsing on charge' },
+      { k: 'wear', t: 'check', label: 'Wear and tear',
+        hint: 'Shine on the keys you would have worn down, and on the palm rest' },
       { k: 'bootScreen', t: 'check', label: 'Power-on self test',
         hint: 'Counts the memory before it lets you type. Any key skips it' },
       { k: 'screensaver', t: 'select', num: true, label: 'Screensaver', options: [

@@ -115,6 +115,7 @@
     body.classList.toggle('no-grain', !p.grain);
     body.classList.toggle('muted', !p.sound);
     body.classList.toggle('deck-flat', !!p.deckTilt);
+    body.classList.toggle('worn', !!p.wear);
     desk.classList.toggle('night', !!p.night);
     if (batteryRepaint) batteryRepaint();
     if (p.deck) buildKeyboardOnce();

@@ -291,11 +291,19 @@ body.no-glare .lcd-glare{opacity:0}
   box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
   transition:background .12s,box-shadow .12s;
 }
-.led em{font-style:normal}
-.led-cell em{
-  font:400 clamp(5px,.72vh,7px)/1 Tahoma,Verdana,sans-serif;
-  letter-spacing:.06em;color:#575c64;
+/* silk-screened marks under each light, the way the bezel had them */
+.led-cell .ico{
+  width:clamp(8px,1.15vh,11px);
+  height:clamp(8px,1.15vh,11px);
+  fill:none;
+  stroke:#5f646c;
+  stroke-width:1.1;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
 }
+.led-cell .ico ellipse,.led-cell .ico rect{fill:none}
+body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
 .led.on{background:var(--led-green);box-shadow:0 0 5px rgba(99,255,134,.75),inset 0 0 2px rgba(255,255,255,.7)}
 .led.amber{background:var(--led-amber);box-shadow:0 0 5px rgba(255,182,61,.7),inset 0 0 2px rgba(255,255,255,.6)}
 .led.blink{animation:ledblink .16s steps(1) 2}
@@ -432,6 +440,7 @@ body.no-keyboard .keyboard{display:none}
   padding:0 1px;cursor:pointer;user-select:none;
   transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
   overflow:hidden;text-overflow:clip;white-space:nowrap;
+  position:relative;
 }
 .key.wide-label{font-size:clamp(5px,.82vh,8px)}
 .key.fn{color:var(--ibm-blue-lt)}
@@ -657,4 +666,59 @@ body.no-keyboard .keyboard{display:none}
 
 @media (prefers-reduced-motion:reduce){
   .post-ibm{animation:none}
+}
+
+
+/* ============================================================
+   signs of use
+   Ten years of fingers polish the caps they land on. The shine
+   is brightest on the home row and the letters English leans on,
+   and the space bar wears to the right of centre, where the
+   thumb actually sits.
+   ============================================================ */
+body.worn .key[data-wear]::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(58% 46% at 50% 42%,rgba(255,255,255,.055),transparent 72%);
+}
+body.worn .key[data-wear="2"]::after{
+  background:radial-gradient(64% 54% at 50% 42%,rgba(255,255,255,.11),transparent 74%);
+}
+body.worn .key[data-wear="2"]{color:#b7babf}
+body.worn .key[data-code="Space"]::after{
+  background:radial-gradient(24% 56% at 60% 48%,rgba(255,255,255,.10),transparent 72%);
+}
+
+/* on a light case the same wear reads as a darker, greasier patch */
+body.worn[data-case="titanium"] .key[data-wear]::after{
+  background:radial-gradient(58% 46% at 50% 42%,rgba(0,0,0,.055),transparent 72%);
+}
+body.worn[data-case="titanium"] .key[data-wear="2"]::after{
+  background:radial-gradient(64% 54% at 50% 42%,rgba(0,0,0,.10),transparent 74%);
+}
+body.worn[data-case="titanium"] .key[data-wear="2"]{color:#31343a}
+body.worn[data-case="titanium"] .key[data-code="Space"]::after{
+  background:radial-gradient(24% 56% at 60% 48%,rgba(0,0,0,.09),transparent 72%);
+}
+
+/* where wrists have rested */
+body.worn .palmrest::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:
+    radial-gradient(20% 54% at 26% 64%,rgba(255,255,255,.05),transparent 72%),
+    radial-gradient(20% 54% at 74% 64%,rgba(255,255,255,.05),transparent 72%);
+}
+body.worn[data-case="titanium"] .palmrest::after{
+  background:
+    radial-gradient(20% 54% at 26% 64%,rgba(0,0,0,.05),transparent 72%),
+    radial-gradient(20% 54% at 74% 64%,rgba(0,0,0,.05),transparent 72%);
+}
+
+/* the cap's texture goes smooth in the middle, and picks up a sheen */
+body.worn .trackpoint{
+  background:radial-gradient(circle at 34% 26%,#f2536a,var(--tp-red) 45%,var(--tp-red-dk) 100%);
+}
+body.worn .trackpoint::after{
+  opacity:.38;
+  -webkit-mask-image:radial-gradient(circle at 50% 50%,transparent 18%,#000 62%);
+  mask-image:radial-gradient(circle at 50% 50%,transparent 18%,#000 62%);
 }

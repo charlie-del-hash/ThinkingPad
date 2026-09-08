@@ -70,6 +70,19 @@
     ]}
   ];
 
+  /* Where the shine ends up on a keyboard someone actually used: the
+     home row and the letters English leans on, the space bar, and the
+     two keys every hand reaches for without looking. */
+  var WEAR = {
+    KeyA: 2, KeyS: 2, KeyD: 2, KeyF: 2, KeyJ: 2, KeyE: 2, KeyR: 2, KeyT: 2,
+    KeyN: 2, KeyI: 2, KeyO: 2, Space: 2, Backspace: 2, Enter: 2,
+    ShiftLeft: 2, ControlLeft: 2,
+    KeyQ: 1, KeyW: 1, KeyY: 1, KeyU: 1, KeyP: 1, KeyG: 1, KeyH: 1, KeyK: 1,
+    KeyL: 1, KeyZ: 1, KeyC: 1, KeyV: 1, KeyB: 1, KeyM: 1, Comma: 1, Period: 1,
+    Tab: 1, CapsLock: 1, Fn: 1, AltLeft: 1, ShiftRight: 1, Escape: 1, Delete: 1,
+    ArrowLeft: 1, ArrowRight: 1, ArrowUp: 1, ArrowDown: 1
+  };
+
   var byCode = Object.create(null);
 
   function build(root, onKeyClick) {
@@ -88,6 +101,7 @@
           el.type = 'button';
           el.className = 'key' + (key.cls ? ' ' + key.cls : '');
           el.dataset.code = key.code;
+          if (WEAR[key.code]) el.dataset.wear = WEAR[key.code];
           if (key.ch !== undefined) el.dataset.ch = key.ch;
           if (key.sub) {
             el.classList.add('dual');
