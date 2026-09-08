@@ -60,7 +60,7 @@ change it.
 
 | Tab | What's in it |
 | --- | --- |
-| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, ThinkLight, screen glare, LCD grain, key click and its volume |
+| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, power-on self test, screensaver delay, ThinkLight, screen glare, LCD grain, key click and its volume |
 | **Screen** | Colour scheme (classic grey / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
 | **Notes** | Note list on or off, list on the left or right, list width, sort by last edited / created / title, date format, and whether opening the app resumes your last note or starts a blank one |
 | **Data** | Back up everything to `.json`, restore from a backup, empty the trash, reset every setting, erase all notes — with a live count of notes, words, storage used and what's in the trash |
@@ -128,6 +128,21 @@ editor, the counter shows `3/12`, and each note in the list carries a badge
 with how many matches it holds. `F3` and `Shift+F3` step through them,
 wrapping around the ends; `Enter` in the Find box does the same.
 
+## Two things it does for the era rather than for you
+
+Both off by default, both in **Settings > Machine**.
+
+**Power-on self test.** Switch it on and the machine posts before it hands
+over: the striped IBM logo, the memory counted out to 262144 KB, the ThinkPad
+line, and a note about the setup utility nobody ever pressed in time. About
+two and a half seconds, and any key skips it — that key is swallowed rather
+than typed into your note.
+
+**Screensaver.** A starfield, because it was always a starfield. Off, or after
+1, 5 or 15 minutes idle. Anything wakes it, and the key that wakes it doesn't
+land in the note either. **View > Start Screensaver** runs it on demand, and
+`prefers-reduced-motion` gives you the stars without the motion.
+
 ## When something goes wrong
 
 Losing notes is the only unforgivable bug in a notepad, so:
@@ -175,7 +190,7 @@ js/keyboard.js      the seven-row keyboard — builds it, mirrors real keystroke
 js/settings.js      the settings spec, its form, and migration of older preferences
 js/app.js           the notes themselves, and what the commands do
 build.js            folds all of the above into dist/thinkpad-notes.html
-tests/              a static server, a browser, and six suites
+tests/              a static server, a browser, and seven suites
 ```
 
 Load order matters and is fixed in `index.html`: `store`, `ui`, `settings`,

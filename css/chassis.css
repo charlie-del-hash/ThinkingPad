@@ -614,3 +614,47 @@ body.no-keyboard .keyboard{display:none}
     box-shadow:0 0 5px rgba(255,182,61,.7);
   }
 }
+
+
+/* ============================================================
+   power-on self test and the screensaver
+   Both live on the panel, above everything the software draws
+   but below the sleep overlay.
+   ============================================================ */
+.post{
+  position:absolute;inset:0;z-index:40;
+  background:#000;color:#d8dce2;
+  font:400 clamp(11px,1.5vh,15px)/1.6 "Courier New","Lucida Console",monospace;
+  padding:clamp(14px,3vh,32px);
+  display:flex;flex-direction:column;
+  transition:opacity .3s ease;
+}
+.post.done{opacity:0}
+.post-ibm{
+  font:700 clamp(26px,5.4vh,52px)/1 Rockwell,"Courier New",Georgia,serif;
+  letter-spacing:.08em;
+  background-image:repeating-linear-gradient(180deg,#e8ecf2 0 3px,rgba(0,0,0,0) 3px 5px);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:post-in .5s ease both;
+}
+.post-mem{margin-top:auto;min-height:1.6em;white-space:pre}
+.post-foot{
+  display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  margin-top:.8em;opacity:0;transition:opacity .25s ease;flex-wrap:wrap;
+}
+.post-foot.show{opacity:1}
+.post-tp{
+  font:600 clamp(13px,2vh,20px)/1 Tahoma,Verdana,sans-serif;
+  color:#c8ccd2;letter-spacing:-.01em;
+}
+.post-hint{color:#7d838c}
+@keyframes post-in{from{opacity:0}to{opacity:1}}
+
+.saver{
+  position:absolute;inset:0;z-index:45;background:#000;cursor:none;
+}
+.saver canvas{display:block}
+
+@media (prefers-reduced-motion:reduce){
+  .post-ibm{animation:none}
+}

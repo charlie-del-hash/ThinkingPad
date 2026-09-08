@@ -899,6 +899,9 @@
         '<dt>Access IBM</dt><dd>This window.</dd>' +
         '<dt>Volume</dt><dd>Key click volume. The dot lights when muted.</dd>' +
         '<dt>Power</dt><dd>Standby. Click anywhere to wake.</dd>' +
+        '<dt>Self test</dt><dd>Settings &gt; Machine can make it count its memory on the ' +
+        'way up, the way it used to. Any key skips it.</dd>' +
+        '<dt>Screensaver</dt><dd>A starfield, after however long you say. Anything wakes it.</dd>' +
         '<dt>Battery light</dt><dd>Follows this laptop where the browser will say: ' +
         'amber below 20%, pulsing while charging.</dd>' +
         '<dt>Drive light</dt><dd>Flickers on every save, and sits amber when storage is nearly full.</dd>' +
@@ -972,6 +975,7 @@
       { label: 'Key Click', check: 'sound', act: function () { setVolume(0); } },
       SEP,
       { label: 'Settings…', accel: 'Ctrl+,', act: openSettings },
+      { label: 'Start Screensaver', act: function () { machine.startSaver(); } },
       { label: 'Standby', act: function () { setStandby(true); } }
     ]},
     { id: 'help', label: 'Help', key: 'h', items: [
@@ -1251,6 +1255,8 @@
   function boot() {
     ui.buildMenus(MENUS);
     lcd.appendChild(modalLayer);
+
+    if (prefs.bootScreen) machine.playBoot(function () { editor.focus(); });
 
     var purged = purgeTrash();
 

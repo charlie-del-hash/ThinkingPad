@@ -36,6 +36,7 @@
     wireButtons();
     wireTrackPoint();
     wireKeyMirror();
+    wireIdle();
     window.addEventListener('resize', scheduleFit);
   }
 
@@ -117,6 +118,7 @@
     desk.classList.toggle('night', !!p.night);
     if (batteryRepaint) batteryRepaint();
     if (p.deck) buildKeyboardOnce();
+    resetIdle();
     fit();
   }
 
@@ -381,6 +383,177 @@
     window.addEventListener('blur', function () { TPKeyboard.releaseAll(); });
   }
 
+  /* ---------------------------------------------------------
+     power-on self test
+
+     What these machines did before they would let you type: the logo,
+     the memory counted out loud, and a line about the setup utility
+     nobody ever pressed in time. Any key skips it.
+     --------------------------------------------------------- */
+  var MEMORY_KB = 262144;                       /* 256 MB, and generous for 2001 */
+  var postEl = null;
+
+  function playBoot(done) {
+    if (postEl) return;
+    var lcd = document.querySelector('#lcd');
+    postEl = document.createElement('div');
+    postEl.className = 'post';
+    postEl.innerHTML =
+      '<div class="post-ibm">IBM</div>' +
+      '<div class="post-mem"></div>' +
+      '<div class="post-foot">' +
+        '<span class="post-tp">ThinkPad</span>' +
+        '<span class="post-hint">Press F1 for IBM BIOS Setup Utility</span>' +
+      '</div>';
+    lcd.appendChild(postEl);
+
+    var mem = postEl.querySelector('.post-mem');
+    var foot = postEl.querySelector('.post-foot');
+    var timers = [];
+    var counter = null;
+    var finished = false;
+
+    function stamp(kb, ok) {
+      mem.textContent = 'Memory Test : ' + String(kb) + ' KB' + (ok ? ' OK' : '');
+    }
+
+    function finish() {
+      if (finished) return;
+      finished = true;
+      timers.forEach(clearTimeout);
+      if (counter) clearInterval(counter);
+      window.removeEventListener('keydown', skip, true);
+      window.removeEventListener('pointerdown', skip, true);
+      postEl.classList.add('done');
+      setTimeout(function () {
+        if (postEl && postEl.parentNode) postEl.parentNode.removeChild(postEl);
+        postEl = null;
+        if (done) done();
+      }, 320);
+    }
+    function skip(e) {
+      if (e.type === 'keydown') { e.preventDefault(); e.stopPropagation(); }
+      finish();
+    }
+    window.addEventListener('keydown', skip, true);
+    window.addEventListener('pointerdown', skip, true);
+
+    timers.push(setTimeout(function () {
+      var kb = 0;
+      var step = MEMORY_KB / 22;
+      counter = setInterval(function () {
+        kb = Math.min(MEMORY_KB, kb + step);
+        stamp(Math.round(kb / 1024) * 1024, false);
+        if (kb >= MEMORY_KB) {
+          clearInterval(counter);
+          counter = null;
+          stamp(MEMORY_KB, true);
+          Sound.beep();                          /* one beep: it is happy */
+        }
+      }, 38);
+    }, 620));
+
+    timers.push(setTimeout(function () { foot.classList.add('show'); }, 1600));
+    timers.push(setTimeout(finish, 2500));
+  }
+
+  /* ---------------------------------------------------------
+     screensaver — a starfield, because it was always a starfield
+     --------------------------------------------------------- */
+  var saverEl = null, saverRaf = null, saverTimer = null, stars = [];
+
+  function startSaver() {
+    if (saverEl || isAsleep()) return;
+    var lcd = document.querySelector('#lcd');
+    saverEl = document.createElement('div');
+    saverEl.className = 'saver';
+    var canvas = document.createElement('canvas');
+    saverEl.appendChild(canvas);
+    lcd.appendChild(saverEl);
+
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w = lcd.clientWidth, h = lcd.clientHeight;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = w + 'px';
+    canvas.style.height = h + 'px';
+    var ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+
+    stars = [];
+    for (var i = 0; i < 260; i++) stars.push(newStar(w, h, true));
+
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    draw(ctx, w, h, still ? 0 : 1);
+    if (!still) {
+      var frame = function () {
+        draw(ctx, w, h, 1);
+        saverRaf = requestAnimationFrame(frame);
+      };
+      saverRaf = requestAnimationFrame(frame);
+    }
+  }
+
+  function newStar(w, h, spread) {
+    return {
+      x: (Math.random() - 0.5) * w,
+      y: (Math.random() - 0.5) * h,
+      z: spread ? Math.random() * w : w
+    };
+  }
+
+  function draw(ctx, w, h, speed) {
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, w, h);
+    var cx = w / 2, cy = h / 2;
+    for (var i = 0; i < stars.length; i++) {
+      var s = stars[i];
+      s.z -= speed * 2.6;
+      if (s.z <= 1) stars[i] = s = newStar(w, h, false);
+      var k = 128 / s.z;
+      var x = cx + s.x * k;
+      var y = cy + s.y * k;
+      if (x < 0 || x >= w || y < 0 || y >= h) { stars[i] = newStar(w, h, false); continue; }
+      var depth = 1 - s.z / w;
+      var size = Math.max(1, depth * 2.6);
+      ctx.fillStyle = 'rgba(255,255,255,' + (0.25 + depth * 0.75).toFixed(2) + ')';
+      ctx.fillRect(x, y, size, size);
+    }
+  }
+
+  function stopSaver() {
+    if (!saverEl) return;
+    if (saverRaf) cancelAnimationFrame(saverRaf);
+    saverRaf = null;
+    if (saverEl.parentNode) saverEl.parentNode.removeChild(saverEl);
+    saverEl = null;
+    resetIdle();
+  }
+
+  function saverIsUp() { return !!saverEl; }
+
+  function resetIdle() {
+    if (saverTimer) clearTimeout(saverTimer);
+    saverTimer = null;
+    var minutes = Number(prefs().screensaver) || 0;
+    if (!minutes) return;
+    saverTimer = setTimeout(startSaver, minutes * 60000);
+  }
+
+  function wireIdle() {
+    ['keydown', 'pointerdown', 'pointermove', 'wheel'].forEach(function (type) {
+      window.addEventListener(type, function (e) {
+        if (saverEl) {
+          /* the keystroke that wakes it should not also land in the note */
+          if (e.type === 'keydown') { e.preventDefault(); e.stopPropagation(); }
+          stopSaver();
+          return;
+        }
+        resetIdle();
+      }, true);
+    });
+  }
+
   TP.machine = {
     init: init,
     apply: apply,
@@ -394,6 +567,11 @@
     toggleThinkLight: toggleThinkLight,
     setVolume: setVolume,
     watchBattery: watchBattery,
-    buildKeyboard: buildKeyboardOnce
+    buildKeyboard: buildKeyboardOnce,
+    playBoot: playBoot,
+    startSaver: startSaver,
+    stopSaver: stopSaver,
+    saverIsUp: saverIsUp,
+    resetIdle: resetIdle
   };
 })(window);
