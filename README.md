@@ -176,7 +176,10 @@ Losing notes is the only unforgivable bug in a notepad, so:
 - **`#reset`** on the end of the URL starts with standard settings, for when a
   setting makes the app unusable. It does not touch your notes.
 - **Settings > Data > Factory reset** is the other direction: settings *and*
-  notes back to the day it arrived, so you get the machine as it ships.
+  notes back to the day it arrived, so you get the machine as it ships. It
+  asks first. **`#factory`** on the end of the URL opens the same question,
+  including when the page is already open — pasting a hash does not reload
+  anything, so that case is handled on `hashchange` too.
 
 ## Developing
 
@@ -207,7 +210,8 @@ js/keyboard.js      the seven-row keyboard — builds it, mirrors real keystroke
 js/settings.js      the settings spec, its form, and migration of older preferences
 js/app.js           the notes themselves, and what the commands do
 build.js            folds all of the above into dist/thinkpad-notes.html
-tests/              a static server, a browser, and seven suites
+tests/              a static server, a browser, and eight suites — the last
+                    one drives the built file over file://, downloads and all
 ```
 
 Load order matters and is fixed in `index.html`: `store`, `ui`, `settings`,

@@ -165,6 +165,23 @@ module.exports = {
       return keys === 1;
     }), 'and no stray note keys in storage');
 
+    /* ---------- #factory asks before it wipes ---------- */
+    page = await t.open();
+    await page.click('#editor');
+    await page.keyboard.press('Control+A');
+    await page.keyboard.type('Still here for now');
+    await page.waitForTimeout(600);
+    await page.goto(t.origin + '/index.html?from=test#factory');
+    await page.waitForTimeout(600);
+    t.ok(await page.isVisible('.dlg'), '#factory offers the wipe rather than doing it');
+    t.ok(/day it arrived/.test(await page.textContent('.dlg-body')), 'and says what it will take');
+    t.ok((await t.notes(page)).notes.some((n) => /Still here for now/.test(n.body)),
+      'nothing is gone while the question is on screen');
+    await page.click('.dlg-foot .btn:has-text("Cancel")');
+    await page.waitForTimeout(300);
+    t.ok((await t.notes(page)).notes.some((n) => /Still here for now/.test(n.body)),
+      'and Cancel leaves it all alone');
+
     /* ---------- notes saved by the old single-blob version ---------- */
     page = await t.open();
     await page.evaluate(() => {

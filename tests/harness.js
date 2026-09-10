@@ -76,7 +76,8 @@ function makeContext(browser, origin, results) {
       );
       const page = await bctx.newPage();
       ctx.watch(page);
-      await page.goto(origin + (opts.path || '/index.html'));
+      page.appUrl = opts.url || (origin + (opts.path || '/index.html'));
+      await page.goto(page.appUrl);
       await page.waitForTimeout(opts.settle || 400);
       contexts.add(bctx);
       page.browserContext = bctx;

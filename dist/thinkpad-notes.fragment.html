@@ -3288,12 +3288,32 @@ body.no-case .lcd{border-radius:0}
      storage — the shape of it lives in store.js
      --------------------------------------------------------- */
 
-  /* thinkpad-notes.html#reset starts with standard settings, for when a
-     choice in here makes the app unusable. Notes are left alone. */
-  if (window.location.hash === '#reset') {
-    store.clearPrefs();
-    try { window.history.replaceState(null, '', window.location.pathname); } catch (e) { /* fine */ }
+  /* Two escape hatches on the end of the URL. #reset starts with standard
+     settings, for when a choice in here makes the app unusable — notes are
+     left alone. #factory offers the full wipe, and asks first, because a
+     link that quietly erased your notes would be a trap. */
+  var askFactory = window.location.hash === '#factory';
+  if (window.location.hash === '#reset') store.clearPrefs();
+  if (askFactory || window.location.hash === '#reset') dropHash();
+
+  function dropHash() {
+    try { window.history.replaceState(null, '', window.location.pathname); }
+    catch (e) { /* an old browser, or a file:// path it will not rewrite */ }
   }
+
+  /* Pasting one of those onto a page that is already open only changes the
+     hash — the browser does not reload — so handle it live as well. */
+  window.addEventListener('hashchange', function () {
+    var hash = window.location.hash;
+    if (hash === '#factory') {
+      dropHash();
+      factoryReset();
+    } else if (hash === '#reset') {
+      store.clearPrefs();
+      dropHash();
+      window.location.reload();
+    }
+  });
 
   var prefs = TPSettings.migrate(store.loadPrefs());
   var db = store.load();
@@ -4448,6 +4468,7 @@ body.no-case .lcd{border-radius:0}
       editor.setSelectionRange(c, c);
     }
     editor.focus();
+    if (askFactory) factoryReset();
     machine.watchBattery();
     checkQuota();
     setMsg('Ready');
