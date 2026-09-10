@@ -37,7 +37,7 @@
     wireTrackPoint();
     wireKeyMirror();
     wireIdle();
-    window.addEventListener('resize', scheduleFit);
+    window.addEventListener('resize', onResize);
   }
 
   /* ---------------------------------------------------------
@@ -97,6 +97,11 @@
     };
     requestAnimationFrame(run);
     setTimeout(run, 150);
+  }
+
+  function onResize() {
+    scheduleFit();
+    resizeSaver();
   }
 
   /* ---------------------------------------------------------
@@ -461,17 +466,11 @@
   /* ---------------------------------------------------------
      screensaver — a starfield, because it was always a starfield
      --------------------------------------------------------- */
-  var saverEl = null, saverRaf = null, saverTimer = null, stars = [];
+  var saverEl = null, saverRaf = null, saverTimer = null, saverView = null, stars = [];
 
-  function startSaver() {
-    if (saverEl || isAsleep()) return;
+  function sizeSaver() {
     var lcd = document.querySelector('#lcd');
-    saverEl = document.createElement('div');
-    saverEl.className = 'saver';
-    var canvas = document.createElement('canvas');
-    saverEl.appendChild(canvas);
-    lcd.appendChild(saverEl);
-
+    var canvas = saverEl.querySelector('canvas');
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = lcd.clientWidth, h = lcd.clientHeight;
     canvas.width = w * dpr;
@@ -480,19 +479,40 @@
     canvas.style.height = h + 'px';
     var ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
+    return { ctx: ctx, w: w, h: h };
+  }
 
+  function startSaver() {
+    if (saverEl || isAsleep() || postEl) return;
+    var lcd = document.querySelector('#lcd');
+    saverEl = document.createElement('div');
+    saverEl.className = 'saver';
+    saverEl.appendChild(document.createElement('canvas'));
+    lcd.appendChild(saverEl);
+
+    var view = sizeSaver();
     stars = [];
-    for (var i = 0; i < 260; i++) stars.push(newStar(w, h, true));
+    for (var i = 0; i < 260; i++) stars.push(newStar(view.w, view.h, true));
 
     var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    draw(ctx, w, h, still ? 0 : 1);
-    if (!still) {
-      var frame = function () {
-        draw(ctx, w, h, 1);
-        saverRaf = requestAnimationFrame(frame);
-      };
+    draw(view.ctx, view.w, view.h, still ? 0 : 1);
+    if (still) return;
+
+    var frame = function () {
+      if (!saverEl) return;
+      var v = saverView || view;
+      draw(v.ctx, v.w, v.h, 1);
       saverRaf = requestAnimationFrame(frame);
-    }
+    };
+    saverView = view;
+    saverRaf = requestAnimationFrame(frame);
+  }
+
+  /* a window resized while the stars are up would otherwise leave a
+     canvas the wrong size for the panel */
+  function resizeSaver() {
+    if (!saverEl) return;
+    saverView = sizeSaver();
   }
 
   function newStar(w, h, spread) {
@@ -528,6 +548,7 @@
     saverRaf = null;
     if (saverEl.parentNode) saverEl.parentNode.removeChild(saverEl);
     saverEl = null;
+    saverView = null;
     resetIdle();
   }
 

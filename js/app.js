@@ -548,6 +548,7 @@
     renderTitle();
     updateCounts();
     updatePos();
+    if (find.term) renderFind();     /* the text may have changed under us */
   }
 
   /* ---------------------------------------------------------
@@ -555,6 +556,7 @@
      --------------------------------------------------------- */
   function applyPrefs() {
     /* the screen */
+    ensurePlex();
     lcd.dataset.theme = prefs.theme;
     body.style.setProperty('--ui-font', TPSettings.UI_FONTS[prefs.uiFont] || TPSettings.UI_FONTS.tahoma);
     body.style.setProperty('--mono-font', TPSettings.MONO_FONTS[prefs.monoFont] || TPSettings.MONO_FONTS.courier);
@@ -564,6 +566,7 @@
     body.classList.toggle('no-status', !prefs.statusbar);
     editor.setAttribute('wrap', prefs.wrap ? 'soft' : 'off');
     editor.style.tabSize = String(prefs.tabSize);
+    underlay.style.tabSize = String(prefs.tabSize);
     editor.spellcheck = !!prefs.spellcheck;
 
     /* the notes */
@@ -578,6 +581,23 @@
     savePrefs();
     machine.apply();
     if (find.term) renderFind(); else syncUnderlay();
+  }
+
+  /* IBM Plex is the only thing here that comes from off this machine, and
+     the period faces are the default — so fetch it only when it is actually
+     asked for. As a <link> in the head it blocks the parser, which means a
+     network that swallows requests to fonts.googleapis.com rather than
+     refusing them leaves you looking at a dead grey panel. */
+  var plexLink = null;
+  function ensurePlex() {
+    if (plexLink) return;
+    if (prefs.uiFont !== 'plex' && prefs.monoFont !== 'plex') return;
+    plexLink = document.createElement('link');
+    plexLink.rel = 'stylesheet';
+    plexLink.href = 'https://fonts.googleapis.com/css2' +
+      '?family=IBM+Plex+Mono:wght@400;500;600' +
+      '&family=IBM+Plex+Sans:wght@400;500;600&display=swap';
+    document.head.appendChild(plexLink);
   }
 
   function applyPreset(name) {
@@ -749,7 +769,8 @@
       restore: function () { pickFile('json'); },
       reset: resetSettings,
       erase: eraseAllNotes,
-      trash: emptyTrash
+      trash: emptyTrash,
+      factory: factoryReset
     };
     var form = TPSettings.buildForm(prefs, function (key, value, item) {
       prefs[key] = value;
@@ -813,6 +834,22 @@
             applyPrefs();
             renderAll();
             setMsg('Restored ' + db.notes.length + ' notes');
+      }
+    });
+  }
+
+  function factoryReset() {
+    confirmDialog({
+      title: 'Factory reset',
+      bodyHTML: '<p>Put this machine back to the day it arrived?</p>' +
+                '<p class="hint">Every setting goes back to standard and <b></b> note(s) ' +
+                'are erased, trash included. Back up first if you want any of it.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(liveNotes().length); },
+      confirmLabel: 'Factory reset',
+      act: function () {
+        store.eraseNotes(db);
+        store.clearPrefs();
+        window.location.reload();
       }
     });
   }

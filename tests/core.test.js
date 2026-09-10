@@ -37,8 +37,12 @@ module.exports = {
     await page.fill('#search', '');
     await page.waitForTimeout(250);
 
-    /* typeface */
+    /* typeface — and nothing reaches off this machine unless Plex is asked for */
+    t.eq(await page.$$eval('link[href*="fonts.googleapis"]', (els) => els.length), 0,
+      'nothing is fetched from off the machine by default');
     await page.click('#stFont');
+    t.eq(await page.$$eval('link[href*="fonts.googleapis"]', (els) => els.length), 1,
+      'and IBM Plex is fetched only once you ask for it');
     t.ok(/IBM Plex Mono/.test(await page.evaluate(
       () => getComputedStyle(document.querySelector('#editor')).fontFamily)),
       'the status bar switches the note face to IBM Plex');

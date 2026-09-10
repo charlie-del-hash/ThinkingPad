@@ -135,6 +135,36 @@ module.exports = {
       'and tidies the hash away');
     t.ok((await t.notes(page)).notes.length > 0, 'without touching the notes');
 
+    /* ---------- back to the day it arrived ---------- */
+    page = await t.open();
+    await page.click('#editor');
+    await page.keyboard.press('Control+A');
+    await page.keyboard.type('Something I will not miss');
+    await page.waitForTimeout(600);
+    await page.keyboard.press('Control+,');
+    await page.check('#set-deck');                 /* something visibly non-standard */
+    await page.click('.settings .dlg-tab[data-tab="data"]');
+    await page.click('.set-pane[data-tab="data"] button:has-text("Factory reset")');
+    await page.waitForTimeout(200);
+    await page.click('.dlg-foot .btn');
+    await page.waitForTimeout(700);
+
+    t.ok(await page.evaluate(() => document.body.classList.contains('no-keyboard')),
+      'a factory reset puts the settings back to standard');
+    t.ok(await page.evaluate(() => localStorage.getItem('thinkpad.prefs.v1') === null ||
+      !JSON.parse(localStorage.getItem('thinkpad.prefs.v1')).deck),
+      'with nothing left of the old preferences');
+    t.ok(/plain text notepad/.test(await page.inputValue('#editor')),
+      'and hands back the note it shipped with');
+    t.eq((await t.notes(page)).notes.length, 1, 'with nothing else left behind');
+    t.ok(await page.evaluate(() => {
+      let keys = 0;
+      for (let i = 0; i < localStorage.length; i++) {
+        if (localStorage.key(i).indexOf('thinkpad.note.') === 0) keys++;
+      }
+      return keys === 1;
+    }), 'and no stray note keys in storage');
+
     /* ---------- notes saved by the old single-blob version ---------- */
     page = await t.open();
     await page.evaluate(() => {

@@ -63,7 +63,7 @@ change it.
 | **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, wear and tear, power-on self test, screensaver delay, ThinkLight, screen glare, LCD grain, key click and its volume |
 | **Screen** | Colour scheme (classic grey / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
 | **Notes** | Note list on or off, list on the left or right, list width, sort by last edited / created / title, date format, and whether opening the app resumes your last note or starts a blank one |
-| **Data** | Back up everything to `.json`, restore from a backup, empty the trash, reset every setting, erase all notes — with a live count of notes, words, storage used and what's in the trash |
+| **Data** | Back up everything to `.json`, restore from a backup, empty the trash, reset every setting, erase all notes, or factory reset the lot — with a live count of notes, words, storage used and what's in the trash |
 
 Turning the machine off entirely (**Machine > Show the machine**) leaves the
 notepad alone in the window, which is the mode to use when you actually have
@@ -77,8 +77,14 @@ to get work done.
 | **IBM Plex** | IBM Plex Sans | IBM Plex Mono | Gloriously anachronistic: IBM didn't draw Plex until 2017 |
 
 Switch in **Format**, or click the typeface name in the status bar. The choice
-is remembered. Plex is pulled from Google Fonts when you're online and falls
-back to the period stack when you aren't, so the app works offline either way.
+is remembered.
+
+The period faces are already on your machine, so **nothing is fetched from
+anywhere by default** — the stylesheet for Plex is only requested the moment
+you choose it, and falls back to the period stack if it can't be reached. It
+is not a `<link>` in the head, deliberately: a network that swallows requests
+to `fonts.googleapis.com` rather than refusing them would block the parser and
+leave you looking at a dead grey panel.
 
 Either face can be picked apart in **Settings > Screen** — Verdana, MS Sans
 Serif or a system stack for the chrome; Lucida Console, Andale Mono, Consolas
@@ -169,6 +175,8 @@ Losing notes is the only unforgivable bug in a notepad, so:
   settings, and a button that dumps your raw notes as text to copy out.
 - **`#reset`** on the end of the URL starts with standard settings, for when a
   setting makes the app unusable. It does not touch your notes.
+- **Settings > Data > Factory reset** is the other direction: settings *and*
+  notes back to the day it arrived, so you get the machine as it ships.
 
 ## Developing
 

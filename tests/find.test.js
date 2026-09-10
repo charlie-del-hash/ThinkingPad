@@ -84,5 +84,42 @@ module.exports = {
     await page.fill('#search', 'zzzz');
     await page.waitForTimeout(300);
     t.eq(await page.textContent('#findCount'), 'none', 'a term with no matches says none');
+
+    /* ---------- the highlight has to be readable under every scheme ---------- */
+    await page.fill('#search', 'printer');
+    await page.waitForTimeout(300);
+    for (const theme of ['classic', 'paper', 'midnight', 'amber', 'green']) {
+      const worst = await page.evaluate((name) => {
+        document.querySelector('#lcd').dataset.theme = name;
+        const ink = getComputedStyle(document.querySelector('#editor')).color;
+        const marks = ['mark', 'mark.current'].map((sel) =>
+          getComputedStyle(document.querySelector('.editor-underlay ' + sel)).backgroundColor);
+        const parse = (s) => s.match(/\d+/g).slice(0, 3).map(Number);
+        const lum = (rgb) => {
+          const c = rgb.map((v) => v / 255)
+            .map((v) => (v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4)));
+          return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+        };
+        const a = lum(parse(ink));
+        return Math.min.apply(null, marks.map((bg) => {
+          const b = lum(parse(bg));
+          return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+        }));
+      }, theme);
+      t.ok(worst >= 4.5,
+        theme + ': text stays readable on a highlight (' + worst.toFixed(1) + ':1)');
+    }
+    await page.evaluate(() => { document.querySelector('#lcd').dataset.theme = 'classic'; });
+
+    /* ---------- and line up when the tab width is not eight ---------- */
+    await page.keyboard.press('Control+,');
+    await page.click('.settings .dlg-tab[data-tab="screen"]');
+    await page.selectOption('#set-tabSize', '2');
+    await page.click('.dlg-foot .btn');
+    await page.waitForTimeout(200);
+    t.eq(await page.evaluate(
+      () => getComputedStyle(document.querySelector('.editor-underlay')).tabSize),
+      await page.evaluate(() => getComputedStyle(document.querySelector('#editor')).tabSize),
+      'the highlight layer uses the same tab stops as the text');
   }
 };

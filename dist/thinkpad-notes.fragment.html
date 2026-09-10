@@ -1,8 +1,5 @@
-<!-- ThinkPad Notes — built 2026-09-08 by build.js. Edit the sources, not this file. -->
+<!-- ThinkPad Notes — built 2026-09-10 by build.js. Edit the sources, not this file. -->
 <title>ThinkPad Notes</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
 <style>
 /* css/chassis.css */
 /* ============================================================
@@ -1206,16 +1203,19 @@ body[data-cap="eraser"] .trackpoint::after{
   --face:#2b2f36;--face-lt:#3a3f48;--hi:rgba(255,255,255,.16);--sh:#171a1f;--dk:#0b0d10;
   --ink:#ccd2da;--navy:#1d3f73;--navy-lt:#4a7ec0;--paper:#12151a;--paper-ink:#c9d1da;
   --flash:#2f3a4a;--flash-ink:#dfe6ee;
+  --find-hit:#3d4a1c;--find-now:#71531a;
 }
 .lcd[data-theme="amber"]{
   --face:#2a2013;--face-lt:#3a2d1b;--hi:rgba(255,190,90,.22);--sh:#180f06;--dk:#0d0803;
   --ink:#ffc97a;--navy:#7a4a00;--navy-lt:#c98a2a;--paper:#1d1407;--paper-ink:#ffb545;
   --flash:#4a3208;--flash-ink:#ffd79a;
+  --find-hit:#4a3205;--find-now:#704800;
 }
 .lcd[data-theme="green"]{
   --face:#16221a;--face-lt:#203126;--hi:rgba(120,255,160,.2);--sh:#0a130d;--dk:#050a07;
   --ink:#9fffbc;--navy:#12401f;--navy-lt:#2f8f4c;--paper:#08120b;--paper-ink:#65ff92;
   --flash:#17361f;--flash-ink:#b6ffcd;
+  --find-hit:#17401f;--find-now:#2a6f38;
 }
 .lcd[data-theme="midnight"] .note-item,
 .lcd[data-theme="amber"] .note-item,
@@ -2323,7 +2323,8 @@ body.no-case .lcd{border-radius:0}
       ['Restore from a backup…', 'restore', 'Replaces everything currently on this machine.'],
       ['Empty the trash…', 'trash', 'Deleted notes are kept for 30 days before they go on their own.'],
       ['Reset settings', 'reset', 'Puts every switch on this page back to standard.'],
-      ['Erase all notes…', 'erase', 'There is no wastebasket. Back up first.']
+      ['Erase all notes…', 'erase', 'There is no wastebasket. Back up first.'],
+      ['Factory reset…', 'factory', 'Settings and notes both, back to the day it arrived.']
     ].forEach(function (spec) {
       var row = document.createElement('div');
       row.className = 'set-row is-action';
@@ -2561,7 +2562,7 @@ body.no-case .lcd{border-radius:0}
     wireTrackPoint();
     wireKeyMirror();
     wireIdle();
-    window.addEventListener('resize', scheduleFit);
+    window.addEventListener('resize', onResize);
   }
 
   /* ---------------------------------------------------------
@@ -2621,6 +2622,11 @@ body.no-case .lcd{border-radius:0}
     };
     requestAnimationFrame(run);
     setTimeout(run, 150);
+  }
+
+  function onResize() {
+    scheduleFit();
+    resizeSaver();
   }
 
   /* ---------------------------------------------------------
@@ -2985,17 +2991,11 @@ body.no-case .lcd{border-radius:0}
   /* ---------------------------------------------------------
      screensaver — a starfield, because it was always a starfield
      --------------------------------------------------------- */
-  var saverEl = null, saverRaf = null, saverTimer = null, stars = [];
+  var saverEl = null, saverRaf = null, saverTimer = null, saverView = null, stars = [];
 
-  function startSaver() {
-    if (saverEl || isAsleep()) return;
+  function sizeSaver() {
     var lcd = document.querySelector('#lcd');
-    saverEl = document.createElement('div');
-    saverEl.className = 'saver';
-    var canvas = document.createElement('canvas');
-    saverEl.appendChild(canvas);
-    lcd.appendChild(saverEl);
-
+    var canvas = saverEl.querySelector('canvas');
     var dpr = Math.min(window.devicePixelRatio || 1, 2);
     var w = lcd.clientWidth, h = lcd.clientHeight;
     canvas.width = w * dpr;
@@ -3004,19 +3004,40 @@ body.no-case .lcd{border-radius:0}
     canvas.style.height = h + 'px';
     var ctx = canvas.getContext('2d');
     ctx.scale(dpr, dpr);
+    return { ctx: ctx, w: w, h: h };
+  }
 
+  function startSaver() {
+    if (saverEl || isAsleep() || postEl) return;
+    var lcd = document.querySelector('#lcd');
+    saverEl = document.createElement('div');
+    saverEl.className = 'saver';
+    saverEl.appendChild(document.createElement('canvas'));
+    lcd.appendChild(saverEl);
+
+    var view = sizeSaver();
     stars = [];
-    for (var i = 0; i < 260; i++) stars.push(newStar(w, h, true));
+    for (var i = 0; i < 260; i++) stars.push(newStar(view.w, view.h, true));
 
     var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    draw(ctx, w, h, still ? 0 : 1);
-    if (!still) {
-      var frame = function () {
-        draw(ctx, w, h, 1);
-        saverRaf = requestAnimationFrame(frame);
-      };
+    draw(view.ctx, view.w, view.h, still ? 0 : 1);
+    if (still) return;
+
+    var frame = function () {
+      if (!saverEl) return;
+      var v = saverView || view;
+      draw(v.ctx, v.w, v.h, 1);
       saverRaf = requestAnimationFrame(frame);
-    }
+    };
+    saverView = view;
+    saverRaf = requestAnimationFrame(frame);
+  }
+
+  /* a window resized while the stars are up would otherwise leave a
+     canvas the wrong size for the panel */
+  function resizeSaver() {
+    if (!saverEl) return;
+    saverView = sizeSaver();
   }
 
   function newStar(w, h, spread) {
@@ -3052,6 +3073,7 @@ body.no-case .lcd{border-radius:0}
     saverRaf = null;
     if (saverEl.parentNode) saverEl.parentNode.removeChild(saverEl);
     saverEl = null;
+    saverView = null;
     resetIdle();
   }
 
@@ -3653,6 +3675,7 @@ body.no-case .lcd{border-radius:0}
     renderTitle();
     updateCounts();
     updatePos();
+    if (find.term) renderFind();     /* the text may have changed under us */
   }
 
   /* ---------------------------------------------------------
@@ -3660,6 +3683,7 @@ body.no-case .lcd{border-radius:0}
      --------------------------------------------------------- */
   function applyPrefs() {
     /* the screen */
+    ensurePlex();
     lcd.dataset.theme = prefs.theme;
     body.style.setProperty('--ui-font', TPSettings.UI_FONTS[prefs.uiFont] || TPSettings.UI_FONTS.tahoma);
     body.style.setProperty('--mono-font', TPSettings.MONO_FONTS[prefs.monoFont] || TPSettings.MONO_FONTS.courier);
@@ -3669,6 +3693,7 @@ body.no-case .lcd{border-radius:0}
     body.classList.toggle('no-status', !prefs.statusbar);
     editor.setAttribute('wrap', prefs.wrap ? 'soft' : 'off');
     editor.style.tabSize = String(prefs.tabSize);
+    underlay.style.tabSize = String(prefs.tabSize);
     editor.spellcheck = !!prefs.spellcheck;
 
     /* the notes */
@@ -3683,6 +3708,23 @@ body.no-case .lcd{border-radius:0}
     savePrefs();
     machine.apply();
     if (find.term) renderFind(); else syncUnderlay();
+  }
+
+  /* IBM Plex is the only thing here that comes from off this machine, and
+     the period faces are the default — so fetch it only when it is actually
+     asked for. As a <link> in the head it blocks the parser, which means a
+     network that swallows requests to fonts.googleapis.com rather than
+     refusing them leaves you looking at a dead grey panel. */
+  var plexLink = null;
+  function ensurePlex() {
+    if (plexLink) return;
+    if (prefs.uiFont !== 'plex' && prefs.monoFont !== 'plex') return;
+    plexLink = document.createElement('link');
+    plexLink.rel = 'stylesheet';
+    plexLink.href = 'https://fonts.googleapis.com/css2' +
+      '?family=IBM+Plex+Mono:wght@400;500;600' +
+      '&family=IBM+Plex+Sans:wght@400;500;600&display=swap';
+    document.head.appendChild(plexLink);
   }
 
   function applyPreset(name) {
@@ -3854,7 +3896,8 @@ body.no-case .lcd{border-radius:0}
       restore: function () { pickFile('json'); },
       reset: resetSettings,
       erase: eraseAllNotes,
-      trash: emptyTrash
+      trash: emptyTrash,
+      factory: factoryReset
     };
     var form = TPSettings.buildForm(prefs, function (key, value, item) {
       prefs[key] = value;
@@ -3918,6 +3961,22 @@ body.no-case .lcd{border-radius:0}
             applyPrefs();
             renderAll();
             setMsg('Restored ' + db.notes.length + ' notes');
+      }
+    });
+  }
+
+  function factoryReset() {
+    confirmDialog({
+      title: 'Factory reset',
+      bodyHTML: '<p>Put this machine back to the day it arrived?</p>' +
+                '<p class="hint">Every setting goes back to standard and <b></b> note(s) ' +
+                'are erased, trash included. Back up first if you want any of it.</p>',
+      onBuild: function (bodyEl) { $('b', bodyEl).textContent = String(liveNotes().length); },
+      confirmLabel: 'Factory reset',
+      act: function () {
+        store.eraseNotes(db);
+        store.clearPrefs();
+        window.location.reload();
       }
     });
   }

@@ -268,7 +268,8 @@
       ['Restore from a backup…', 'restore', 'Replaces everything currently on this machine.'],
       ['Empty the trash…', 'trash', 'Deleted notes are kept for 30 days before they go on their own.'],
       ['Reset settings', 'reset', 'Puts every switch on this page back to standard.'],
-      ['Erase all notes…', 'erase', 'There is no wastebasket. Back up first.']
+      ['Erase all notes…', 'erase', 'There is no wastebasket. Back up first.'],
+      ['Factory reset…', 'factory', 'Settings and notes both, back to the day it arrived.']
     ].forEach(function (spec) {
       var row = document.createElement('div');
       row.className = 'set-row is-action';

@@ -72,16 +72,19 @@ body[data-cap="eraser"] .trackpoint::after{
   --face:#2b2f36;--face-lt:#3a3f48;--hi:rgba(255,255,255,.16);--sh:#171a1f;--dk:#0b0d10;
   --ink:#ccd2da;--navy:#1d3f73;--navy-lt:#4a7ec0;--paper:#12151a;--paper-ink:#c9d1da;
   --flash:#2f3a4a;--flash-ink:#dfe6ee;
+  --find-hit:#3d4a1c;--find-now:#71531a;
 }
 .lcd[data-theme="amber"]{
   --face:#2a2013;--face-lt:#3a2d1b;--hi:rgba(255,190,90,.22);--sh:#180f06;--dk:#0d0803;
   --ink:#ffc97a;--navy:#7a4a00;--navy-lt:#c98a2a;--paper:#1d1407;--paper-ink:#ffb545;
   --flash:#4a3208;--flash-ink:#ffd79a;
+  --find-hit:#4a3205;--find-now:#704800;
 }
 .lcd[data-theme="green"]{
   --face:#16221a;--face-lt:#203126;--hi:rgba(120,255,160,.2);--sh:#0a130d;--dk:#050a07;
   --ink:#9fffbc;--navy:#12401f;--navy-lt:#2f8f4c;--paper:#08120b;--paper-ink:#65ff92;
   --flash:#17361f;--flash-ink:#b6ffcd;
+  --find-hit:#17401f;--find-now:#2a6f38;
 }
 .lcd[data-theme="midnight"] .note-item,
 .lcd[data-theme="amber"] .note-item,
