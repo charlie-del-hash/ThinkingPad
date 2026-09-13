@@ -9,7 +9,7 @@ name: Pages
 
 on:
   push:
-    branches: ["claude/thinkpad-notepad-app-k4013w"]
+    branches: ["main"]
   pull_request:
   workflow_dispatch:
 
