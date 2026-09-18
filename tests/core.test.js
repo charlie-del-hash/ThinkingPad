@@ -51,9 +51,12 @@ module.exports = {
       return p.preset === 'plex' && p.monoFont === 'plex' && p.uiFont === 'plex';
     }), 'the typeface choice persists');
     await page.click('#stFont');
-    t.ok(/Courier New/.test(await page.evaluate(
-      () => getComputedStyle(document.querySelector('#editor')).fontFamily)),
-      'and switches back to the period face');
+    /* the Plex stack lists Courier New as its own fallback, so testing for
+       Courier alone passes either way — the absence of Plex is the test */
+    const backToPeriod = await page.evaluate(
+      () => getComputedStyle(document.querySelector('#editor')).fontFamily);
+    t.ok(/Courier New/.test(backToPeriod) && backToPeriod.indexOf('Plex') < 0,
+      'and clicking again switches back to the period face (' + backToPeriod + ')');
 
     /* the keyboard mirrors real typing */
     await page.click('#editor');
@@ -66,6 +69,21 @@ module.exports = {
     const before = (await page.inputValue('#editor')).length;
     await page.click('.key[data-code="KeyZ"]');
     t.eq((await page.inputValue('#editor')).length, before + 1, 'clicking a cap types a character');
+    await page.keyboard.press('Backspace');
+
+    /* Caps has two sources and one light; typing on the real keyboard used
+       to wipe a Caps you had clicked on the deck */
+    await page.click('.key[data-code="CapsLock"]');
+    t.ok(await page.evaluate(() => document.querySelector('.led-cap').classList.contains('on')),
+      'clicking Caps on the deck lights the Caps light');
+    await page.click('#editor');
+    await page.keyboard.type('x');
+    t.ok(await page.evaluate(() => document.querySelector('.led-cap').classList.contains('on')),
+      'and typing on the real keyboard does not cancel it');
+    await page.click('.key[data-code="KeyQ"]');
+    t.ok(/Q$/.test(await page.inputValue('#editor')), 'so the deck still types in capitals');
+    await page.click('.key[data-code="CapsLock"]');
+    await page.keyboard.press('Backspace');
     await page.keyboard.press('Backspace');
 
     /* F5 the way Notepad always did */

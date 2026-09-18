@@ -1,4 +1,4 @@
-<!-- ThinkPad Notes — built by build.js from sources 2227a75bed38. Edit the sources, not this file. -->
+<!-- ThinkPad Notes — built by build.js from sources 0be6d5b74463. Edit the sources, not this file. -->
 <title>ThinkPad Notes</title>
 <style>
 /* css/chassis.css */
@@ -15,10 +15,8 @@
   --case-dk:#141518;
   --case-dkr:#0c0d0f;
   --case-lt:#292c32;
-  --case-edge:#3d424a;
   --hair:rgba(255,255,255,.075);
   --hair-lo:rgba(255,255,255,.04);
-  --shadow:rgba(0,0,0,.65);
 
   /* accents */
   --tp-red:#d4213c;
@@ -600,7 +598,7 @@ body.no-keyboard .keyboard{display:none}
 
 
 /* ---------- keyboard focus on the machine itself ---------- */
-.key:focus-visible,
+/* the caps refuse focus on purpose (keyboard.js), so they are not listed */
 .thinklight:focus-visible,
 .access-ibm:focus-visible,
 .hwb:focus-visible,
@@ -736,27 +734,14 @@ body.worn .trackpoint::after{
    ============================================================ */
 
 body{
-  /* PERIOD-CORRECT (default): what actually shipped on these machines */
+  /* The period faces, which is where everything starts. app.js overrides
+     these with whatever the settings say. */
   --ui-font:Tahoma,"MS Sans Serif","Microsoft Sans Serif",Verdana,Geneva,sans-serif;
   --mono-font:"Courier New","Lucida Console","Andale Mono",monospace;
   --ui-size:11px;
   --mono-size:13px;
   --mono-lh:1.45;
-  --typeface-name:"Courier New";
 }
-body.font-plex{
-  /* ANACHRONISTIC: IBM Plex, drawn in 2017, fifteen years too late */
-  --ui-font:"IBM Plex Sans",Tahoma,Verdana,sans-serif;
-  --mono-font:"IBM Plex Mono","Courier New",monospace;
-  --ui-size:11.5px;
-  --mono-size:13px;
-  --mono-lh:1.55;
-  --typeface-name:"IBM Plex Mono";
-}
-body.fs-s{--mono-size:11.5px}
-body.fs-m{--mono-size:13px}
-body.fs-l{--mono-size:15.5px}
-
 .lcd{
   /* classic desktop colours */
   --face:#d4d0c8;
@@ -867,7 +852,7 @@ body.alt-held .find label u,
   background:none;border:0;cursor:pointer;text-align:left;
   color:var(--ink);font:400 var(--ui-size)/1.3 var(--ui-font);
 }
-.mi:hover,.mi.focus{background:var(--navy);color:#fff}
+.mi:hover{background:var(--navy);color:#fff}
 .mi .lbl{flex:1;white-space:nowrap}
 .mi .accel{opacity:.75;font-size:calc(var(--ui-size) - .5px);white-space:nowrap}
 .mi u{text-underline-offset:1px}
@@ -881,7 +866,6 @@ body.alt-held .find label u,
   content:"";width:5px;height:5px;border:0;border-radius:50%;
   background:currentColor;transform:none;margin-top:-2px;left:8px;
 }
-.mi.disabled{color:var(--sh);pointer-events:none}
 .msep{height:0;margin:3px 2px;border-top:1px solid var(--sh);border-bottom:1px solid var(--hi)}
 
 /* ---------- workspace ---------- */
@@ -1078,11 +1062,6 @@ body.no-wrap .editor-underlay{white-space:pre;overflow-wrap:normal}
 
 /* ---------- misc ---------- */
 .hint{color:#5a5a5a}
-kbd{
-  font:400 calc(var(--ui-size) - .5px)/1.2 var(--mono-font);
-  background:var(--face-lt);padding:0 3px;
-  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--sh);
-}
 .dropzone{
   position:absolute;inset:0;z-index:55;display:none;
   place-items:center;background:rgba(10,36,106,.18);
@@ -1116,7 +1095,7 @@ kbd{
   outline:1px dotted var(--ink);
   outline-offset:-3px;
 }
-.mi:focus-visible,
+/* menu items never take focus — the arrow keys move a .focus class instead */
 .mi.focus{
   background:var(--navy);
   color:#fff;
@@ -1137,11 +1116,11 @@ kbd{
 
 /* ---------- case finishes ---------- */
 body[data-case="graphite"]{
-  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;--case-edge:#4d525b;
+  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;
   --key-text:#d6d9de;
 }
 body[data-case="titanium"]{
-  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;--case-edge:#b4b9c1;
+  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;
   --key-text:#23262b;
   --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
 }
@@ -1367,7 +1346,7 @@ body.no-case .lcd{border-radius:0}
       <div class="lid-latches" aria-hidden="true"><i></i><i></i></div>
       <div class="bezel">
         <div class="bezel-top">
-          <button type="button" class="thinklight" id="thinklightBtn" title="ThinkLight (Fn+PgUp)" aria-label="ThinkLight">
+          <button type="button" class="thinklight" id="thinklightBtn" title="ThinkLight — Alt+L here, Fn+PgUp on the real thing" aria-label="ThinkLight">
             <span class="bulb" aria-hidden="true"></span>
           </button>
         </div>
@@ -1433,7 +1412,7 @@ body.no-case .lcd{border-radius:0}
             </div>
             <div class="lcd-grain" aria-hidden="true"></div>
             <div class="lcd-glare" aria-hidden="true"></div>
-            <div class="lcd-dark" id="lcdDark" aria-hidden="true"></div>
+            <div class="lcd-dark" aria-hidden="true"></div>
           </div>
         </div>
 
@@ -1690,8 +1669,7 @@ body.no-case .lcd{border-radius:0}
     saveNote: saveNote, saveIndex: saveIndex, saveAll: saveAll,
     dropNote: dropNote, eraseNotes: eraseNotes,
     loadPrefs: loadPrefs, savePrefs: savePrefs, clearPrefs: clearPrefs,
-    bytes: bytes, dump: dump, classify: classify,
-    INDEX_KEY: INDEX_KEY, NOTE_PREFIX: NOTE_PREFIX, PREFS_KEY: PREFS_KEY, LEGACY_KEY: LEGACY_KEY
+    bytes: bytes, dump: dump, classify: classify
   };
 })(window);
 </script>
@@ -1758,7 +1736,7 @@ body.no-case .lcd{border-radius:0}
       b.addEventListener('click', o.action.act);
       cell.appendChild(document.createTextNode(' '));
       cell.appendChild(b);
-      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, o.expires || 30000);
+      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, 30000);
     }
     if (!o.quiet) {
       cell.classList.add('flash');
@@ -1849,7 +1827,7 @@ body.no-case .lcd{border-radius:0}
       onBuild: opts.onBuild,
       buttons: [
         { label: opts.confirmLabel || 'OK', primary: true, act: opts.act },
-        { label: opts.cancelLabel || 'Cancel' }
+        { label: 'Cancel' }
       ]
     });
   }
@@ -1966,7 +1944,7 @@ body.no-case .lcd{border-radius:0}
 
   function items() {
     if (!openMenu) return [];
-    return $$('.dropdown[data-menu="' + openMenu + '"] .mi:not(.disabled)', deps.menubar);
+    return $$('.dropdown[data-menu="' + openMenu + '"] .mi', deps.menubar);
   }
   function focusItem(mi) {
     $$('.mi.focus', deps.menubar).forEach(function (m) { m.classList.remove('focus'); });
@@ -2045,9 +2023,7 @@ body.no-case .lcd{border-radius:0}
     confirm: confirm,
     buildMenus: buildMenus,
     showMenu: showMenu,
-    closeMenu: closeMenu,
-    menuIsOpen: function () { return !!openMenu; },
-    dialogEl: function () { return openDialogEl; }
+    closeMenu: closeMenu
   };
 })(window);
 </script>
@@ -2362,7 +2338,7 @@ body.no-case .lcd{border-radius:0}
   }
 
   global.TPSettings = {
-    DEFAULTS: DEFAULTS, GROUPS: GROUPS, migrate: migrate, buildForm: buildForm,
+    migrate: migrate, buildForm: buildForm,
     UI_FONTS: UI_FONTS, MONO_FONTS: MONO_FONTS, MONO_NAMES: MONO_NAMES
   };
 })(window);
@@ -2370,7 +2346,7 @@ body.no-case .lcd{border-radius:0}
 <script>
 /* js/keyboard.js */
 /* ============================================================
-   keyboard.js — the seven-row ThinkPad keyboard
+   keyboard.js — the ThinkPad keyboard
    Builds the deck, mirrors real keystrokes, and lets you type
    by clicking the keys. Fn sits in the corner where it belongs.
    ============================================================ */
@@ -2379,7 +2355,7 @@ body.no-case .lcd{border-radius:0}
 
   function k(code, label, w, opts) {
     var o = opts || {};
-    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls, toggle: o.toggle };
+    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls };
   }
   function sp(w) { return { spacer: true, w: w }; }
 
@@ -2413,7 +2389,7 @@ body.no-case .lcd{border-radius:0}
       k('Backslash', '\\', 1.5, { sub: '|', ch: '\\' })
     ]},
     { keys: [
-      k('CapsLock', 'Caps', 1.75, { cls: 'wide-label', toggle: 'cap' }),
+      k('CapsLock', 'Caps', 1.75, { cls: 'wide-label' }),
       k('KeyA', 'A', 1, { ch: 'a' }), k('KeyS', 'S', 1, { ch: 's' }), k('KeyD', 'D', 1, { ch: 'd' }),
       k('KeyF', 'F', 1, { ch: 'f' }), k('KeyG', 'G', 1, { ch: 'g' }), k('KeyH', 'H', 1, { ch: 'h' }),
       k('KeyJ', 'J', 1, { ch: 'j' }), k('KeyK', 'K', 1, { ch: 'k' }), k('KeyL', 'L', 1, { ch: 'l' }),
@@ -2473,7 +2449,6 @@ body.no-case .lcd{border-radius:0}
           el.className = 'key' + (key.cls ? ' ' + key.cls : '');
           el.dataset.code = key.code;
           if (WEAR[key.code]) el.dataset.wear = WEAR[key.code];
-          if (key.ch !== undefined) el.dataset.ch = key.ch;
           if (key.sub) {
             el.classList.add('dual');
             el.innerHTML = '<span class="sub"></span><span class="main"></span>';
@@ -2510,14 +2485,8 @@ body.no-case .lcd{border-radius:0}
   function releaseAll() {
     Object.keys(byCode).forEach(function (c) { byCode[c].classList.remove('down'); });
   }
-  function tap(code, ms) {
-    press(code);
-    setTimeout(function () { release(code); }, ms || 90);
-  }
-
   global.TPKeyboard = {
-    build: build, press: press, release: release, releaseAll: releaseAll, tap: tap,
-    el: function (code) { return byCode[code]; }
+    build: build, press: press, release: release, releaseAll: releaseAll
   };
 })(window);
 </script>
@@ -2650,7 +2619,7 @@ body.no-case .lcd{border-radius:0}
     if (batteryRepaint) batteryRepaint();
     if (p.deck) buildKeyboardOnce();
     resetIdle();
-    fit();
+    scheduleFit();
   }
 
   /* ---------------------------------------------------------
@@ -2663,7 +2632,18 @@ body.no-case .lcd{border-radius:0}
     led.classList.add('blink');
   }
   function leds() {
-    return { pwr: ledPwr, bat: ledBat, slp: ledSlp, hdd: ledHdd, cap: ledCap, num: ledNum };
+    return { hdd: ledHdd };            /* the only light anything outside here drives */
+  }
+
+  /* Caps has two sources — the real key, and the cap you can click on the
+     deck — and one light to show them on. The light is the display; this is
+     the state, so a physical keystroke no longer wipes a clicked Caps. */
+  var physicalCaps = false, virtualCaps = false;
+  function capsOn() { return physicalCaps || virtualCaps; }
+  function paintCaps() { ledCap.classList.toggle('on', capsOn()); }
+  function toggleVirtualCaps() {
+    virtualCaps = !virtualCaps;
+    paintCaps();
   }
 
   /* The BAT light follows this laptop's actual battery where the browser
@@ -2903,7 +2883,8 @@ body.no-case .lcd{border-radius:0}
       TPKeyboard.press(e.code);
       if (!e.repeat) Sound.click(true);
       if (e.getModifierState) {
-        ledCap.classList.toggle('on', e.getModifierState('CapsLock'));
+        physicalCaps = e.getModifierState('CapsLock');
+        paintCaps();
         ledNum.classList.toggle('on', e.getModifierState('NumLock'));
       }
     });
@@ -3024,9 +3005,8 @@ body.no-case .lcd{border-radius:0}
     if (still) return;
 
     var frame = function () {
-      if (!saverEl) return;
-      var v = saverView || view;
-      draw(v.ctx, v.w, v.h, 1);
+      if (!saverEl) return;            /* stopSaver nulls this before anything else */
+      draw(saverView.ctx, saverView.w, saverView.h, 1);
       saverRaf = requestAnimationFrame(frame);
     };
     saverView = view;
@@ -3077,8 +3057,6 @@ body.no-case .lcd{border-radius:0}
     resetIdle();
   }
 
-  function saverIsUp() { return !!saverEl; }
-
   function resetIdle() {
     if (saverTimer) clearTimeout(saverTimer);
     saverTimer = null;
@@ -3105,7 +3083,6 @@ body.no-case .lcd{border-radius:0}
     init: init,
     apply: apply,
     fit: fit,
-    scheduleFit: scheduleFit,
     blink: blink,
     leds: leds,
     sound: Sound,
@@ -3114,12 +3091,10 @@ body.no-case .lcd{border-radius:0}
     toggleThinkLight: toggleThinkLight,
     setVolume: setVolume,
     watchBattery: watchBattery,
-    buildKeyboard: buildKeyboardOnce,
+    capsOn: capsOn,
+    toggleVirtualCaps: toggleVirtualCaps,
     playBoot: playBoot,
-    startSaver: startSaver,
-    stopSaver: stopSaver,
-    saverIsUp: saverIsUp,
-    resetIdle: resetIdle
+    startSaver: startSaver
   };
 })(window);
 </script>
@@ -3256,7 +3231,7 @@ body.no-case .lcd{border-radius:0}
   /* a cap on the deck was clicked: type it */
   function onKeyCap(key, e) {
     if (key.code === 'Fn') { toggleThinkLight(); return; }
-    if (key.code === 'CapsLock') { leds.cap.classList.toggle('on'); return; }
+    if (key.code === 'CapsLock') { machine.toggleVirtualCaps(); return; }
     if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
     if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
     if (key.code === 'Backspace') {
@@ -3270,7 +3245,7 @@ body.no-case .lcd{border-radius:0}
     if (key.ch !== undefined) {
       editor.focus();
       var ch = key.ch;
-      if (e.shiftKey || leds.cap.classList.contains('on')) {
+      if (e.shiftKey || machine.capsOn()) {
         ch = key.sub && e.shiftKey ? key.sub : ch.toUpperCase();
       }
       insertAtCaret(ch);
@@ -3318,9 +3293,23 @@ body.no-case .lcd{border-radius:0}
   var prefs = TPSettings.migrate(store.loadPrefs());
   var db = store.load();
 
-  function savePrefs() { store.savePrefs(prefs); }
+  /* Ticking a box writes at once — that is what you would expect. Dragging
+     a slider fires on every pixel, so that one write waits, the way the
+     splitter already held its own until you let go. */
+  var prefsTimer = null;
+  function savePrefs() {
+    if (prefsTimer) { clearTimeout(prefsTimer); prefsTimer = null; }
+    store.savePrefs(prefs);
+  }
+  function savePrefsSoon() {
+    if (prefsTimer) clearTimeout(prefsTimer);
+    prefsTimer = setTimeout(savePrefs, 150);
+  }
+  function flushPrefs() {
+    if (prefsTimer) savePrefs();
+  }
 
-  /* the whole set, for anything that adds, removes or reorders notes */
+  /* every note and the index: for anything that adds or removes one */
   function persistAll() { return store.saveAll(db); }
 
   /* swap the library wholesale, dropping keys nothing points at any more */
@@ -3451,22 +3440,22 @@ body.no-case .lcd{border-radius:0}
     return note;
   }
 
-  function selectNote(id, keepFocus) {
+  function selectNote(id) {
     if (id === db.activeId) return;
-    flushSave();
+    flushSave();                       /* writes the note being left, and the index */
     db.activeId = id;
+    find.index = -1;                   /* before renderAll, which redraws the matches */
+
     var note = active();
     editor.value = note ? note.body : '';
     renderAll();
     if (note && typeof note.caret === 'number') {
-      var c = Math.min(note.caret, editor.value.length);
-      editor.setSelectionRange(c, c);
+      var caret = Math.min(note.caret, editor.value.length);
+      editor.setSelectionRange(caret, caret);
     }
-    if (keepFocus !== false) editor.focus();
-    find.index = -1;
-    renderFind();
+    editor.focus();
     updatePos();
-    persistAll();
+    store.saveIndex(db);               /* only activeId moved; the notes are untouched */
   }
 
   function deleteNote() {
@@ -3639,12 +3628,13 @@ body.no-case .lcd{border-radius:0}
      rendering
      --------------------------------------------------------- */
   function renderList() {
+    var term = search.value.trim();
     var list = visibleNotes();
     listbox.textContent = '';
     if (!list.length) {
       var empty = document.createElement('div');
       empty.className = 'empty';
-      empty.textContent = search.value.trim() ? 'No notes match.' : 'No notes yet.';
+      empty.textContent = term ? 'No notes match.' : 'No notes yet.';
       listbox.appendChild(empty);
       return;
     }
@@ -3657,7 +3647,6 @@ body.no-case .lcd{border-radius:0}
       b.setAttribute('aria-selected', note.id === db.activeId ? 'true' : 'false');
 
       var t = document.createElement('span'); t.className = 'nt'; t.textContent = titleOf(note);
-      var term = search.value.trim();
       if (term) {
         var count = matchesIn(note.body, term).length;
         if (count) {
@@ -3701,7 +3690,7 @@ body.no-case .lcd{border-radius:0}
   /* ---------------------------------------------------------
      preferences applied to the machine
      --------------------------------------------------------- */
-  function applyPrefs() {
+  function applyPrefs(opts) {
     /* the screen */
     ensurePlex();
     lcd.dataset.theme = prefs.theme;
@@ -3725,7 +3714,8 @@ body.no-case .lcd{border-radius:0}
     stFont.title = prefs.preset === 'plex'
       ? 'IBM Plex Mono (2017) — click for the period-correct face'
       : 'Click to switch typeface — Settings for the rest';
-    savePrefs();
+    if (opts && opts.defer) savePrefsSoon();
+    else savePrefs();
     machine.apply();
     if (find.term) renderFind(); else syncUnderlay();
   }
@@ -3923,8 +3913,9 @@ body.no-case .lcd{border-radius:0}
       prefs[key] = value;
       if (key === 'preset') applyPreset(value);
       if (key === 'uiFont' || key === 'monoFont') prefs.preset = 'custom';
-      applyPrefs();
-      if (item && item.t !== 'range') form.refresh();
+      var dragging = !!item && item.t === 'range';
+      applyPrefs(dragging ? { defer: true } : null);
+      if (!dragging) form.refresh();
     }, actions);
 
     dialog({
@@ -3951,9 +3942,19 @@ body.no-case .lcd{border-radius:0}
   function restoreFrom(text) {
     var data;
     try { data = JSON.parse(text); } catch (e) { data = null; }
-    if (!data || !Array.isArray(data.notes)) {
+    if (!data || !Array.isArray(data.notes) ||
+        (data.app && data.app !== 'thinkpad-notes')) {
       machine.sound.beep();
       dialog({ title: 'Restore', bodyHTML: '<p>That is not a ThinkPad Notes backup.</p>' });
+      return;
+    }
+    if (data.version > 1) {
+      machine.sound.beep();
+      dialog({
+        title: 'Restore',
+        bodyHTML: '<p>That backup was written by a newer version of this notepad ' +
+                  'than the one you are running.</p>'
+      });
       return;
     }
     confirmDialog({
@@ -4242,7 +4243,9 @@ body.no-case .lcd{border-radius:0}
   $('#tbMax').addEventListener('click', function () {
     prefs.list = !prefs.list; applyPrefs();
   });
-  stFont.addEventListener('click', function () { setFont(prefs.font === 'plex' ? 'period' : 'plex'); });
+  stFont.addEventListener('click', function () {
+    setFont(prefs.preset === 'plex' ? 'period' : 'plex');
+  });
 
   var fileMode = 'txt';
   function pickFile(mode) {
@@ -4265,7 +4268,7 @@ body.no-case .lcd{border-radius:0}
     fileInput.value = '';
   });
 
-  /* drag a .txt onto the screen */
+  /* drop a .txt to open it, or a .json backup to restore it */
   var dropzone = document.createElement('div');
   dropzone.className = 'dropzone';
   dropzone.innerHTML = '<span>Drop a .txt file to open it, or a .json backup to restore</span>';
@@ -4408,9 +4411,14 @@ body.no-case .lcd{border-radius:0}
     setMsg(changed === 1 ? 'Updated from another tab' : changed + ' notes updated from another tab');
   });
 
-  window.addEventListener('beforeunload', function () { if (saveTimer) flushSave(); });
+  window.addEventListener('beforeunload', function () {
+    if (saveTimer) flushSave();
+    flushPrefs();
+  });
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'hidden' && saveTimer) flushSave();
+    if (document.visibilityState !== 'hidden') return;
+    if (saveTimer) flushSave();
+    flushPrefs();
   });
 
   /* ---------------------------------------------------------
@@ -4427,7 +4435,7 @@ body.no-case .lcd{border-radius:0}
     'Things worth trying:\n' +
     '  * Settings — in the Format menu, or Ctrl and the comma key — holds\n' +
     '    the case finish, panel shape, screen colours and typefaces.\n' +
-    '  * View > Keyboard unfolds the seven-row keyboard. It mirrors what\n' +
+    '  * View > Keyboard unfolds the keyboard. It mirrors what\n' +
     '    you type, at the cost of some screen.\n' +
     '  * The lamp above the screen is the ThinkLight (Alt+L).\n' +
     '  * Push the red TrackPoint to scroll a long note.\n' +

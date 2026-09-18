@@ -5,27 +5,14 @@
    ============================================================ */
 
 body{
-  /* PERIOD-CORRECT (default): what actually shipped on these machines */
+  /* The period faces, which is where everything starts. app.js overrides
+     these with whatever the settings say. */
   --ui-font:Tahoma,"MS Sans Serif","Microsoft Sans Serif",Verdana,Geneva,sans-serif;
   --mono-font:"Courier New","Lucida Console","Andale Mono",monospace;
   --ui-size:11px;
   --mono-size:13px;
   --mono-lh:1.45;
-  --typeface-name:"Courier New";
 }
-body.font-plex{
-  /* ANACHRONISTIC: IBM Plex, drawn in 2017, fifteen years too late */
-  --ui-font:"IBM Plex Sans",Tahoma,Verdana,sans-serif;
-  --mono-font:"IBM Plex Mono","Courier New",monospace;
-  --ui-size:11.5px;
-  --mono-size:13px;
-  --mono-lh:1.55;
-  --typeface-name:"IBM Plex Mono";
-}
-body.fs-s{--mono-size:11.5px}
-body.fs-m{--mono-size:13px}
-body.fs-l{--mono-size:15.5px}
-
 .lcd{
   /* classic desktop colours */
   --face:#d4d0c8;
@@ -136,7 +123,7 @@ body.alt-held .find label u,
   background:none;border:0;cursor:pointer;text-align:left;
   color:var(--ink);font:400 var(--ui-size)/1.3 var(--ui-font);
 }
-.mi:hover,.mi.focus{background:var(--navy);color:#fff}
+.mi:hover{background:var(--navy);color:#fff}
 .mi .lbl{flex:1;white-space:nowrap}
 .mi .accel{opacity:.75;font-size:calc(var(--ui-size) - .5px);white-space:nowrap}
 .mi u{text-underline-offset:1px}
@@ -150,7 +137,6 @@ body.alt-held .find label u,
   content:"";width:5px;height:5px;border:0;border-radius:50%;
   background:currentColor;transform:none;margin-top:-2px;left:8px;
 }
-.mi.disabled{color:var(--sh);pointer-events:none}
 .msep{height:0;margin:3px 2px;border-top:1px solid var(--sh);border-bottom:1px solid var(--hi)}
 
 /* ---------- workspace ---------- */
@@ -347,11 +333,6 @@ body.no-wrap .editor-underlay{white-space:pre;overflow-wrap:normal}
 
 /* ---------- misc ---------- */
 .hint{color:#5a5a5a}
-kbd{
-  font:400 calc(var(--ui-size) - .5px)/1.2 var(--mono-font);
-  background:var(--face-lt);padding:0 3px;
-  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--sh);
-}
 .dropzone{
   position:absolute;inset:0;z-index:55;display:none;
   place-items:center;background:rgba(10,36,106,.18);
@@ -385,7 +366,7 @@ kbd{
   outline:1px dotted var(--ink);
   outline-offset:-3px;
 }
-.mi:focus-visible,
+/* menu items never take focus — the arrow keys move a .focus class instead */
 .mi.focus{
   background:var(--navy);
   color:#fff;

@@ -59,7 +59,7 @@
       b.addEventListener('click', o.action.act);
       cell.appendChild(document.createTextNode(' '));
       cell.appendChild(b);
-      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, o.expires || 30000);
+      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, 30000);
     }
     if (!o.quiet) {
       cell.classList.add('flash');
@@ -150,7 +150,7 @@
       onBuild: opts.onBuild,
       buttons: [
         { label: opts.confirmLabel || 'OK', primary: true, act: opts.act },
-        { label: opts.cancelLabel || 'Cancel' }
+        { label: 'Cancel' }
       ]
     });
   }
@@ -267,7 +267,7 @@
 
   function items() {
     if (!openMenu) return [];
-    return $$('.dropdown[data-menu="' + openMenu + '"] .mi:not(.disabled)', deps.menubar);
+    return $$('.dropdown[data-menu="' + openMenu + '"] .mi', deps.menubar);
   }
   function focusItem(mi) {
     $$('.mi.focus', deps.menubar).forEach(function (m) { m.classList.remove('focus'); });
@@ -346,8 +346,6 @@
     confirm: confirm,
     buildMenus: buildMenus,
     showMenu: showMenu,
-    closeMenu: closeMenu,
-    menuIsOpen: function () { return !!openMenu; },
-    dialogEl: function () { return openDialogEl; }
+    closeMenu: closeMenu
   };
 })(window);

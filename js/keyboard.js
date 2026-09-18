@@ -1,5 +1,5 @@
 /* ============================================================
-   keyboard.js — the seven-row ThinkPad keyboard
+   keyboard.js — the ThinkPad keyboard
    Builds the deck, mirrors real keystrokes, and lets you type
    by clicking the keys. Fn sits in the corner where it belongs.
    ============================================================ */
@@ -8,7 +8,7 @@
 
   function k(code, label, w, opts) {
     var o = opts || {};
-    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls, toggle: o.toggle };
+    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls };
   }
   function sp(w) { return { spacer: true, w: w }; }
 
@@ -42,7 +42,7 @@
       k('Backslash', '\\', 1.5, { sub: '|', ch: '\\' })
     ]},
     { keys: [
-      k('CapsLock', 'Caps', 1.75, { cls: 'wide-label', toggle: 'cap' }),
+      k('CapsLock', 'Caps', 1.75, { cls: 'wide-label' }),
       k('KeyA', 'A', 1, { ch: 'a' }), k('KeyS', 'S', 1, { ch: 's' }), k('KeyD', 'D', 1, { ch: 'd' }),
       k('KeyF', 'F', 1, { ch: 'f' }), k('KeyG', 'G', 1, { ch: 'g' }), k('KeyH', 'H', 1, { ch: 'h' }),
       k('KeyJ', 'J', 1, { ch: 'j' }), k('KeyK', 'K', 1, { ch: 'k' }), k('KeyL', 'L', 1, { ch: 'l' }),
@@ -102,7 +102,6 @@
           el.className = 'key' + (key.cls ? ' ' + key.cls : '');
           el.dataset.code = key.code;
           if (WEAR[key.code]) el.dataset.wear = WEAR[key.code];
-          if (key.ch !== undefined) el.dataset.ch = key.ch;
           if (key.sub) {
             el.classList.add('dual');
             el.innerHTML = '<span class="sub"></span><span class="main"></span>';
@@ -139,13 +138,7 @@
   function releaseAll() {
     Object.keys(byCode).forEach(function (c) { byCode[c].classList.remove('down'); });
   }
-  function tap(code, ms) {
-    press(code);
-    setTimeout(function () { release(code); }, ms || 90);
-  }
-
   global.TPKeyboard = {
-    build: build, press: press, release: release, releaseAll: releaseAll, tap: tap,
-    el: function (code) { return byCode[code]; }
+    build: build, press: press, release: release, releaseAll: releaseAll
   };
 })(window);

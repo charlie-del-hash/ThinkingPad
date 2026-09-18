@@ -11,10 +11,8 @@
   --case-dk:#141518;
   --case-dkr:#0c0d0f;
   --case-lt:#292c32;
-  --case-edge:#3d424a;
   --hair:rgba(255,255,255,.075);
   --hair-lo:rgba(255,255,255,.04);
-  --shadow:rgba(0,0,0,.65);
 
   /* accents */
   --tp-red:#d4213c;
@@ -596,7 +594,7 @@ body.no-keyboard .keyboard{display:none}
 
 
 /* ---------- keyboard focus on the machine itself ---------- */
-.key:focus-visible,
+/* the caps refuse focus on purpose (keyboard.js), so they are not listed */
 .thinklight:focus-visible,
 .access-ibm:focus-visible,
 .hwb:focus-visible,
