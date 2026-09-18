@@ -125,7 +125,7 @@
     if (batteryRepaint) batteryRepaint();
     if (p.deck) buildKeyboardOnce();
     resetIdle();
-    fit();
+    scheduleFit();
   }
 
   /* ---------------------------------------------------------
@@ -138,7 +138,18 @@
     led.classList.add('blink');
   }
   function leds() {
-    return { pwr: ledPwr, bat: ledBat, slp: ledSlp, hdd: ledHdd, cap: ledCap, num: ledNum };
+    return { hdd: ledHdd };            /* the only light anything outside here drives */
+  }
+
+  /* Caps has two sources — the real key, and the cap you can click on the
+     deck — and one light to show them on. The light is the display; this is
+     the state, so a physical keystroke no longer wipes a clicked Caps. */
+  var physicalCaps = false, virtualCaps = false;
+  function capsOn() { return physicalCaps || virtualCaps; }
+  function paintCaps() { ledCap.classList.toggle('on', capsOn()); }
+  function toggleVirtualCaps() {
+    virtualCaps = !virtualCaps;
+    paintCaps();
   }
 
   /* The BAT light follows this laptop's actual battery where the browser
@@ -378,7 +389,8 @@
       TPKeyboard.press(e.code);
       if (!e.repeat) Sound.click(true);
       if (e.getModifierState) {
-        ledCap.classList.toggle('on', e.getModifierState('CapsLock'));
+        physicalCaps = e.getModifierState('CapsLock');
+        paintCaps();
         ledNum.classList.toggle('on', e.getModifierState('NumLock'));
       }
     });
@@ -499,9 +511,8 @@
     if (still) return;
 
     var frame = function () {
-      if (!saverEl) return;
-      var v = saverView || view;
-      draw(v.ctx, v.w, v.h, 1);
+      if (!saverEl) return;            /* stopSaver nulls this before anything else */
+      draw(saverView.ctx, saverView.w, saverView.h, 1);
       saverRaf = requestAnimationFrame(frame);
     };
     saverView = view;
@@ -586,6 +597,8 @@
     toggleThinkLight: toggleThinkLight,
     setVolume: setVolume,
     watchBattery: watchBattery,
+    capsOn: capsOn,
+    toggleVirtualCaps: toggleVirtualCaps,
     playBoot: playBoot,
     startSaver: startSaver
   };

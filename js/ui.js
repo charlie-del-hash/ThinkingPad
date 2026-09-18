@@ -59,7 +59,7 @@
       b.addEventListener('click', o.action.act);
       cell.appendChild(document.createTextNode(' '));
       cell.appendChild(b);
-      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, o.expires || 30000);
+      msgExpiry = setTimeout(function () { setMsg('Ready', true); }, 30000);
     }
     if (!o.quiet) {
       cell.classList.add('flash');
@@ -150,7 +150,7 @@
       onBuild: opts.onBuild,
       buttons: [
         { label: opts.confirmLabel || 'OK', primary: true, act: opts.act },
-        { label: opts.cancelLabel || 'Cancel' }
+        { label: 'Cancel' }
       ]
     });
   }

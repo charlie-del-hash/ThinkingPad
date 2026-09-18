@@ -594,7 +594,7 @@ body.no-keyboard .keyboard{display:none}
 
 
 /* ---------- keyboard focus on the machine itself ---------- */
-.key:focus-visible,
+/* the caps refuse focus on purpose (keyboard.js), so they are not listed */
 .thinklight:focus-visible,
 .access-ibm:focus-visible,
 .hwb:focus-visible,

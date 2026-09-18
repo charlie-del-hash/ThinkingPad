@@ -28,10 +28,7 @@ const TYPES = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
   '.js': 'text/javascript; charset=utf-8',
-  '.json': 'application/json; charset=utf-8',
-  '.svg': 'image/svg+xml',
-  '.png': 'image/png',
-  '.txt': 'text/plain; charset=utf-8'
+  '.json': 'application/json; charset=utf-8'
 };
 
 function serve(root) {
@@ -61,7 +58,6 @@ function makeContext(browser, origin, results) {
   const contexts = new Set();
   const ctx = {
     origin: origin,
-    results: results,
     errors: [],
     allowed: [],
 
@@ -76,8 +72,7 @@ function makeContext(browser, origin, results) {
       );
       const page = await bctx.newPage();
       ctx.watch(page);
-      page.appUrl = opts.url || (origin + (opts.path || '/index.html'));
-      await page.goto(page.appUrl);
+      await page.goto(opts.url || (origin + '/index.html'));
       await page.waitForTimeout(opts.settle || 400);
       contexts.add(bctx);
       page.browserContext = bctx;
@@ -85,12 +80,12 @@ function makeContext(browser, origin, results) {
     },
 
     /* a second tab sharing storage with an existing page */
-    async tab(page, p) {
-      const t = await page.browserContext.newPage();
-      ctx.watch(t);
-      await t.goto(origin + (p || '/index.html'));
-      await t.waitForTimeout(400);
-      return t;
+    async tab(page) {
+      const second = await page.browserContext.newPage();
+      ctx.watch(second);
+      await second.goto(origin + '/index.html');
+      await second.waitForTimeout(400);
+      return second;
     },
 
     watch(page) {

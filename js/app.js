@@ -129,7 +129,7 @@
   /* a cap on the deck was clicked: type it */
   function onKeyCap(key, e) {
     if (key.code === 'Fn') { toggleThinkLight(); return; }
-    if (key.code === 'CapsLock') { leds.cap.classList.toggle('on'); return; }
+    if (key.code === 'CapsLock') { machine.toggleVirtualCaps(); return; }
     if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
     if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
     if (key.code === 'Backspace') {
@@ -143,7 +143,7 @@
     if (key.ch !== undefined) {
       editor.focus();
       var ch = key.ch;
-      if (e.shiftKey || leds.cap.classList.contains('on')) {
+      if (e.shiftKey || machine.capsOn()) {
         ch = key.sub && e.shiftKey ? key.sub : ch.toUpperCase();
       }
       insertAtCaret(ch);
@@ -191,9 +191,23 @@
   var prefs = TPSettings.migrate(store.loadPrefs());
   var db = store.load();
 
-  function savePrefs() { store.savePrefs(prefs); }
+  /* Ticking a box writes at once — that is what you would expect. Dragging
+     a slider fires on every pixel, so that one write waits, the way the
+     splitter already held its own until you let go. */
+  var prefsTimer = null;
+  function savePrefs() {
+    if (prefsTimer) { clearTimeout(prefsTimer); prefsTimer = null; }
+    store.savePrefs(prefs);
+  }
+  function savePrefsSoon() {
+    if (prefsTimer) clearTimeout(prefsTimer);
+    prefsTimer = setTimeout(savePrefs, 150);
+  }
+  function flushPrefs() {
+    if (prefsTimer) savePrefs();
+  }
 
-  /* the whole set, for anything that adds, removes or reorders notes */
+  /* every note and the index: for anything that adds or removes one */
   function persistAll() { return store.saveAll(db); }
 
   /* swap the library wholesale, dropping keys nothing points at any more */
@@ -324,22 +338,22 @@
     return note;
   }
 
-  function selectNote(id, keepFocus) {
+  function selectNote(id) {
     if (id === db.activeId) return;
-    flushSave();
+    flushSave();                       /* writes the note being left, and the index */
     db.activeId = id;
+    find.index = -1;                   /* before renderAll, which redraws the matches */
+
     var note = active();
     editor.value = note ? note.body : '';
     renderAll();
     if (note && typeof note.caret === 'number') {
-      var c = Math.min(note.caret, editor.value.length);
-      editor.setSelectionRange(c, c);
+      var caret = Math.min(note.caret, editor.value.length);
+      editor.setSelectionRange(caret, caret);
     }
-    if (keepFocus !== false) editor.focus();
-    find.index = -1;
-    renderFind();
+    editor.focus();
     updatePos();
-    persistAll();
+    store.saveIndex(db);               /* only activeId moved; the notes are untouched */
   }
 
   function deleteNote() {
@@ -512,12 +526,13 @@
      rendering
      --------------------------------------------------------- */
   function renderList() {
+    var term = search.value.trim();
     var list = visibleNotes();
     listbox.textContent = '';
     if (!list.length) {
       var empty = document.createElement('div');
       empty.className = 'empty';
-      empty.textContent = search.value.trim() ? 'No notes match.' : 'No notes yet.';
+      empty.textContent = term ? 'No notes match.' : 'No notes yet.';
       listbox.appendChild(empty);
       return;
     }
@@ -530,7 +545,6 @@
       b.setAttribute('aria-selected', note.id === db.activeId ? 'true' : 'false');
 
       var t = document.createElement('span'); t.className = 'nt'; t.textContent = titleOf(note);
-      var term = search.value.trim();
       if (term) {
         var count = matchesIn(note.body, term).length;
         if (count) {
@@ -574,7 +588,7 @@
   /* ---------------------------------------------------------
      preferences applied to the machine
      --------------------------------------------------------- */
-  function applyPrefs() {
+  function applyPrefs(opts) {
     /* the screen */
     ensurePlex();
     lcd.dataset.theme = prefs.theme;
@@ -598,7 +612,8 @@
     stFont.title = prefs.preset === 'plex'
       ? 'IBM Plex Mono (2017) — click for the period-correct face'
       : 'Click to switch typeface — Settings for the rest';
-    savePrefs();
+    if (opts && opts.defer) savePrefsSoon();
+    else savePrefs();
     machine.apply();
     if (find.term) renderFind(); else syncUnderlay();
   }
@@ -796,8 +811,9 @@
       prefs[key] = value;
       if (key === 'preset') applyPreset(value);
       if (key === 'uiFont' || key === 'monoFont') prefs.preset = 'custom';
-      applyPrefs();
-      if (item && item.t !== 'range') form.refresh();
+      var dragging = !!item && item.t === 'range';
+      applyPrefs(dragging ? { defer: true } : null);
+      if (!dragging) form.refresh();
     }, actions);
 
     dialog({
@@ -824,9 +840,19 @@
   function restoreFrom(text) {
     var data;
     try { data = JSON.parse(text); } catch (e) { data = null; }
-    if (!data || !Array.isArray(data.notes)) {
+    if (!data || !Array.isArray(data.notes) ||
+        (data.app && data.app !== 'thinkpad-notes')) {
       machine.sound.beep();
       dialog({ title: 'Restore', bodyHTML: '<p>That is not a ThinkPad Notes backup.</p>' });
+      return;
+    }
+    if (data.version > 1) {
+      machine.sound.beep();
+      dialog({
+        title: 'Restore',
+        bodyHTML: '<p>That backup was written by a newer version of this notepad ' +
+                  'than the one you are running.</p>'
+      });
       return;
     }
     confirmDialog({
@@ -1115,7 +1141,9 @@
   $('#tbMax').addEventListener('click', function () {
     prefs.list = !prefs.list; applyPrefs();
   });
-  stFont.addEventListener('click', function () { setFont(prefs.font === 'plex' ? 'period' : 'plex'); });
+  stFont.addEventListener('click', function () {
+    setFont(prefs.preset === 'plex' ? 'period' : 'plex');
+  });
 
   var fileMode = 'txt';
   function pickFile(mode) {
@@ -1138,7 +1166,7 @@
     fileInput.value = '';
   });
 
-  /* drag a .txt onto the screen */
+  /* drop a .txt to open it, or a .json backup to restore it */
   var dropzone = document.createElement('div');
   dropzone.className = 'dropzone';
   dropzone.innerHTML = '<span>Drop a .txt file to open it, or a .json backup to restore</span>';
@@ -1281,9 +1309,14 @@
     setMsg(changed === 1 ? 'Updated from another tab' : changed + ' notes updated from another tab');
   });
 
-  window.addEventListener('beforeunload', function () { if (saveTimer) flushSave(); });
+  window.addEventListener('beforeunload', function () {
+    if (saveTimer) flushSave();
+    flushPrefs();
+  });
   document.addEventListener('visibilitychange', function () {
-    if (document.visibilityState === 'hidden' && saveTimer) flushSave();
+    if (document.visibilityState !== 'hidden') return;
+    if (saveTimer) flushSave();
+    flushPrefs();
   });
 
   /* ---------------------------------------------------------
@@ -1300,7 +1333,7 @@
     'Things worth trying:\n' +
     '  * Settings — in the Format menu, or Ctrl and the comma key — holds\n' +
     '    the case finish, panel shape, screen colours and typefaces.\n' +
-    '  * View > Keyboard unfolds the seven-row keyboard. It mirrors what\n' +
+    '  * View > Keyboard unfolds the keyboard. It mirrors what\n' +
     '    you type, at the cost of some screen.\n' +
     '  * The lamp above the screen is the ThinkLight (Alt+L).\n' +
     '  * Push the red TrackPoint to scroll a long note.\n' +
