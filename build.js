@@ -26,12 +26,12 @@ const stamp = '<!-- ThinkPad Notes — built ' + new Date().toISOString().slice(
 
 let out;
 if (fragment) {
-  /* head bits that must survive, then the body contents */
+  /* the title and the inlined styles survive; the host supplies the rest.
+     Nothing else in the head is ours — the one webfont this app can use is
+     fetched at runtime, and only if it is asked for. */
   const head = html.slice(html.indexOf('<head>'), html.indexOf('</head>'));
   const keep = []
     .concat(head.match(/<title>[\s\S]*?<\/title>/g) || [])
-    .concat(head.match(/<link rel="preconnect"[^>]*>/g) || [])
-    .concat(head.match(/<link rel="stylesheet" href="https:[^>]*>/g) || [])
     .concat(head.match(/<style>[\s\S]*?<\/style>/g) || []);
   const body = html.slice(html.indexOf('<body') , html.lastIndexOf('</body>'));
   out = stamp + keep.join('\n') + '\n' + body.replace(/^<body[^>]*>\n?/, '');

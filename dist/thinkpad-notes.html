@@ -1,5 +1,5 @@
 <!doctype html>
-<!-- ThinkPad Notes — built 2026-09-10 by build.js. Edit the sources, not this file. -->
+<!-- ThinkPad Notes — built 2026-09-18 by build.js. Edit the sources, not this file. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -22,10 +22,8 @@
   --case-dk:#141518;
   --case-dkr:#0c0d0f;
   --case-lt:#292c32;
-  --case-edge:#3d424a;
   --hair:rgba(255,255,255,.075);
   --hair-lo:rgba(255,255,255,.04);
-  --shadow:rgba(0,0,0,.65);
 
   /* accents */
   --tp-red:#d4213c;
@@ -743,27 +741,14 @@ body.worn .trackpoint::after{
    ============================================================ */
 
 body{
-  /* PERIOD-CORRECT (default): what actually shipped on these machines */
+  /* The period faces, which is where everything starts. app.js overrides
+     these with whatever the settings say. */
   --ui-font:Tahoma,"MS Sans Serif","Microsoft Sans Serif",Verdana,Geneva,sans-serif;
   --mono-font:"Courier New","Lucida Console","Andale Mono",monospace;
   --ui-size:11px;
   --mono-size:13px;
   --mono-lh:1.45;
-  --typeface-name:"Courier New";
 }
-body.font-plex{
-  /* ANACHRONISTIC: IBM Plex, drawn in 2017, fifteen years too late */
-  --ui-font:"IBM Plex Sans",Tahoma,Verdana,sans-serif;
-  --mono-font:"IBM Plex Mono","Courier New",monospace;
-  --ui-size:11.5px;
-  --mono-size:13px;
-  --mono-lh:1.55;
-  --typeface-name:"IBM Plex Mono";
-}
-body.fs-s{--mono-size:11.5px}
-body.fs-m{--mono-size:13px}
-body.fs-l{--mono-size:15.5px}
-
 .lcd{
   /* classic desktop colours */
   --face:#d4d0c8;
@@ -888,7 +873,6 @@ body.alt-held .find label u,
   content:"";width:5px;height:5px;border:0;border-radius:50%;
   background:currentColor;transform:none;margin-top:-2px;left:8px;
 }
-.mi.disabled{color:var(--sh);pointer-events:none}
 .msep{height:0;margin:3px 2px;border-top:1px solid var(--sh);border-bottom:1px solid var(--hi)}
 
 /* ---------- workspace ---------- */
@@ -1085,11 +1069,6 @@ body.no-wrap .editor-underlay{white-space:pre;overflow-wrap:normal}
 
 /* ---------- misc ---------- */
 .hint{color:#5a5a5a}
-kbd{
-  font:400 calc(var(--ui-size) - .5px)/1.2 var(--mono-font);
-  background:var(--face-lt);padding:0 3px;
-  box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--sh);
-}
 .dropzone{
   position:absolute;inset:0;z-index:55;display:none;
   place-items:center;background:rgba(10,36,106,.18);
@@ -1144,11 +1123,11 @@ kbd{
 
 /* ---------- case finishes ---------- */
 body[data-case="graphite"]{
-  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;--case-edge:#4d525b;
+  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;
   --key-text:#d6d9de;
 }
 body[data-case="titanium"]{
-  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;--case-edge:#b4b9c1;
+  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;
   --key-text:#23262b;
   --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
 }
@@ -1364,7 +1343,7 @@ body.no-case .lcd{border-radius:0}
 .dlg.wide .dlg-body{padding-top:0}
 </style>
 </head>
-<body class="font-period">
+<body>
 
 <div class="desk" id="desk">
   <div class="room-light" aria-hidden="true"></div>
@@ -1442,7 +1421,7 @@ body.no-case .lcd{border-radius:0}
             </div>
             <div class="lcd-grain" aria-hidden="true"></div>
             <div class="lcd-glare" aria-hidden="true"></div>
-            <div class="lcd-dark" id="lcdDark" aria-hidden="true"></div>
+            <div class="lcd-dark" aria-hidden="true"></div>
           </div>
         </div>
 
@@ -1699,8 +1678,7 @@ body.no-case .lcd{border-radius:0}
     saveNote: saveNote, saveIndex: saveIndex, saveAll: saveAll,
     dropNote: dropNote, eraseNotes: eraseNotes,
     loadPrefs: loadPrefs, savePrefs: savePrefs, clearPrefs: clearPrefs,
-    bytes: bytes, dump: dump, classify: classify,
-    INDEX_KEY: INDEX_KEY, NOTE_PREFIX: NOTE_PREFIX, PREFS_KEY: PREFS_KEY, LEGACY_KEY: LEGACY_KEY
+    bytes: bytes, dump: dump, classify: classify
   };
 })(window);
 </script>
@@ -1975,7 +1953,7 @@ body.no-case .lcd{border-radius:0}
 
   function items() {
     if (!openMenu) return [];
-    return $$('.dropdown[data-menu="' + openMenu + '"] .mi:not(.disabled)', deps.menubar);
+    return $$('.dropdown[data-menu="' + openMenu + '"] .mi', deps.menubar);
   }
   function focusItem(mi) {
     $$('.mi.focus', deps.menubar).forEach(function (m) { m.classList.remove('focus'); });
@@ -2054,9 +2032,7 @@ body.no-case .lcd{border-radius:0}
     confirm: confirm,
     buildMenus: buildMenus,
     showMenu: showMenu,
-    closeMenu: closeMenu,
-    menuIsOpen: function () { return !!openMenu; },
-    dialogEl: function () { return openDialogEl; }
+    closeMenu: closeMenu
   };
 })(window);
 </script>
@@ -2371,7 +2347,7 @@ body.no-case .lcd{border-radius:0}
   }
 
   global.TPSettings = {
-    DEFAULTS: DEFAULTS, GROUPS: GROUPS, migrate: migrate, buildForm: buildForm,
+    migrate: migrate, buildForm: buildForm,
     UI_FONTS: UI_FONTS, MONO_FONTS: MONO_FONTS, MONO_NAMES: MONO_NAMES
   };
 })(window);
@@ -2519,14 +2495,8 @@ body.no-case .lcd{border-radius:0}
   function releaseAll() {
     Object.keys(byCode).forEach(function (c) { byCode[c].classList.remove('down'); });
   }
-  function tap(code, ms) {
-    press(code);
-    setTimeout(function () { release(code); }, ms || 90);
-  }
-
   global.TPKeyboard = {
-    build: build, press: press, release: release, releaseAll: releaseAll, tap: tap,
-    el: function (code) { return byCode[code]; }
+    build: build, press: press, release: release, releaseAll: releaseAll
   };
 })(window);
 </script>
@@ -3086,8 +3056,6 @@ body.no-case .lcd{border-radius:0}
     resetIdle();
   }
 
-  function saverIsUp() { return !!saverEl; }
-
   function resetIdle() {
     if (saverTimer) clearTimeout(saverTimer);
     saverTimer = null;
@@ -3114,7 +3082,6 @@ body.no-case .lcd{border-radius:0}
     init: init,
     apply: apply,
     fit: fit,
-    scheduleFit: scheduleFit,
     blink: blink,
     leds: leds,
     sound: Sound,
@@ -3123,12 +3090,8 @@ body.no-case .lcd{border-radius:0}
     toggleThinkLight: toggleThinkLight,
     setVolume: setVolume,
     watchBattery: watchBattery,
-    buildKeyboard: buildKeyboardOnce,
     playBoot: playBoot,
-    startSaver: startSaver,
-    stopSaver: stopSaver,
-    saverIsUp: saverIsUp,
-    resetIdle: resetIdle
+    startSaver: startSaver
   };
 })(window);
 </script>

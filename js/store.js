@@ -151,7 +151,6 @@
     saveNote: saveNote, saveIndex: saveIndex, saveAll: saveAll,
     dropNote: dropNote, eraseNotes: eraseNotes,
     loadPrefs: loadPrefs, savePrefs: savePrefs, clearPrefs: clearPrefs,
-    bytes: bytes, dump: dump, classify: classify,
-    INDEX_KEY: INDEX_KEY, NOTE_PREFIX: NOTE_PREFIX, PREFS_KEY: PREFS_KEY, LEGACY_KEY: LEGACY_KEY
+    bytes: bytes, dump: dump, classify: classify
   };
 })(window);

@@ -101,7 +101,13 @@ function makeContext(browser, origin, results) {
       page.on('console', (m) => {
         const text = m.text();
         if (m.type() !== 'error') return;
-        if (/ERR_CONNECTION|fonts\.g|favicon/.test(text) || expected(text)) return;
+        /* A machine that cannot reach the internet is a supported state here:
+           the app asks for IBM Plex only when it is chosen, and falls back to
+           the period faces when it cannot be had. Transport-level failures to
+           an outside host are noise; a local file that fails to load is not,
+           and reads differently ("404 (Not Found)"), so it still fails. */
+        if (/net::ERR_(CONNECTION|CERT|NAME_NOT_RESOLVED|INTERNET|TIMED_OUT|FAILED)/.test(text)) return;
+        if (/fonts\.g|favicon/.test(text) || expected(text)) return;
         ctx.errors.push('console error: ' + text);
       });
     },

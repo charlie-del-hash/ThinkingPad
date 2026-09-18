@@ -139,13 +139,7 @@
   function releaseAll() {
     Object.keys(byCode).forEach(function (c) { byCode[c].classList.remove('down'); });
   }
-  function tap(code, ms) {
-    press(code);
-    setTimeout(function () { release(code); }, ms || 90);
-  }
-
   global.TPKeyboard = {
-    build: build, press: press, release: release, releaseAll: releaseAll, tap: tap,
-    el: function (code) { return byCode[code]; }
+    build: build, press: press, release: release, releaseAll: releaseAll
   };
 })(window);

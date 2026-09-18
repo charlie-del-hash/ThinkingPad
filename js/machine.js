@@ -552,8 +552,6 @@
     resetIdle();
   }
 
-  function saverIsUp() { return !!saverEl; }
-
   function resetIdle() {
     if (saverTimer) clearTimeout(saverTimer);
     saverTimer = null;
@@ -580,7 +578,6 @@
     init: init,
     apply: apply,
     fit: fit,
-    scheduleFit: scheduleFit,
     blink: blink,
     leds: leds,
     sound: Sound,
@@ -589,11 +586,7 @@
     toggleThinkLight: toggleThinkLight,
     setVolume: setVolume,
     watchBattery: watchBattery,
-    buildKeyboard: buildKeyboardOnce,
     playBoot: playBoot,
-    startSaver: startSaver,
-    stopSaver: stopSaver,
-    saverIsUp: saverIsUp,
-    resetIdle: resetIdle
+    startSaver: startSaver
   };
 })(window);

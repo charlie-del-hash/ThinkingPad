@@ -307,7 +307,7 @@
   }
 
   global.TPSettings = {
-    DEFAULTS: DEFAULTS, GROUPS: GROUPS, migrate: migrate, buildForm: buildForm,
+    migrate: migrate, buildForm: buildForm,
     UI_FONTS: UI_FONTS, MONO_FONTS: MONO_FONTS, MONO_NAMES: MONO_NAMES
   };
 })(window);

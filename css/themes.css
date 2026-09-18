@@ -6,11 +6,11 @@
 
 /* ---------- case finishes ---------- */
 body[data-case="graphite"]{
-  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;--case-edge:#4d525b;
+  --case:#2b2e33;--case-dk:#212429;--case-dkr:#15171a;--case-lt:#3b3f46;
   --key-text:#d6d9de;
 }
 body[data-case="titanium"]{
-  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;--case-edge:#b4b9c1;
+  --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;
   --key-text:#23262b;
   --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
 }
