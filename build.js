@@ -21,8 +21,14 @@ html = html.replace(/[ \t]*<link rel="stylesheet" href="(css\/[^"]+)">\n?/g,
 html = html.replace(/[ \t]*<script src="(js\/[^"]+)"><\/script>\n?/g,
   (_, src) => '<script>\n/* ' + src + ' */\n' + read(src).trim() + '\n</script>\n');
 
-const stamp = '<!-- ThinkPad Notes — built ' + new Date().toISOString().slice(0, 10) +
-              ' by build.js. Edit the sources, not this file. -->\n';
+/* Stamped with a digest of the assembled sources rather than the date: the
+   build has to be reproducible, because CI rebuilds dist/ and fails if the
+   result differs from what is committed. A wall-clock date made that check
+   fail on any day after the one dist/ was last committed on, whether or not a
+   source had changed. A digest changes when — and only when — the sources do. */
+const sources = require('crypto').createHash('sha256').update(html).digest('hex').slice(0, 12);
+const stamp = '<!-- ThinkPad Notes — built by build.js from sources ' + sources +
+              '. Edit the sources, not this file. -->\n';
 
 let out;
 if (fragment) {
