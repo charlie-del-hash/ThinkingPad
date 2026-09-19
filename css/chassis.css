@@ -1,34 +1,39 @@
 /* ============================================================
    chassis.css — the physical machine
-   An early-2000s IBM ThinkPad (A/T series era, 1999-2004):
-   matte black magnesium-look plastic, chunky bezel, red
-   TrackPoint, blue Access IBM button, ThinkLight.
+   A mid-2000s IBM ThinkPad, the T4x as it left Yamato (2003-05):
+   soft-touch matte black, a deep bezel with the indicators lit
+   through printed marks, the seven-row keyboard with its blue Fn
+   legends, the red TrackPoint, the UltraNav touchpad under the
+   space bar, and the blue Access IBM button beside the power key.
    ============================================================ */
 
 :root{
-  /* casing */
-  --case:#1c1e22;
-  --case-dk:#141518;
-  --case-dkr:#0c0d0f;
-  --case-lt:#292c32;
-  --hair:rgba(255,255,255,.075);
-  --hair-lo:rgba(255,255,255,.04);
+  /* casing — a flat, neutral black. Rubberised paint has almost no
+     specular, so the highlights here are broad and faint. */
+  --case:#1f2022;
+  --case-dk:#161718;
+  --case-dkr:#0d0e0f;
+  --case-lt:#2a2b2e;
+  --hair:rgba(255,255,255,.06);
+  --hair-lo:rgba(255,255,255,.03);
 
   /* accents */
-  --tp-red:#d4213c;
-  --tp-red-lt:#f0475f;
-  --tp-red-dk:#7d0f20;
-  --ibm-blue:#2a6ec7;
-  --ibm-blue-lt:#5b9df0;
-  --led-green:#63ff86;
-  --led-amber:#ffb63d;
-  --key-text:#c9ccd1;
+  --tp-red:#d4232e;
+  --tp-red-lt:#ef4d55;
+  --tp-red-dk:#7a1017;
+  --ibm-blue:#2a6bd0;
+  --ibm-blue-lt:#5f9cf2;
+  --led-green:#5cf07c;
+  --led-amber:#ffb347;
+  --led-blue:#57a8ff;
+  --key-text:#e9e9e6;
+  --key-blue:#6aa3f5;
 
   /* metrics */
   --u:clamp(21px,2.6vh,32px);           /* key unit height          */
   --key-gap:3px;
-  --bezel:clamp(16px,2.2vh,26px);       /* side bezel width         */
-  --radius:14px;
+  --bezel:clamp(18px,3vh,34px);         /* side bezel width         */
+  --radius:12px;
 
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -54,7 +59,7 @@ body{
   gap:6px;
   padding:clamp(6px,1.6vh,20px) 10px;
   background:
-    radial-gradient(120% 95% at 50% -12%, #55565b 0%, #35373b 30%, #212327 60%, #131416 88%, #0d0e10 100%);
+    radial-gradient(120% 95% at 50% -12%, #4e4f52 0%, #333437 30%, #202124 60%, #131315 88%, #0d0d0f 100%);
   transition:background .5s ease;
 }
 .desk::after{ /* desk grain */
@@ -83,7 +88,7 @@ body{
 .machine{
   position:relative;
   flex:1 1 auto;
-  width:min(1060px,97vw);
+  width:min(1100px,97vw);
   max-height:1000px;
   min-height:0;
   display:flex;
@@ -109,7 +114,7 @@ body.deck-flat .base{
 }
 
 /* The panel is 4:3, the way every ThinkPad panel was before widescreen.
-   app.js measures the case around it and sets these two values so the
+   machine.js measures the case around it and sets these two values so the
    whole machine lands inside the window. Without JS the layout below
    simply fills the height instead. */
 body.fitted .machine{
@@ -126,10 +131,10 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
   flex:1 1 auto;min-height:0;
   display:flex;flex-direction:column;
   position:relative;
-  padding:6px 6px 0;
+  padding:6px 7px 0;
   border-radius:var(--radius) var(--radius) 3px 3px;
   background:
-    linear-gradient(180deg,var(--case-lt) 0%,var(--case) 4px,var(--case) 100%);
+    linear-gradient(180deg,var(--case-lt) 0%,var(--case) 3px,var(--case) 100%);
   box-shadow:
     inset 0 1px 0 var(--hair),
     inset 1px 0 0 var(--hair-lo),
@@ -138,10 +143,10 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 }
 .lid-latches{
   position:absolute;top:-5px;left:0;right:0;height:6px;
-  display:flex;justify-content:center;gap:26%;
+  display:flex;justify-content:center;gap:30%;
 }
 .lid-latches i{
-  width:44px;height:6px;border-radius:3px 3px 0 0;
+  width:40px;height:6px;border-radius:3px 3px 0 0;
   background:linear-gradient(180deg,var(--case-lt),var(--case-dk));
   box-shadow:inset 0 1px 0 var(--hair);
 }
@@ -150,35 +155,34 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
   flex:1 1 auto;min-height:0;
   display:flex;flex-direction:column;
   padding:0 var(--bezel);
-  border-radius:9px 9px 2px 2px;
-  background:
-    linear-gradient(180deg,#26282d,#191b1f 30%,#16181b 100%);
+  border-radius:8px 8px 2px 2px;
+  background:linear-gradient(180deg,#222325,#1a1b1d 25%,#171819 100%);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.55);
   position:relative;overflow:hidden;
 }
 .bezel::after{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:var(--noise);opacity:.2;mix-blend-mode:overlay;
+  background-image:var(--noise);opacity:.18;mix-blend-mode:overlay;
 }
 
+/* the ThinkLight: a small lens in the top of the bezel, with its mark */
 .bezel-top{
-  flex:0 0 auto;height:clamp(14px,2vh,22px);
+  flex:0 0 auto;height:clamp(18px,2.4vh,28px);
   display:flex;align-items:center;justify-content:center;
 }
 .thinklight{
-  appearance:none;border:0;background:none;padding:4px 10px;cursor:pointer;
-  display:flex;align-items:center;gap:6px;position:relative;
+  appearance:none;border:0;background:none;padding:4px 8px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;position:relative;
 }
 .thinklight .bulb{
-  width:9px;height:5px;border-radius:5px 5px 2px 2px;
-  background:linear-gradient(180deg,#4b4f56,#2a2d32);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  width:11px;height:5px;border-radius:5px;
+  background:linear-gradient(180deg,#3d4045,#26282c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(0,0,0,.5);
   transition:background .2s,box-shadow .2s;
 }
-.thinklight::after{ /* engraved lamp label */
-  content:"";position:absolute;inset:auto auto -1px 50%;
-  transform:translateX(-50%);
-  width:26px;height:1px;background:rgba(255,255,255,.05);
+.thinklight .lamp-mark{
+  width:12px;height:8px;fill:none;stroke:#45484e;stroke-width:1.2;
+  stroke-linecap:round;stroke-linejoin:round;
 }
 .desk.night .thinklight .bulb{
   background:linear-gradient(180deg,#fff9e6,#ffe9a8);
@@ -188,15 +192,15 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 /* screen well */
 .screen{
   flex:1 1 auto;min-height:0;position:relative;
-  padding:3px;border-radius:3px;
-  background:linear-gradient(180deg,#0a0b0c,#101113);
+  padding:3px;border-radius:2px;
+  background:linear-gradient(180deg,#09090a,#0f1011);
   box-shadow:
     inset 0 2px 5px rgba(0,0,0,.9),
     0 1px 0 var(--hair-lo);
 }
 .bumper{
-  position:absolute;width:7px;height:7px;border-radius:50%;z-index:5;
-  background:radial-gradient(circle at 35% 30%,#3b3f45,#15161a 70%);
+  position:absolute;width:6px;height:6px;border-radius:50%;z-index:5;
+  background:radial-gradient(circle at 35% 30%,#35383d,#141518 70%);
   box-shadow:0 1px 1px rgba(0,0,0,.6);
 }
 .bumper.tl{top:-5px;left:-5px} .bumper.tr{top:-5px;right:-5px}
@@ -206,12 +210,12 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 .lcd{
   position:relative;height:100%;width:100%;overflow:hidden;
   border-radius:1px;
-  background:#c3c7c2;
+  background:#c8ccc6;
   isolation:isolate;
 }
 .lcd-inner{position:absolute;inset:0;display:flex;overflow:hidden}
 
-/* subpixel grain + vignette */
+/* subpixel grain + vignette: a matte XGA panel is visibly textured */
 .lcd-grain{
   position:absolute;inset:0;pointer-events:none;z-index:3;
   background:
@@ -221,25 +225,28 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 }
 body.no-grain .lcd-grain{opacity:0}
 
-/* backlight glare on the glass */
+/* Room light on the glass. The panel is matte, so a reflection is not a
+   hard diagonal but a broad soft haze that sits mostly at the top. */
 .lcd-glare{
   position:absolute;inset:0;pointer-events:none;z-index:4;
   background:
-    linear-gradient(122deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.05) 22%,transparent 42%),
-    linear-gradient(0deg,rgba(255,255,255,.05),transparent 30%);
+    radial-gradient(60% 45% at 22% 0%,rgba(255,255,255,.09),transparent 70%),
+    linear-gradient(180deg,rgba(255,255,255,.04),transparent 35%);
   opacity:1;transition:opacity .25s;
 }
 body.no-glare .lcd-glare{opacity:0}
 
 /* Backlight bleed. Screen-blended, so it does nothing on white paper and
-   shows at the corners on a dark one — which is how a real panel leaks. */
+   shows at the corners on a dark one — which is how a real panel leaks.
+   The lamp sits along the bottom edge, so that edge leaks most. */
 .lcd::after{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
   background:
     radial-gradient(58% 38% at 0% 100%,rgba(188,214,255,.17),transparent 62%),
-    radial-gradient(50% 34% at 100% 0%,rgba(188,214,255,.14),transparent 62%),
-    radial-gradient(42% 30% at 100% 100%,rgba(200,220,255,.11),transparent 62%),
-    radial-gradient(46% 30% at 0% 0%,rgba(200,220,255,.10),transparent 62%);
+    radial-gradient(50% 34% at 100% 0%,rgba(188,214,255,.12),transparent 62%),
+    radial-gradient(42% 30% at 100% 100%,rgba(200,220,255,.13),transparent 62%),
+    radial-gradient(46% 30% at 0% 0%,rgba(200,220,255,.09),transparent 62%),
+    linear-gradient(0deg,rgba(200,214,235,.09),transparent 16%);
   mix-blend-mode:screen;
 }
 
@@ -254,25 +261,25 @@ body.no-glare .lcd-glare{opacity:0}
 
 /* bezel foot: IBM · indicators · ThinkPad */
 .bezel-foot{
-  flex:0 0 auto;height:clamp(20px,2.9vh,30px);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  flex:0 0 auto;height:clamp(26px,3.6vh,40px);
+  display:flex;align-items:center;gap:10px;
   padding:0 2px;position:relative;z-index:2;
 }
-.ibm-logo{width:9ch;flex:0 0 auto}
+.ibm-logo{flex:1 1 0;min-width:9ch}
 .ibm-logo span{
   display:inline-block;
-  font:700 clamp(11px,1.5vh,15px)/1 Rockwell,"Courier New",Georgia,serif;
+  font:700 clamp(14px,2vh,20px)/1 Rockwell,"Courier New",Georgia,serif;
   letter-spacing:.06em;
   background-image:repeating-linear-gradient(
-    180deg,#b9bec6 0 2px,rgba(0,0,0,0) 2px 3px);
+    180deg,#c3c7ce 0 2px,rgba(0,0,0,0) 2px 3px);
   -webkit-background-clip:text;background-clip:text;
   color:transparent;
   filter:drop-shadow(0 1px 0 rgba(0,0,0,.6));
 }
 .tp-logo{
-  flex:0 0 auto;text-align:right;position:relative;
-  font:600 clamp(10px,1.45vh,14px)/1 Tahoma,Verdana,sans-serif;
-  letter-spacing:-.01em;color:#9aa0a8;
+  flex:.7 1 0;text-align:right;position:relative;
+  font:600 clamp(11px,1.6vh,16px)/1 Tahoma,Verdana,sans-serif;
+  letter-spacing:-.01em;color:#a9adb4;
   filter:drop-shadow(0 1px 0 rgba(0,0,0,.55));
 }
 .tp-logo .i{position:relative;display:inline-block}
@@ -281,50 +288,67 @@ body.no-glare .lcd-glare{opacity:0}
   width:.26em;height:.26em;border-radius:1px;background:var(--tp-red);
   box-shadow:0 0 3px rgba(212,33,60,.7);
 }
-.leds{display:flex;align-items:center;gap:clamp(6px,1.1vw,14px)}
-.led-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
-.led{
-  width:5px;height:5px;border-radius:50%;
-  background:#1a1c20;
-  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
-  transition:background .12s,box-shadow .12s;
-}
-/* silk-screened marks under each light, the way the bezel had them */
+
+/* The indicators. On this machine the mark printed on the bezel is the
+   light: an LED behind a translucent pictogram. <i class="led"> holds the
+   state for the script; the mark next to it shows it. */
+.leds{flex:0 0 auto;display:flex;align-items:center;gap:clamp(7px,1.2vw,16px)}
+.led-cell{display:flex;align-items:center;justify-content:center}
+.led{display:none}
 .led-cell .ico{
-  width:clamp(8px,1.15vh,11px);
-  height:clamp(8px,1.15vh,11px);
+  width:clamp(9px,1.35vh,13px);
+  height:clamp(9px,1.35vh,13px);
   fill:none;
-  stroke:#5f646c;
-  stroke-width:1.1;
+  stroke:#4d5057;
+  stroke-width:1.15;
   stroke-linecap:round;
   stroke-linejoin:round;
   vector-effect:non-scaling-stroke;
+  transition:stroke .12s,filter .12s;
 }
 .led-cell .ico ellipse,.led-cell .ico rect{fill:none}
 body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
-.led.on{background:var(--led-green);box-shadow:0 0 5px rgba(99,255,134,.75),inset 0 0 2px rgba(255,255,255,.7)}
-.led.amber{background:var(--led-amber);box-shadow:0 0 5px rgba(255,182,61,.7),inset 0 0 2px rgba(255,255,255,.6)}
-.led.blink{animation:ledblink .16s steps(1) 2}
-@keyframes ledblink{0%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}100%{background:#1a1c20;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}}
-.led.pulse{animation:ledpulse 2.4s ease-in-out infinite}
-@keyframes ledpulse{
-  0%,100%{background:#3a2c12;box-shadow:none}
-  50%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}
+.led.on + .ico{
+  stroke:var(--led-green);
+  filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.45));
+}
+.led-bt.on + .ico{
+  stroke:var(--led-blue);
+  filter:drop-shadow(0 0 1.5px rgba(87,168,255,.9)) drop-shadow(0 0 5px rgba(87,168,255,.45));
+}
+.led.amber + .ico{
+  stroke:var(--led-amber);
+  filter:drop-shadow(0 0 1.5px rgba(255,179,71,.9)) drop-shadow(0 0 5px rgba(255,179,71,.45));
+}
+.led.blink + .ico{animation:icoblink .16s steps(1) 2}
+@keyframes icoblink{
+  0%{stroke:var(--led-green);filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.5))}
+  100%{stroke:#4d5057;filter:none}
+}
+.led.pulse + .ico{animation:icopulse 2.4s ease-in-out infinite}
+.led.amber.pulse + .ico{animation:icopulse-amber 2.4s ease-in-out infinite}
+@keyframes icopulse{
+  0%,100%{stroke:#2f4a35;filter:none}
+  50%{stroke:var(--led-green);filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.5))}
+}
+@keyframes icopulse-amber{
+  0%,100%{stroke:#4a3a20;filter:none}
+  50%{stroke:var(--led-amber);filter:drop-shadow(0 0 1.5px rgba(255,179,71,.9)) drop-shadow(0 0 5px rgba(255,179,71,.5))}
 }
 
 /* =====================  HINGES  ===================== */
 .hinges{
   flex:0 0 auto;height:9px;display:flex;align-items:stretch;
-  padding:0 34px;gap:0;
+  padding:0 30px;gap:0;
 }
 .hinges .hinge{
-  width:78px;border-radius:0 0 4px 4px;
-  background:linear-gradient(180deg,#2e3238,#15161a 60%,#0d0e10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 3px rgba(0,0,0,.5);
+  width:84px;border-radius:0 0 4px 4px;
+  background:linear-gradient(180deg,#2c2e32,#151618 60%,#0d0e10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 3px rgba(0,0,0,.5);
 }
 .hinge-gap{
   flex:1;
-  background:linear-gradient(180deg,#0a0b0c,#131418);
+  background:linear-gradient(180deg,#0a0b0c,#131417);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.8);
   margin:0 6px;border-radius:0 0 2px 2px;
 }
@@ -332,9 +356,9 @@ body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
 /* =====================  BASE  ===================== */
 .base{
   flex:0 0 auto;
-  padding:5px 10px 0;
+  padding:5px 12px 0;
   border-radius:3px 3px calc(var(--radius) + 4px) calc(var(--radius) + 4px);
-  background:linear-gradient(180deg,#232529,#1a1c20 40%,#141519);
+  background:linear-gradient(180deg,#222325,#1c1d1f 40%,#161719);
   box-shadow:
     inset 0 1px 0 var(--hair),
     inset 1px 0 0 var(--hair-lo),
@@ -347,21 +371,65 @@ body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
   background-image:var(--noise);opacity:.18;mix-blend-mode:overlay;
 }
 
-/* top row: Access IBM, speaker holes, volume, power */
+/* top row: power and its light, volume, Access IBM, and a grille */
 .topdeck{
   height:clamp(18px,2.4vh,26px);
-  display:flex;align-items:center;gap:10px;
-  padding:0 6px 2px;position:relative;z-index:2;
+  display:flex;align-items:center;gap:8px;
+  padding:0 4px 2px;position:relative;z-index:2;
 }
+.power{
+  appearance:none;cursor:pointer;
+  width:30px;height:13px;border-radius:7px;border:1px solid #0a0b0c;
+  background:linear-gradient(180deg,#3a3d42,#25272b 55%,#1b1d20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(0,0,0,.6);
+  display:grid;place-items:center;padding:0;
+}
+.power svg{
+  width:9px;height:9px;fill:none;stroke:#8d939b;stroke-width:1.4;
+  stroke-linecap:round;
+}
+.power:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.desk:not(.standby) .power svg{stroke:#a9e9b5}
+.pwr-led{
+  width:4px;height:4px;border-radius:50%;margin-left:-4px;
+  background:#1a1c20;box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+  transition:background .2s,box-shadow .2s;
+}
+.desk:not(.standby) .pwr-led{background:var(--led-green);box-shadow:0 0 4px rgba(92,240,124,.8)}
+.desk.standby .pwr-led{animation:pwrpulse 2.4s ease-in-out infinite}
+@keyframes pwrpulse{
+  0%,100%{background:#2f4a35;box-shadow:none}
+  50%{background:var(--led-green);box-shadow:0 0 4px rgba(92,240,124,.8)}
+}
+.hw-buttons{display:flex;align-items:center;gap:4px}
+.hwb{
+  appearance:none;cursor:pointer;width:20px;height:11px;border-radius:3px;
+  border:1px solid #0a0b0d;padding:0;
+  background:linear-gradient(180deg,#34383f,#1c1e22);
+  display:inline-flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.5);
+}
+.hwb svg{
+  width:13px;height:9px;fill:none;stroke:#9aa0a8;stroke-width:1.3;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.hwb svg .spk{fill:#9aa0a8;stroke:none}
+.hwb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.mute-led{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#1a1c20;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+}
+body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182,61,.8)}
 .access-ibm{
   appearance:none;cursor:pointer;
-  padding:2px 9px;border-radius:3px;
+  padding:2px 10px;border-radius:8px;
   border:1px solid #0e3a76;
-  background:linear-gradient(180deg,var(--ibm-blue-lt),var(--ibm-blue) 45%,#1b508f);
-  color:#eaf2ff;
+  background:linear-gradient(180deg,#68a6f5,var(--ibm-blue) 48%,#1d55ad);
+  color:#f2f7ff;
   font:700 clamp(7px,.95vh,9px)/1.4 Tahoma,Verdana,sans-serif;
   letter-spacing:.04em;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 1px 2px rgba(0,0,0,.6);
   white-space:nowrap;
 }
 .access-ibm:hover{filter:brightness(1.12)}
@@ -370,46 +438,11 @@ body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
   box-shadow:inset 0 2px 4px rgba(0,0,0,.5);
 }
 .drilled{
-  flex:1;height:8px;border-radius:4px;
-  background-image:radial-gradient(circle,#0a0b0c 32%,transparent 34%);
-  background-size:7px 7px;background-position:0 1px;
-  opacity:.85;
+  flex:0 0 clamp(56px,9%,100px);height:11px;margin-left:auto;border-radius:4px;
+  background-image:radial-gradient(circle,#08090a 34%,transparent 38%);
+  background-size:5px 5px;background-position:0 1px;
+  opacity:.9;
 }
-.hw-buttons{display:flex;align-items:center;gap:5px}
-.hwb{
-  appearance:none;cursor:pointer;width:20px;height:11px;border-radius:2px;
-  border:1px solid #0a0b0d;
-  background:linear-gradient(180deg,#34383f,#1c1e22);
-  color:#9aa0a8;font:700 8px/1 Tahoma,sans-serif;
-  display:inline-flex;align-items:center;justify-content:center;position:relative;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.5);
-}
-.hwb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
-.mute-led{
-  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
-  width:4px;height:4px;border-radius:50%;background:#1a1c20;
-  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
-}
-body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182,61,.8)}
-.power{
-  appearance:none;cursor:pointer;
-  width:22px;height:22px;border-radius:50%;border:1px solid #0a0b0d;
-  background:radial-gradient(circle at 40% 32%,#3a3e45,#1a1c20 62%,#101114);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.6);
-  display:grid;place-items:center;margin-left:4px;
-}
-.power .ring{
-  width:9px;height:9px;border-radius:50%;
-  border:1.5px solid #7f858d;border-top-color:transparent;
-  position:relative;
-}
-.power .ring::after{
-  content:"";position:absolute;left:50%;top:-3px;transform:translateX(-50%);
-  width:1.5px;height:6px;background:#7f858d;border-radius:1px;
-}
-.power:active{transform:translateY(1px)}
-.desk:not(.standby) .power .ring{border-color:#9fe3ad;border-top-color:transparent}
-.desk:not(.standby) .power .ring::after{background:#9fe3ad}
 
 /* =====================  KEYBOARD  ===================== */
 .keyboard{
@@ -421,45 +454,84 @@ body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182
   box-shadow:inset 0 2px 5px rgba(0,0,0,.85),0 1px 0 var(--hair-lo);
 }
 body.no-keyboard .keyboard{display:none}
-.krow{display:flex;gap:var(--key-gap);height:var(--u)}
+.krow{display:flex;gap:0;height:var(--u)}
 .krow.fn-row{height:calc(var(--u) * .72)}
+
+/* Each key is a fixed share of the row (keyboard.js sets it) with the gap
+   inside it, and the cap is the thing you see. Black, slightly dished,
+   with the legend up in the top-left corner where IBM printed it. */
 .key{
-  appearance:none;
-  flex:1 1 0;min-width:0;
-  border:0;border-radius:3px 3px 5px 5px;
-  background:linear-gradient(180deg,#3a3e45 0%,#2a2d33 42%,#1f2228 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.14),
-    inset 0 -2px 3px rgba(0,0,0,.45),
-    0 2px 2px rgba(0,0,0,.55);
-  color:var(--key-text);
-  font:500 clamp(6px,.98vh,10px)/1.1 Tahoma,Verdana,sans-serif;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 1px;cursor:pointer;user-select:none;
-  transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
-  overflow:hidden;text-overflow:clip;white-space:nowrap;
-  position:relative;
+  appearance:none;border:0;background:none;margin:0;
+  padding:0 calc(var(--key-gap) / 2);
+  min-width:0;height:100%;display:block;position:relative;
+  cursor:pointer;user-select:none;
 }
-.key.wide-label{font-size:clamp(5px,.82vh,8px)}
-.key.fn{color:var(--ibm-blue-lt)}
-.key.spacer{background:none;box-shadow:none;pointer-events:none}
-.key.down,.key:active{
+.key .cap{
+  position:relative;display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:flex-start;
+  width:100%;height:100%;
+  border-radius:2px 2px 3px 3px;
+  background:linear-gradient(180deg,#2c2c2f 0%,#222224 40%,#19191b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 -2px 3px rgba(0,0,0,.5),
+    0 2px 2px rgba(0,0,0,.6);
+  color:var(--key-text);
+  font:500 clamp(6px,1vh,10px)/1 Arial,Helvetica,sans-serif;
+  padding:2px 0 0 3px;
+  overflow:hidden;white-space:nowrap;
+  transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
+}
+.key .cap::before{ /* the dish */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(70% 60% at 50% 40%,rgba(255,255,255,.035),transparent 75%);
+}
+.key.wide-label .cap{font-size:clamp(5px,.82vh,8px)}
+.key.fn .cap{color:var(--key-blue);font-weight:700}
+.key.arrow .cap,.key.browser .cap,.key[data-code="Space"] .cap{
+  align-items:center;justify-content:center;padding:0;
+}
+.key.arrow .cap{font-size:clamp(5px,.8vh,8px)}
+.krow.fn-row .key .cap{
+  flex-direction:row;align-items:center;justify-content:center;gap:2px;
+  padding:0 2px;
+}
+.krow.fn-row .key.has-fn .cap{justify-content:space-between}
+.key.spacer{pointer-events:none}
+.key.down .cap,.key:active .cap{
   transform:translateY(1.5px);
-  background:linear-gradient(180deg,#2b2e34,#232227 60%,#1b1d21);
+  background:linear-gradient(180deg,#232326,#1c1c1f 60%,#151517);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.7),0 0 0 rgba(0,0,0,0);
 }
-.desk.night .key{
-  color:#e6dcc0;
+.desk.night .key .cap{
+  color:#f0e6cc;
   box-shadow:
-    inset 0 1px 0 rgba(255,244,214,.22),
+    inset 0 1px 0 rgba(255,244,214,.2),
     inset 0 -2px 3px rgba(0,0,0,.45),
     0 2px 2px rgba(0,0,0,.55);
 }
 
-/* TrackPoint */
+/* the blue Fn marks, and the browser keys' glyphs */
+.key .fnl,.key .glyph{
+  flex:0 0 auto;
+  width:clamp(7px,1.1vh,11px);height:clamp(7px,1.1vh,11px);
+  fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;
+}
+.key .fnl{stroke:var(--key-blue)}
+.key .glyph{stroke:var(--key-text)}
+
+/* dual-legend keys: the shifted character above, both at the left */
+.key.dual .cap{gap:0;line-height:1;padding-top:1px}
+.key.dual .sub{font-size:.78em;opacity:.7;line-height:1}
+.key.dual .main{line-height:1.05}
+@media (max-height:760px){
+  .key.dual .sub{display:none}
+}
+
+/* TrackPoint: between G, H and B */
 .trackpoint{
   position:absolute;z-index:6;
-  left:45.4%;top:65%;
+  left:45.1%;top:65%;
   transform:translate(-50%,-50%);
   width:calc(var(--u) * .62);height:calc(var(--u) * .62);
   max-width:20px;max-height:20px;min-width:12px;min-height:12px;
@@ -480,24 +552,31 @@ body.no-keyboard .keyboard{display:none}
 /* =====================  PALM REST  ===================== */
 .palmrest{
   position:relative;z-index:2;
-  height:clamp(30px,5.4vh,56px);
+  height:clamp(48px,8.6vh,94px);
   margin-top:4px;
   border-radius:2px 2px 10px 10px;
-  background:linear-gradient(180deg,#1e2024,#191b1f 55%,#141619);
+  background:linear-gradient(180deg,#1f2022,#1a1b1d 55%,#151618);
   box-shadow:inset 0 1px 0 var(--hair-lo);
-  display:flex;align-items:flex-start;justify-content:center;
+  display:flex;align-items:stretch;justify-content:center;
+}
+body.no-touchpad .palmrest{height:clamp(30px,5.4vh,56px)}
+
+/* UltraNav: three TrackPoint buttons, the touchpad, two more buttons */
+.ultranav{
+  display:flex;flex-direction:column;align-items:center;
+  width:clamp(160px,22%,236px);height:100%;
 }
 .tp-buttons{
-  margin-top:-1px;display:flex;gap:2px;
-  width:clamp(150px,22%,210px);height:clamp(12px,1.8vh,18px);
+  flex:0 0 auto;margin-top:-1px;display:flex;gap:2px;
+  width:100%;height:clamp(11px,1.9vh,19px);
 }
 .tpb{
-  appearance:none;border:0;cursor:pointer;flex:1;
-  background:linear-gradient(180deg,#33373d,#212429 60%,#1a1c20);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 1px 2px rgba(0,0,0,.5);
+  appearance:none;border:0;cursor:pointer;flex:1;padding:0;
+  background:linear-gradient(180deg,#303337,#212429 60%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.5);
 }
-.tpb.left{border-radius:0 0 0 8px}
-.tpb.right{border-radius:0 0 8px 0}
+.tpb.left{border-radius:0 0 0 7px}
+.tpb.right{border-radius:0 0 7px 0}
 .tpb.center{
   flex:0 0 26%;
   background:linear-gradient(180deg,#3b6fb5,#28517f 60%,#1d3c60);
@@ -509,7 +588,38 @@ body.no-keyboard .keyboard{display:none}
   background:repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 1px,transparent 1px 3px);
 }
 .tpb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
-.badge{position:absolute;left:16px;bottom:8px}
+.touchpad{
+  flex:1 1 auto;min-height:0;width:90%;
+  margin:clamp(3px,.6vh,6px) 0;
+  border-radius:3px;position:relative;
+  background:linear-gradient(180deg,#303134,#27282b);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 1px 2px rgba(0,0,0,.4),
+    0 1px 0 var(--hair-lo);
+  cursor:ns-resize;touch-action:none;
+}
+.touchpad .tp-scroll{ /* the dotted scroll strip down the right */
+  position:absolute;top:8%;bottom:8%;right:6%;width:2px;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.22) 0 1px,transparent 1px 4px);
+}
+.touchpad.dragging{background:linear-gradient(180deg,#2d2e31,#26272a)}
+.tp-buttons.lower{
+  width:90%;margin-top:0;margin-bottom:clamp(3px,.6vh,6px);
+  height:clamp(10px,1.7vh,17px);
+}
+.tp-buttons.lower .tpb.left{border-radius:3px 0 0 3px}
+.tp-buttons.lower .tpb.right{border-radius:0 3px 3px 0}
+body.no-touchpad .touchpad,body.no-touchpad .tp-buttons.lower{display:none}
+
+/* the fingerprint reader on the right of the palm rest */
+.fingerprint{
+  position:absolute;right:7%;top:50%;transform:translateY(-50%);
+  width:clamp(8px,1.1vh,11px);height:clamp(14px,2.6vh,26px);border-radius:3px;
+  background:linear-gradient(180deg,#0f1012,#1a1b1e);
+  box-shadow:inset 0 0 0 1px #2c2e33,0 0 0 2px #1f2023,0 0 0 3px #0d0e0f;
+}
+.badge{position:absolute;left:16px;bottom:7px}
 .badge-plate{
   display:inline-block;padding:2px 7px;border-radius:2px;
   font:600 clamp(6px,.9vh,9px)/1.2 Tahoma,Verdana,sans-serif;
@@ -517,15 +627,29 @@ body.no-keyboard .keyboard{display:none}
   background:linear-gradient(180deg,#232529,#191b1e);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5);
 }
+
+/* the front edge: latch hooks, the release slider, the infrared window */
 .front-lip{
-  height:8px;margin:0 -10px;
+  height:8px;margin:0 -12px;position:relative;
   border-radius:0 0 var(--radius) var(--radius);
   background:linear-gradient(180deg,#111214,#08090a);
-  display:flex;justify-content:center;gap:26%;align-items:flex-start;
 }
+.front-lip i{position:absolute;top:0}
 .front-lip .latch-slot{
-  width:40px;height:3px;border-radius:0 0 2px 2px;
+  width:38px;height:3px;border-radius:0 0 2px 2px;
   background:#050506;box-shadow:inset 0 1px 1px rgba(0,0,0,.9);
+}
+.front-lip .latch-slot:first-child{left:35%}
+.front-lip .latch-slot + .latch-slot{right:35%}
+.front-lip .latch-slider{
+  left:44%;width:22px;height:5px;border-radius:0 0 2px 2px;
+  background:repeating-linear-gradient(90deg,#2a2b2e 0 2px,#1b1c1e 2px 4px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 1px rgba(0,0,0,.6);
+}
+.front-lip .ir-window{
+  right:9%;width:18px;height:4px;border-radius:0 0 2px 2px;
+  background:linear-gradient(180deg,#2a1013,#160a0c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
 }
 
 /* =====================  THINKLIGHT  ===================== */
@@ -556,7 +680,8 @@ body.no-keyboard .keyboard{display:none}
 @media (max-width:820px){
   :root{--bezel:10px;--radius:10px}
   .machine{width:100%}
-  .keyboard,.tp-buttons{display:none}
+  .keyboard,.ultranav,.fingerprint{display:none}
+  .palmrest{height:24px}
   .hinges{padding:0 18px}
   .hinges .hinge{width:42px}
 }
@@ -579,27 +704,14 @@ body.no-keyboard .keyboard{display:none}
   .print-sheet .meta{font:9pt Tahoma,sans-serif;color:#555;margin:0 0 1.2em}
 }
 
-/* ---------- dual-legend keys (the shifted character above) ---------- */
-.key.dual{
-  flex-direction:column;justify-content:center;gap:0;line-height:1;
-  padding-top:1px;
-}
-.key.dual .sub{
-  font-size:.78em;opacity:.62;line-height:1;
-}
-.key.dual .main{line-height:1.05}
-@media (max-height:760px){
-  .key.dual .sub{display:none}
-}
-
-
 /* ---------- keyboard focus on the machine itself ---------- */
 /* the caps refuse focus on purpose (keyboard.js), so they are not listed */
 .thinklight:focus-visible,
 .access-ibm:focus-visible,
 .hwb:focus-visible,
 .power:focus-visible,
-.tpb:focus-visible{
+.tpb:focus-visible,
+.touchpad:focus-visible{
   outline:2px solid var(--ibm-blue-lt);
   outline-offset:1px;
 }
@@ -616,10 +728,15 @@ body.no-keyboard .keyboard{display:none}
     transition-duration:.001ms !important;
   }
   /* the sleep light still has to read as "asleep", just without the pulse */
-  .led.pulse{
-    background:var(--led-amber);
-    box-shadow:0 0 5px rgba(255,182,61,.7);
+  .led.pulse + .ico{
+    stroke:var(--led-green);
+    filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.45));
   }
+  .led.amber.pulse + .ico{
+    stroke:var(--led-amber);
+    filter:drop-shadow(0 0 1.5px rgba(255,179,71,.9)) drop-shadow(0 0 5px rgba(255,179,71,.45));
+  }
+  .desk.standby .pwr-led{background:var(--led-green);box-shadow:0 0 4px rgba(92,240,124,.8)}
 }
 
 
@@ -675,13 +792,14 @@ body.no-keyboard .keyboard{display:none}
    thumb actually sits.
    ============================================================ */
 body.worn .key[data-wear]::after{
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  content:"";position:absolute;inset:0 calc(var(--key-gap) / 2);
+  border-radius:2px 2px 3px 3px;pointer-events:none;
   background:radial-gradient(58% 46% at 50% 42%,rgba(255,255,255,.055),transparent 72%);
 }
 body.worn .key[data-wear="2"]::after{
   background:radial-gradient(64% 54% at 50% 42%,rgba(255,255,255,.11),transparent 74%);
 }
-body.worn .key[data-wear="2"]{color:#b7babf}
+body.worn .key[data-wear="2"] .cap{color:#c9c9c5}
 body.worn .key[data-code="Space"]::after{
   background:radial-gradient(24% 56% at 60% 48%,rgba(255,255,255,.10),transparent 72%);
 }
@@ -693,22 +811,26 @@ body.worn[data-case="titanium"] .key[data-wear]::after{
 body.worn[data-case="titanium"] .key[data-wear="2"]::after{
   background:radial-gradient(64% 54% at 50% 42%,rgba(0,0,0,.10),transparent 74%);
 }
-body.worn[data-case="titanium"] .key[data-wear="2"]{color:#31343a}
+body.worn[data-case="titanium"] .key[data-wear="2"] .cap{color:#31343a}
 body.worn[data-case="titanium"] .key[data-code="Space"]::after{
   background:radial-gradient(24% 56% at 60% 48%,rgba(0,0,0,.09),transparent 72%);
 }
 
-/* where wrists have rested */
+/* where wrists have rested, and the touchpad's dull patch in the middle */
 body.worn .palmrest::after{
   content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:
-    radial-gradient(20% 54% at 26% 64%,rgba(255,255,255,.05),transparent 72%),
-    radial-gradient(20% 54% at 74% 64%,rgba(255,255,255,.05),transparent 72%);
+    radial-gradient(18% 54% at 22% 64%,rgba(255,255,255,.05),transparent 72%),
+    radial-gradient(18% 54% at 78% 64%,rgba(255,255,255,.05),transparent 72%);
 }
 body.worn[data-case="titanium"] .palmrest::after{
   background:
-    radial-gradient(20% 54% at 26% 64%,rgba(0,0,0,.05),transparent 72%),
-    radial-gradient(20% 54% at 74% 64%,rgba(0,0,0,.05),transparent 72%);
+    radial-gradient(18% 54% at 22% 64%,rgba(0,0,0,.05),transparent 72%),
+    radial-gradient(18% 54% at 78% 64%,rgba(0,0,0,.05),transparent 72%);
+}
+body.worn .touchpad::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(50% 60% at 48% 50%,rgba(255,255,255,.06),transparent 75%);
 }
 
 /* the cap's texture goes smooth in the middle, and picks up a sheen */

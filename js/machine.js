@@ -12,7 +12,7 @@
 
   var deps = {};
   var body, desk, machineEl, screenEl, editor;
-  var ledPwr, ledBat, ledSlp, ledHdd, ledCap, ledNum, batteryCell;
+  var ledPwr, ledBat, ledSlp, ledHdd, ledCap, ledNum, ledWifi, batteryCell, wifiCell;
   var batteryRepaint = null;
 
   var ASPECTS = { '4:3': 4 / 3, '16:10': 1.6 };
@@ -30,13 +30,17 @@
 
     ledPwr = $('.led-pwr'); ledBat = $('.led-bat'); ledSlp = $('.led-slp');
     ledHdd = $('.led-hdd'); ledCap = $('.led-cap'); ledNum = $('.led-num');
+    ledWifi = $('.led-wifi');
     batteryCell = ledBat.parentNode;
+    wifiCell = ledWifi.parentNode;
 
     addLightCone();
     wireButtons();
     wireTrackPoint();
+    wireTouchpad();
     wireKeyMirror();
     wireIdle();
+    watchWireless();
     window.addEventListener('resize', onResize);
   }
 
@@ -115,6 +119,7 @@
     body.classList.toggle('no-case', !p.showCase);
     body.classList.toggle('no-keyboard', !p.deck);
     body.classList.toggle('no-tpb', !p.tpButtons);
+    body.classList.toggle('no-touchpad', !p.touchpad);
     body.classList.toggle('no-leds', !p.leds);
     body.classList.toggle('no-glare', !p.glare);
     body.classList.toggle('no-grain', !p.grain);
@@ -178,6 +183,21 @@
       b.addEventListener('levelchange', batteryRepaint);
       b.addEventListener('chargingchange', batteryRepaint);
     }, function () { /* refused: leave the light alone */ });
+  }
+
+  /* The wireless light is the one indicator with something honest to
+     report: it is lit while the browser says it has a network, and goes
+     out when it does not — which is exactly what the antenna mark on the
+     bezel meant. */
+  function paintWireless() {
+    var online = navigator.onLine !== false;
+    ledWifi.classList.toggle('on', online);
+    wifiCell.title = online ? 'Wireless — connected' : 'Wireless — no network';
+  }
+  function watchWireless() {
+    paintWireless();
+    window.addEventListener('online', paintWireless);
+    window.addEventListener('offline', paintWireless);
   }
 
   /* ---------------------------------------------------------
@@ -316,6 +336,8 @@
     $('#tpbCenter').addEventListener('click', function () {
       deps.setMsg('Hold the red nub and push to scroll');
     });
+    $('#tpbLeft2').addEventListener('click', function () { deps.onPrevNote(); });
+    $('#tpbRight2').addEventListener('click', function () { deps.onNextNote(); });
 
     /* any prod wakes it up, except the button that put it to sleep */
     desk.addEventListener('mousedown', function (e) {
@@ -365,6 +387,43 @@
     nub.addEventListener('pointerup', stop);
     nub.addEventListener('pointercancel', stop);
     nub.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { editor.scrollTop += 40; e.preventDefault(); }
+      if (e.key === 'ArrowUp') { editor.scrollTop -= 40; e.preventDefault(); }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     UltraNav touchpad: a finger dragged down it scrolls the page down,
+     one for one, the way a touchpad's scroll strip did. The TrackPoint
+     is a force stick and scrolls by how hard you push; this scrolls by
+     how far you move.
+     --------------------------------------------------------- */
+  function wireTouchpad() {
+    var pad = $('#touchpad');
+    if (!pad) return;
+    var dragging = false, lastY = 0;
+
+    pad.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      lastY = e.clientY;
+      pad.classList.add('dragging');
+      pad.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    pad.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      editor.scrollTop += (e.clientY - lastY) * 2;
+      lastY = e.clientY;
+    });
+    function stop(e) {
+      if (!dragging) return;
+      dragging = false;
+      pad.classList.remove('dragging');
+      try { pad.releasePointerCapture(e.pointerId); } catch (err) { /* already gone */ }
+    }
+    pad.addEventListener('pointerup', stop);
+    pad.addEventListener('pointercancel', stop);
+    pad.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowDown') { editor.scrollTop += 40; e.preventDefault(); }
       if (e.key === 'ArrowUp') { editor.scrollTop -= 40; e.preventDefault(); }
     });
@@ -421,7 +480,7 @@
       '<div class="post-mem"></div>' +
       '<div class="post-foot">' +
         '<span class="post-tp">ThinkPad</span>' +
-        '<span class="post-hint">Press F1 for IBM BIOS Setup Utility</span>' +
+        '<span class="post-hint">To interrupt normal startup, press the blue Access IBM button</span>' +
       '</div>';
     lcd.appendChild(postEl);
 

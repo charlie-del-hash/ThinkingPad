@@ -1,45 +1,50 @@
 <!doctype html>
-<!-- ThinkPad Notes — built by build.js from sources 0be6d5b74463. Edit the sources, not this file. -->
+<!-- ThinkPad Notes — built by build.js from sources cd84b5f956d9. Edit the sources, not this file. -->
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ThinkPad Notes</title>
-<meta name="description" content="A skeuomorphic plain-text notepad in the shape of an early-2000s IBM ThinkPad.">
+<meta name="description" content="A skeuomorphic plain-text notepad in the shape of a mid-2000s IBM ThinkPad.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%231d1f23'/%3E%3Crect x='5' y='8' width='22' height='14' rx='1' fill='%23cfd8d0'/%3E%3Ccircle cx='16' cy='26' r='2.5' fill='%23d21f3c'/%3E%3C/svg%3E">
 <style>
 /* css/chassis.css */
 /* ============================================================
    chassis.css — the physical machine
-   An early-2000s IBM ThinkPad (A/T series era, 1999-2004):
-   matte black magnesium-look plastic, chunky bezel, red
-   TrackPoint, blue Access IBM button, ThinkLight.
+   A mid-2000s IBM ThinkPad, the T4x as it left Yamato (2003-05):
+   soft-touch matte black, a deep bezel with the indicators lit
+   through printed marks, the seven-row keyboard with its blue Fn
+   legends, the red TrackPoint, the UltraNav touchpad under the
+   space bar, and the blue Access IBM button beside the power key.
    ============================================================ */
 
 :root{
-  /* casing */
-  --case:#1c1e22;
-  --case-dk:#141518;
-  --case-dkr:#0c0d0f;
-  --case-lt:#292c32;
-  --hair:rgba(255,255,255,.075);
-  --hair-lo:rgba(255,255,255,.04);
+  /* casing — a flat, neutral black. Rubberised paint has almost no
+     specular, so the highlights here are broad and faint. */
+  --case:#1f2022;
+  --case-dk:#161718;
+  --case-dkr:#0d0e0f;
+  --case-lt:#2a2b2e;
+  --hair:rgba(255,255,255,.06);
+  --hair-lo:rgba(255,255,255,.03);
 
   /* accents */
-  --tp-red:#d4213c;
-  --tp-red-lt:#f0475f;
-  --tp-red-dk:#7d0f20;
-  --ibm-blue:#2a6ec7;
-  --ibm-blue-lt:#5b9df0;
-  --led-green:#63ff86;
-  --led-amber:#ffb63d;
-  --key-text:#c9ccd1;
+  --tp-red:#d4232e;
+  --tp-red-lt:#ef4d55;
+  --tp-red-dk:#7a1017;
+  --ibm-blue:#2a6bd0;
+  --ibm-blue-lt:#5f9cf2;
+  --led-green:#5cf07c;
+  --led-amber:#ffb347;
+  --led-blue:#57a8ff;
+  --key-text:#e9e9e6;
+  --key-blue:#6aa3f5;
 
   /* metrics */
   --u:clamp(21px,2.6vh,32px);           /* key unit height          */
   --key-gap:3px;
-  --bezel:clamp(16px,2.2vh,26px);       /* side bezel width         */
-  --radius:14px;
+  --bezel:clamp(18px,3vh,34px);         /* side bezel width         */
+  --radius:12px;
 
   --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
 }
@@ -65,7 +70,7 @@ body{
   gap:6px;
   padding:clamp(6px,1.6vh,20px) 10px;
   background:
-    radial-gradient(120% 95% at 50% -12%, #55565b 0%, #35373b 30%, #212327 60%, #131416 88%, #0d0e10 100%);
+    radial-gradient(120% 95% at 50% -12%, #4e4f52 0%, #333437 30%, #202124 60%, #131315 88%, #0d0d0f 100%);
   transition:background .5s ease;
 }
 .desk::after{ /* desk grain */
@@ -94,7 +99,7 @@ body{
 .machine{
   position:relative;
   flex:1 1 auto;
-  width:min(1060px,97vw);
+  width:min(1100px,97vw);
   max-height:1000px;
   min-height:0;
   display:flex;
@@ -120,7 +125,7 @@ body.deck-flat .base{
 }
 
 /* The panel is 4:3, the way every ThinkPad panel was before widescreen.
-   app.js measures the case around it and sets these two values so the
+   machine.js measures the case around it and sets these two values so the
    whole machine lands inside the window. Without JS the layout below
    simply fills the height instead. */
 body.fitted .machine{
@@ -137,10 +142,10 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
   flex:1 1 auto;min-height:0;
   display:flex;flex-direction:column;
   position:relative;
-  padding:6px 6px 0;
+  padding:6px 7px 0;
   border-radius:var(--radius) var(--radius) 3px 3px;
   background:
-    linear-gradient(180deg,var(--case-lt) 0%,var(--case) 4px,var(--case) 100%);
+    linear-gradient(180deg,var(--case-lt) 0%,var(--case) 3px,var(--case) 100%);
   box-shadow:
     inset 0 1px 0 var(--hair),
     inset 1px 0 0 var(--hair-lo),
@@ -149,10 +154,10 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 }
 .lid-latches{
   position:absolute;top:-5px;left:0;right:0;height:6px;
-  display:flex;justify-content:center;gap:26%;
+  display:flex;justify-content:center;gap:30%;
 }
 .lid-latches i{
-  width:44px;height:6px;border-radius:3px 3px 0 0;
+  width:40px;height:6px;border-radius:3px 3px 0 0;
   background:linear-gradient(180deg,var(--case-lt),var(--case-dk));
   box-shadow:inset 0 1px 0 var(--hair);
 }
@@ -161,35 +166,34 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
   flex:1 1 auto;min-height:0;
   display:flex;flex-direction:column;
   padding:0 var(--bezel);
-  border-radius:9px 9px 2px 2px;
-  background:
-    linear-gradient(180deg,#26282d,#191b1f 30%,#16181b 100%);
+  border-radius:8px 8px 2px 2px;
+  background:linear-gradient(180deg,#222325,#1a1b1d 25%,#171819 100%);
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.55);
   position:relative;overflow:hidden;
 }
 .bezel::after{
   content:"";position:absolute;inset:0;pointer-events:none;
-  background-image:var(--noise);opacity:.2;mix-blend-mode:overlay;
+  background-image:var(--noise);opacity:.18;mix-blend-mode:overlay;
 }
 
+/* the ThinkLight: a small lens in the top of the bezel, with its mark */
 .bezel-top{
-  flex:0 0 auto;height:clamp(14px,2vh,22px);
+  flex:0 0 auto;height:clamp(18px,2.4vh,28px);
   display:flex;align-items:center;justify-content:center;
 }
 .thinklight{
-  appearance:none;border:0;background:none;padding:4px 10px;cursor:pointer;
-  display:flex;align-items:center;gap:6px;position:relative;
+  appearance:none;border:0;background:none;padding:4px 8px;cursor:pointer;
+  display:flex;align-items:center;gap:5px;position:relative;
 }
 .thinklight .bulb{
-  width:9px;height:5px;border-radius:5px 5px 2px 2px;
-  background:linear-gradient(180deg,#4b4f56,#2a2d32);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+  width:11px;height:5px;border-radius:5px;
+  background:linear-gradient(180deg,#3d4045,#26282c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 1px rgba(0,0,0,.5);
   transition:background .2s,box-shadow .2s;
 }
-.thinklight::after{ /* engraved lamp label */
-  content:"";position:absolute;inset:auto auto -1px 50%;
-  transform:translateX(-50%);
-  width:26px;height:1px;background:rgba(255,255,255,.05);
+.thinklight .lamp-mark{
+  width:12px;height:8px;fill:none;stroke:#45484e;stroke-width:1.2;
+  stroke-linecap:round;stroke-linejoin:round;
 }
 .desk.night .thinklight .bulb{
   background:linear-gradient(180deg,#fff9e6,#ffe9a8);
@@ -199,15 +203,15 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 /* screen well */
 .screen{
   flex:1 1 auto;min-height:0;position:relative;
-  padding:3px;border-radius:3px;
-  background:linear-gradient(180deg,#0a0b0c,#101113);
+  padding:3px;border-radius:2px;
+  background:linear-gradient(180deg,#09090a,#0f1011);
   box-shadow:
     inset 0 2px 5px rgba(0,0,0,.9),
     0 1px 0 var(--hair-lo);
 }
 .bumper{
-  position:absolute;width:7px;height:7px;border-radius:50%;z-index:5;
-  background:radial-gradient(circle at 35% 30%,#3b3f45,#15161a 70%);
+  position:absolute;width:6px;height:6px;border-radius:50%;z-index:5;
+  background:radial-gradient(circle at 35% 30%,#35383d,#141518 70%);
   box-shadow:0 1px 1px rgba(0,0,0,.6);
 }
 .bumper.tl{top:-5px;left:-5px} .bumper.tr{top:-5px;right:-5px}
@@ -217,12 +221,12 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 .lcd{
   position:relative;height:100%;width:100%;overflow:hidden;
   border-radius:1px;
-  background:#c3c7c2;
+  background:#c8ccc6;
   isolation:isolate;
 }
 .lcd-inner{position:absolute;inset:0;display:flex;overflow:hidden}
 
-/* subpixel grain + vignette */
+/* subpixel grain + vignette: a matte XGA panel is visibly textured */
 .lcd-grain{
   position:absolute;inset:0;pointer-events:none;z-index:3;
   background:
@@ -232,25 +236,28 @@ body.fitted .screen{flex:0 0 auto;height:var(--screen-h)}
 }
 body.no-grain .lcd-grain{opacity:0}
 
-/* backlight glare on the glass */
+/* Room light on the glass. The panel is matte, so a reflection is not a
+   hard diagonal but a broad soft haze that sits mostly at the top. */
 .lcd-glare{
   position:absolute;inset:0;pointer-events:none;z-index:4;
   background:
-    linear-gradient(122deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.05) 22%,transparent 42%),
-    linear-gradient(0deg,rgba(255,255,255,.05),transparent 30%);
+    radial-gradient(60% 45% at 22% 0%,rgba(255,255,255,.09),transparent 70%),
+    linear-gradient(180deg,rgba(255,255,255,.04),transparent 35%);
   opacity:1;transition:opacity .25s;
 }
 body.no-glare .lcd-glare{opacity:0}
 
 /* Backlight bleed. Screen-blended, so it does nothing on white paper and
-   shows at the corners on a dark one — which is how a real panel leaks. */
+   shows at the corners on a dark one — which is how a real panel leaks.
+   The lamp sits along the bottom edge, so that edge leaks most. */
 .lcd::after{
   content:"";position:absolute;inset:0;pointer-events:none;z-index:5;
   background:
     radial-gradient(58% 38% at 0% 100%,rgba(188,214,255,.17),transparent 62%),
-    radial-gradient(50% 34% at 100% 0%,rgba(188,214,255,.14),transparent 62%),
-    radial-gradient(42% 30% at 100% 100%,rgba(200,220,255,.11),transparent 62%),
-    radial-gradient(46% 30% at 0% 0%,rgba(200,220,255,.10),transparent 62%);
+    radial-gradient(50% 34% at 100% 0%,rgba(188,214,255,.12),transparent 62%),
+    radial-gradient(42% 30% at 100% 100%,rgba(200,220,255,.13),transparent 62%),
+    radial-gradient(46% 30% at 0% 0%,rgba(200,220,255,.09),transparent 62%),
+    linear-gradient(0deg,rgba(200,214,235,.09),transparent 16%);
   mix-blend-mode:screen;
 }
 
@@ -265,25 +272,25 @@ body.no-glare .lcd-glare{opacity:0}
 
 /* bezel foot: IBM · indicators · ThinkPad */
 .bezel-foot{
-  flex:0 0 auto;height:clamp(20px,2.9vh,30px);
-  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  flex:0 0 auto;height:clamp(26px,3.6vh,40px);
+  display:flex;align-items:center;gap:10px;
   padding:0 2px;position:relative;z-index:2;
 }
-.ibm-logo{width:9ch;flex:0 0 auto}
+.ibm-logo{flex:1 1 0;min-width:9ch}
 .ibm-logo span{
   display:inline-block;
-  font:700 clamp(11px,1.5vh,15px)/1 Rockwell,"Courier New",Georgia,serif;
+  font:700 clamp(14px,2vh,20px)/1 Rockwell,"Courier New",Georgia,serif;
   letter-spacing:.06em;
   background-image:repeating-linear-gradient(
-    180deg,#b9bec6 0 2px,rgba(0,0,0,0) 2px 3px);
+    180deg,#c3c7ce 0 2px,rgba(0,0,0,0) 2px 3px);
   -webkit-background-clip:text;background-clip:text;
   color:transparent;
   filter:drop-shadow(0 1px 0 rgba(0,0,0,.6));
 }
 .tp-logo{
-  flex:0 0 auto;text-align:right;position:relative;
-  font:600 clamp(10px,1.45vh,14px)/1 Tahoma,Verdana,sans-serif;
-  letter-spacing:-.01em;color:#9aa0a8;
+  flex:.7 1 0;text-align:right;position:relative;
+  font:600 clamp(11px,1.6vh,16px)/1 Tahoma,Verdana,sans-serif;
+  letter-spacing:-.01em;color:#a9adb4;
   filter:drop-shadow(0 1px 0 rgba(0,0,0,.55));
 }
 .tp-logo .i{position:relative;display:inline-block}
@@ -292,50 +299,67 @@ body.no-glare .lcd-glare{opacity:0}
   width:.26em;height:.26em;border-radius:1px;background:var(--tp-red);
   box-shadow:0 0 3px rgba(212,33,60,.7);
 }
-.leds{display:flex;align-items:center;gap:clamp(6px,1.1vw,14px)}
-.led-cell{display:flex;flex-direction:column;align-items:center;gap:2px}
-.led{
-  width:5px;height:5px;border-radius:50%;
-  background:#1a1c20;
-  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
-  transition:background .12s,box-shadow .12s;
-}
-/* silk-screened marks under each light, the way the bezel had them */
+
+/* The indicators. On this machine the mark printed on the bezel is the
+   light: an LED behind a translucent pictogram. <i class="led"> holds the
+   state for the script; the mark next to it shows it. */
+.leds{flex:0 0 auto;display:flex;align-items:center;gap:clamp(7px,1.2vw,16px)}
+.led-cell{display:flex;align-items:center;justify-content:center}
+.led{display:none}
 .led-cell .ico{
-  width:clamp(8px,1.15vh,11px);
-  height:clamp(8px,1.15vh,11px);
+  width:clamp(9px,1.35vh,13px);
+  height:clamp(9px,1.35vh,13px);
   fill:none;
-  stroke:#5f646c;
-  stroke-width:1.1;
+  stroke:#4d5057;
+  stroke-width:1.15;
   stroke-linecap:round;
   stroke-linejoin:round;
   vector-effect:non-scaling-stroke;
+  transition:stroke .12s,filter .12s;
 }
 .led-cell .ico ellipse,.led-cell .ico rect{fill:none}
 body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
-.led.on{background:var(--led-green);box-shadow:0 0 5px rgba(99,255,134,.75),inset 0 0 2px rgba(255,255,255,.7)}
-.led.amber{background:var(--led-amber);box-shadow:0 0 5px rgba(255,182,61,.7),inset 0 0 2px rgba(255,255,255,.6)}
-.led.blink{animation:ledblink .16s steps(1) 2}
-@keyframes ledblink{0%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}100%{background:#1a1c20;box-shadow:inset 0 1px 1px rgba(0,0,0,.8)}}
-.led.pulse{animation:ledpulse 2.4s ease-in-out infinite}
-@keyframes ledpulse{
-  0%,100%{background:#3a2c12;box-shadow:none}
-  50%{background:var(--led-amber);box-shadow:0 0 6px rgba(255,182,61,.8)}
+.led.on + .ico{
+  stroke:var(--led-green);
+  filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.45));
+}
+.led-bt.on + .ico{
+  stroke:var(--led-blue);
+  filter:drop-shadow(0 0 1.5px rgba(87,168,255,.9)) drop-shadow(0 0 5px rgba(87,168,255,.45));
+}
+.led.amber + .ico{
+  stroke:var(--led-amber);
+  filter:drop-shadow(0 0 1.5px rgba(255,179,71,.9)) drop-shadow(0 0 5px rgba(255,179,71,.45));
+}
+.led.blink + .ico{animation:icoblink .16s steps(1) 2}
+@keyframes icoblink{
+  0%{stroke:var(--led-green);filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.5))}
+  100%{stroke:#4d5057;filter:none}
+}
+.led.pulse + .ico{animation:icopulse 2.4s ease-in-out infinite}
+.led.amber.pulse + .ico{animation:icopulse-amber 2.4s ease-in-out infinite}
+@keyframes icopulse{
+  0%,100%{stroke:#2f4a35;filter:none}
+  50%{stroke:var(--led-green);filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.5))}
+}
+@keyframes icopulse-amber{
+  0%,100%{stroke:#4a3a20;filter:none}
+  50%{stroke:var(--led-amber);filter:drop-shadow(0 0 1.5px rgba(255,179,71,.9)) drop-shadow(0 0 5px rgba(255,179,71,.5))}
 }
 
 /* =====================  HINGES  ===================== */
 .hinges{
   flex:0 0 auto;height:9px;display:flex;align-items:stretch;
-  padding:0 34px;gap:0;
+  padding:0 30px;gap:0;
 }
 .hinges .hinge{
-  width:78px;border-radius:0 0 4px 4px;
-  background:linear-gradient(180deg,#2e3238,#15161a 60%,#0d0e10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 2px 3px rgba(0,0,0,.5);
+  width:84px;border-radius:0 0 4px 4px;
+  background:linear-gradient(180deg,#2c2e32,#151618 60%,#0d0e10);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 3px rgba(0,0,0,.5);
 }
 .hinge-gap{
   flex:1;
-  background:linear-gradient(180deg,#0a0b0c,#131418);
+  background:linear-gradient(180deg,#0a0b0c,#131417);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.8);
   margin:0 6px;border-radius:0 0 2px 2px;
 }
@@ -343,9 +367,9 @@ body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
 /* =====================  BASE  ===================== */
 .base{
   flex:0 0 auto;
-  padding:5px 10px 0;
+  padding:5px 12px 0;
   border-radius:3px 3px calc(var(--radius) + 4px) calc(var(--radius) + 4px);
-  background:linear-gradient(180deg,#232529,#1a1c20 40%,#141519);
+  background:linear-gradient(180deg,#222325,#1c1d1f 40%,#161719);
   box-shadow:
     inset 0 1px 0 var(--hair),
     inset 1px 0 0 var(--hair-lo),
@@ -358,21 +382,65 @@ body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
   background-image:var(--noise);opacity:.18;mix-blend-mode:overlay;
 }
 
-/* top row: Access IBM, speaker holes, volume, power */
+/* top row: power and its light, volume, Access IBM, and a grille */
 .topdeck{
   height:clamp(18px,2.4vh,26px);
-  display:flex;align-items:center;gap:10px;
-  padding:0 6px 2px;position:relative;z-index:2;
+  display:flex;align-items:center;gap:8px;
+  padding:0 4px 2px;position:relative;z-index:2;
 }
+.power{
+  appearance:none;cursor:pointer;
+  width:30px;height:13px;border-radius:7px;border:1px solid #0a0b0c;
+  background:linear-gradient(180deg,#3a3d42,#25272b 55%,#1b1d20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.16),0 1px 2px rgba(0,0,0,.6);
+  display:grid;place-items:center;padding:0;
+}
+.power svg{
+  width:9px;height:9px;fill:none;stroke:#8d939b;stroke-width:1.4;
+  stroke-linecap:round;
+}
+.power:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.desk:not(.standby) .power svg{stroke:#a9e9b5}
+.pwr-led{
+  width:4px;height:4px;border-radius:50%;margin-left:-4px;
+  background:#1a1c20;box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+  transition:background .2s,box-shadow .2s;
+}
+.desk:not(.standby) .pwr-led{background:var(--led-green);box-shadow:0 0 4px rgba(92,240,124,.8)}
+.desk.standby .pwr-led{animation:pwrpulse 2.4s ease-in-out infinite}
+@keyframes pwrpulse{
+  0%,100%{background:#2f4a35;box-shadow:none}
+  50%{background:var(--led-green);box-shadow:0 0 4px rgba(92,240,124,.8)}
+}
+.hw-buttons{display:flex;align-items:center;gap:4px}
+.hwb{
+  appearance:none;cursor:pointer;width:20px;height:11px;border-radius:3px;
+  border:1px solid #0a0b0d;padding:0;
+  background:linear-gradient(180deg,#34383f,#1c1e22);
+  display:inline-flex;align-items:center;justify-content:center;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.5);
+}
+.hwb svg{
+  width:13px;height:9px;fill:none;stroke:#9aa0a8;stroke-width:1.3;
+  stroke-linecap:round;stroke-linejoin:round;
+}
+.hwb svg .spk{fill:#9aa0a8;stroke:none}
+.hwb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
+.mute-led{
+  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#1a1c20;
+  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
+}
+body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182,61,.8)}
 .access-ibm{
   appearance:none;cursor:pointer;
-  padding:2px 9px;border-radius:3px;
+  padding:2px 10px;border-radius:8px;
   border:1px solid #0e3a76;
-  background:linear-gradient(180deg,var(--ibm-blue-lt),var(--ibm-blue) 45%,#1b508f);
-  color:#eaf2ff;
+  background:linear-gradient(180deg,#68a6f5,var(--ibm-blue) 48%,#1d55ad);
+  color:#f2f7ff;
   font:700 clamp(7px,.95vh,9px)/1.4 Tahoma,Verdana,sans-serif;
   letter-spacing:.04em;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 2px rgba(0,0,0,.6);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 1px 2px rgba(0,0,0,.6);
   white-space:nowrap;
 }
 .access-ibm:hover{filter:brightness(1.12)}
@@ -381,46 +449,11 @@ body[data-case="titanium"] .led-cell .ico{stroke:#6d727a}
   box-shadow:inset 0 2px 4px rgba(0,0,0,.5);
 }
 .drilled{
-  flex:1;height:8px;border-radius:4px;
-  background-image:radial-gradient(circle,#0a0b0c 32%,transparent 34%);
-  background-size:7px 7px;background-position:0 1px;
-  opacity:.85;
+  flex:0 0 clamp(56px,9%,100px);height:11px;margin-left:auto;border-radius:4px;
+  background-image:radial-gradient(circle,#08090a 34%,transparent 38%);
+  background-size:5px 5px;background-position:0 1px;
+  opacity:.9;
 }
-.hw-buttons{display:flex;align-items:center;gap:5px}
-.hwb{
-  appearance:none;cursor:pointer;width:20px;height:11px;border-radius:2px;
-  border:1px solid #0a0b0d;
-  background:linear-gradient(180deg,#34383f,#1c1e22);
-  color:#9aa0a8;font:700 8px/1 Tahoma,sans-serif;
-  display:inline-flex;align-items:center;justify-content:center;position:relative;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 1px 2px rgba(0,0,0,.5);
-}
-.hwb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
-.mute-led{
-  position:absolute;top:-4px;left:50%;transform:translateX(-50%);
-  width:4px;height:4px;border-radius:50%;background:#1a1c20;
-  box-shadow:inset 0 1px 1px rgba(0,0,0,.8);
-}
-body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182,61,.8)}
-.power{
-  appearance:none;cursor:pointer;
-  width:22px;height:22px;border-radius:50%;border:1px solid #0a0b0d;
-  background:radial-gradient(circle at 40% 32%,#3a3e45,#1a1c20 62%,#101114);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 2px 3px rgba(0,0,0,.6);
-  display:grid;place-items:center;margin-left:4px;
-}
-.power .ring{
-  width:9px;height:9px;border-radius:50%;
-  border:1.5px solid #7f858d;border-top-color:transparent;
-  position:relative;
-}
-.power .ring::after{
-  content:"";position:absolute;left:50%;top:-3px;transform:translateX(-50%);
-  width:1.5px;height:6px;background:#7f858d;border-radius:1px;
-}
-.power:active{transform:translateY(1px)}
-.desk:not(.standby) .power .ring{border-color:#9fe3ad;border-top-color:transparent}
-.desk:not(.standby) .power .ring::after{background:#9fe3ad}
 
 /* =====================  KEYBOARD  ===================== */
 .keyboard{
@@ -432,45 +465,84 @@ body.muted .mute-led{background:var(--led-amber);box-shadow:0 0 4px rgba(255,182
   box-shadow:inset 0 2px 5px rgba(0,0,0,.85),0 1px 0 var(--hair-lo);
 }
 body.no-keyboard .keyboard{display:none}
-.krow{display:flex;gap:var(--key-gap);height:var(--u)}
+.krow{display:flex;gap:0;height:var(--u)}
 .krow.fn-row{height:calc(var(--u) * .72)}
+
+/* Each key is a fixed share of the row (keyboard.js sets it) with the gap
+   inside it, and the cap is the thing you see. Black, slightly dished,
+   with the legend up in the top-left corner where IBM printed it. */
 .key{
-  appearance:none;
-  flex:1 1 0;min-width:0;
-  border:0;border-radius:3px 3px 5px 5px;
-  background:linear-gradient(180deg,#3a3e45 0%,#2a2d33 42%,#1f2228 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.14),
-    inset 0 -2px 3px rgba(0,0,0,.45),
-    0 2px 2px rgba(0,0,0,.55);
-  color:var(--key-text);
-  font:500 clamp(6px,.98vh,10px)/1.1 Tahoma,Verdana,sans-serif;
-  display:flex;align-items:center;justify-content:center;
-  padding:0 1px;cursor:pointer;user-select:none;
-  transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
-  overflow:hidden;text-overflow:clip;white-space:nowrap;
-  position:relative;
+  appearance:none;border:0;background:none;margin:0;
+  padding:0 calc(var(--key-gap) / 2);
+  min-width:0;height:100%;display:block;position:relative;
+  cursor:pointer;user-select:none;
 }
-.key.wide-label{font-size:clamp(5px,.82vh,8px)}
-.key.fn{color:var(--ibm-blue-lt)}
-.key.spacer{background:none;box-shadow:none;pointer-events:none}
-.key.down,.key:active{
+.key .cap{
+  position:relative;display:flex;flex-direction:column;
+  align-items:flex-start;justify-content:flex-start;
+  width:100%;height:100%;
+  border-radius:2px 2px 3px 3px;
+  background:linear-gradient(180deg,#2c2c2f 0%,#222224 40%,#19191b 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.09),
+    inset 0 -2px 3px rgba(0,0,0,.5),
+    0 2px 2px rgba(0,0,0,.6);
+  color:var(--key-text);
+  font:500 clamp(6px,1vh,10px)/1 Arial,Helvetica,sans-serif;
+  padding:2px 0 0 3px;
+  overflow:hidden;white-space:nowrap;
+  transition:transform .04s linear,box-shadow .04s linear,background .04s linear;
+}
+.key .cap::before{ /* the dish */
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(70% 60% at 50% 40%,rgba(255,255,255,.035),transparent 75%);
+}
+.key.wide-label .cap{font-size:clamp(5px,.82vh,8px)}
+.key.fn .cap{color:var(--key-blue);font-weight:700}
+.key.arrow .cap,.key.browser .cap,.key[data-code="Space"] .cap{
+  align-items:center;justify-content:center;padding:0;
+}
+.key.arrow .cap{font-size:clamp(5px,.8vh,8px)}
+.krow.fn-row .key .cap{
+  flex-direction:row;align-items:center;justify-content:center;gap:2px;
+  padding:0 2px;
+}
+.krow.fn-row .key.has-fn .cap{justify-content:space-between}
+.key.spacer{pointer-events:none}
+.key.down .cap,.key:active .cap{
   transform:translateY(1.5px);
-  background:linear-gradient(180deg,#2b2e34,#232227 60%,#1b1d21);
+  background:linear-gradient(180deg,#232326,#1c1c1f 60%,#151517);
   box-shadow:inset 0 2px 4px rgba(0,0,0,.7),0 0 0 rgba(0,0,0,0);
 }
-.desk.night .key{
-  color:#e6dcc0;
+.desk.night .key .cap{
+  color:#f0e6cc;
   box-shadow:
-    inset 0 1px 0 rgba(255,244,214,.22),
+    inset 0 1px 0 rgba(255,244,214,.2),
     inset 0 -2px 3px rgba(0,0,0,.45),
     0 2px 2px rgba(0,0,0,.55);
 }
 
-/* TrackPoint */
+/* the blue Fn marks, and the browser keys' glyphs */
+.key .fnl,.key .glyph{
+  flex:0 0 auto;
+  width:clamp(7px,1.1vh,11px);height:clamp(7px,1.1vh,11px);
+  fill:none;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;
+}
+.key .fnl{stroke:var(--key-blue)}
+.key .glyph{stroke:var(--key-text)}
+
+/* dual-legend keys: the shifted character above, both at the left */
+.key.dual .cap{gap:0;line-height:1;padding-top:1px}
+.key.dual .sub{font-size:.78em;opacity:.7;line-height:1}
+.key.dual .main{line-height:1.05}
+@media (max-height:760px){
+  .key.dual .sub{display:none}
+}
+
+/* TrackPoint: between G, H and B */
 .trackpoint{
   position:absolute;z-index:6;
-  left:45.4%;top:65%;
+  left:45.1%;top:65%;
   transform:translate(-50%,-50%);
   width:calc(var(--u) * .62);height:calc(var(--u) * .62);
   max-width:20px;max-height:20px;min-width:12px;min-height:12px;
@@ -491,24 +563,31 @@ body.no-keyboard .keyboard{display:none}
 /* =====================  PALM REST  ===================== */
 .palmrest{
   position:relative;z-index:2;
-  height:clamp(30px,5.4vh,56px);
+  height:clamp(48px,8.6vh,94px);
   margin-top:4px;
   border-radius:2px 2px 10px 10px;
-  background:linear-gradient(180deg,#1e2024,#191b1f 55%,#141619);
+  background:linear-gradient(180deg,#1f2022,#1a1b1d 55%,#151618);
   box-shadow:inset 0 1px 0 var(--hair-lo);
-  display:flex;align-items:flex-start;justify-content:center;
+  display:flex;align-items:stretch;justify-content:center;
+}
+body.no-touchpad .palmrest{height:clamp(30px,5.4vh,56px)}
+
+/* UltraNav: three TrackPoint buttons, the touchpad, two more buttons */
+.ultranav{
+  display:flex;flex-direction:column;align-items:center;
+  width:clamp(160px,22%,236px);height:100%;
 }
 .tp-buttons{
-  margin-top:-1px;display:flex;gap:2px;
-  width:clamp(150px,22%,210px);height:clamp(12px,1.8vh,18px);
+  flex:0 0 auto;margin-top:-1px;display:flex;gap:2px;
+  width:100%;height:clamp(11px,1.9vh,19px);
 }
 .tpb{
-  appearance:none;border:0;cursor:pointer;flex:1;
-  background:linear-gradient(180deg,#33373d,#212429 60%,#1a1c20);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.13),0 1px 2px rgba(0,0,0,.5);
+  appearance:none;border:0;cursor:pointer;flex:1;padding:0;
+  background:linear-gradient(180deg,#303337,#212429 60%,#1a1c20);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 1px 2px rgba(0,0,0,.5);
 }
-.tpb.left{border-radius:0 0 0 8px}
-.tpb.right{border-radius:0 0 8px 0}
+.tpb.left{border-radius:0 0 0 7px}
+.tpb.right{border-radius:0 0 7px 0}
 .tpb.center{
   flex:0 0 26%;
   background:linear-gradient(180deg,#3b6fb5,#28517f 60%,#1d3c60);
@@ -520,7 +599,38 @@ body.no-keyboard .keyboard{display:none}
   background:repeating-linear-gradient(180deg,rgba(255,255,255,.5) 0 1px,transparent 1px 3px);
 }
 .tpb:active{transform:translateY(1px);box-shadow:inset 0 2px 3px rgba(0,0,0,.6)}
-.badge{position:absolute;left:16px;bottom:8px}
+.touchpad{
+  flex:1 1 auto;min-height:0;width:90%;
+  margin:clamp(3px,.6vh,6px) 0;
+  border-radius:3px;position:relative;
+  background:linear-gradient(180deg,#303134,#27282b);
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.6),
+    inset 0 1px 2px rgba(0,0,0,.4),
+    0 1px 0 var(--hair-lo);
+  cursor:ns-resize;touch-action:none;
+}
+.touchpad .tp-scroll{ /* the dotted scroll strip down the right */
+  position:absolute;top:8%;bottom:8%;right:6%;width:2px;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.22) 0 1px,transparent 1px 4px);
+}
+.touchpad.dragging{background:linear-gradient(180deg,#2d2e31,#26272a)}
+.tp-buttons.lower{
+  width:90%;margin-top:0;margin-bottom:clamp(3px,.6vh,6px);
+  height:clamp(10px,1.7vh,17px);
+}
+.tp-buttons.lower .tpb.left{border-radius:3px 0 0 3px}
+.tp-buttons.lower .tpb.right{border-radius:0 3px 3px 0}
+body.no-touchpad .touchpad,body.no-touchpad .tp-buttons.lower{display:none}
+
+/* the fingerprint reader on the right of the palm rest */
+.fingerprint{
+  position:absolute;right:7%;top:50%;transform:translateY(-50%);
+  width:clamp(8px,1.1vh,11px);height:clamp(14px,2.6vh,26px);border-radius:3px;
+  background:linear-gradient(180deg,#0f1012,#1a1b1e);
+  box-shadow:inset 0 0 0 1px #2c2e33,0 0 0 2px #1f2023,0 0 0 3px #0d0e0f;
+}
+.badge{position:absolute;left:16px;bottom:7px}
 .badge-plate{
   display:inline-block;padding:2px 7px;border-radius:2px;
   font:600 clamp(6px,.9vh,9px)/1.2 Tahoma,Verdana,sans-serif;
@@ -528,15 +638,29 @@ body.no-keyboard .keyboard{display:none}
   background:linear-gradient(180deg,#232529,#191b1e);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 1px 1px rgba(0,0,0,.5);
 }
+
+/* the front edge: latch hooks, the release slider, the infrared window */
 .front-lip{
-  height:8px;margin:0 -10px;
+  height:8px;margin:0 -12px;position:relative;
   border-radius:0 0 var(--radius) var(--radius);
   background:linear-gradient(180deg,#111214,#08090a);
-  display:flex;justify-content:center;gap:26%;align-items:flex-start;
 }
+.front-lip i{position:absolute;top:0}
 .front-lip .latch-slot{
-  width:40px;height:3px;border-radius:0 0 2px 2px;
+  width:38px;height:3px;border-radius:0 0 2px 2px;
   background:#050506;box-shadow:inset 0 1px 1px rgba(0,0,0,.9);
+}
+.front-lip .latch-slot:first-child{left:35%}
+.front-lip .latch-slot + .latch-slot{right:35%}
+.front-lip .latch-slider{
+  left:44%;width:22px;height:5px;border-radius:0 0 2px 2px;
+  background:repeating-linear-gradient(90deg,#2a2b2e 0 2px,#1b1c1e 2px 4px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 1px 1px rgba(0,0,0,.6);
+}
+.front-lip .ir-window{
+  right:9%;width:18px;height:4px;border-radius:0 0 2px 2px;
+  background:linear-gradient(180deg,#2a1013,#160a0c);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
 }
 
 /* =====================  THINKLIGHT  ===================== */
@@ -567,7 +691,8 @@ body.no-keyboard .keyboard{display:none}
 @media (max-width:820px){
   :root{--bezel:10px;--radius:10px}
   .machine{width:100%}
-  .keyboard,.tp-buttons{display:none}
+  .keyboard,.ultranav,.fingerprint{display:none}
+  .palmrest{height:24px}
   .hinges{padding:0 18px}
   .hinges .hinge{width:42px}
 }
@@ -590,27 +715,14 @@ body.no-keyboard .keyboard{display:none}
   .print-sheet .meta{font:9pt Tahoma,sans-serif;color:#555;margin:0 0 1.2em}
 }
 
-/* ---------- dual-legend keys (the shifted character above) ---------- */
-.key.dual{
-  flex-direction:column;justify-content:center;gap:0;line-height:1;
-  padding-top:1px;
-}
-.key.dual .sub{
-  font-size:.78em;opacity:.62;line-height:1;
-}
-.key.dual .main{line-height:1.05}
-@media (max-height:760px){
-  .key.dual .sub{display:none}
-}
-
-
 /* ---------- keyboard focus on the machine itself ---------- */
 /* the caps refuse focus on purpose (keyboard.js), so they are not listed */
 .thinklight:focus-visible,
 .access-ibm:focus-visible,
 .hwb:focus-visible,
 .power:focus-visible,
-.tpb:focus-visible{
+.tpb:focus-visible,
+.touchpad:focus-visible{
   outline:2px solid var(--ibm-blue-lt);
   outline-offset:1px;
 }
@@ -627,10 +739,15 @@ body.no-keyboard .keyboard{display:none}
     transition-duration:.001ms !important;
   }
   /* the sleep light still has to read as "asleep", just without the pulse */
-  .led.pulse{
-    background:var(--led-amber);
-    box-shadow:0 0 5px rgba(255,182,61,.7);
+  .led.pulse + .ico{
+    stroke:var(--led-green);
+    filter:drop-shadow(0 0 1.5px rgba(92,240,124,.9)) drop-shadow(0 0 5px rgba(92,240,124,.45));
   }
+  .led.amber.pulse + .ico{
+    stroke:var(--led-amber);
+    filter:drop-shadow(0 0 1.5px rgba(255,179,71,.9)) drop-shadow(0 0 5px rgba(255,179,71,.45));
+  }
+  .desk.standby .pwr-led{background:var(--led-green);box-shadow:0 0 4px rgba(92,240,124,.8)}
 }
 
 
@@ -686,13 +803,14 @@ body.no-keyboard .keyboard{display:none}
    thumb actually sits.
    ============================================================ */
 body.worn .key[data-wear]::after{
-  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  content:"";position:absolute;inset:0 calc(var(--key-gap) / 2);
+  border-radius:2px 2px 3px 3px;pointer-events:none;
   background:radial-gradient(58% 46% at 50% 42%,rgba(255,255,255,.055),transparent 72%);
 }
 body.worn .key[data-wear="2"]::after{
   background:radial-gradient(64% 54% at 50% 42%,rgba(255,255,255,.11),transparent 74%);
 }
-body.worn .key[data-wear="2"]{color:#b7babf}
+body.worn .key[data-wear="2"] .cap{color:#c9c9c5}
 body.worn .key[data-code="Space"]::after{
   background:radial-gradient(24% 56% at 60% 48%,rgba(255,255,255,.10),transparent 72%);
 }
@@ -704,22 +822,26 @@ body.worn[data-case="titanium"] .key[data-wear]::after{
 body.worn[data-case="titanium"] .key[data-wear="2"]::after{
   background:radial-gradient(64% 54% at 50% 42%,rgba(0,0,0,.10),transparent 74%);
 }
-body.worn[data-case="titanium"] .key[data-wear="2"]{color:#31343a}
+body.worn[data-case="titanium"] .key[data-wear="2"] .cap{color:#31343a}
 body.worn[data-case="titanium"] .key[data-code="Space"]::after{
   background:radial-gradient(24% 56% at 60% 48%,rgba(0,0,0,.09),transparent 72%);
 }
 
-/* where wrists have rested */
+/* where wrists have rested, and the touchpad's dull patch in the middle */
 body.worn .palmrest::after{
   content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   background:
-    radial-gradient(20% 54% at 26% 64%,rgba(255,255,255,.05),transparent 72%),
-    radial-gradient(20% 54% at 74% 64%,rgba(255,255,255,.05),transparent 72%);
+    radial-gradient(18% 54% at 22% 64%,rgba(255,255,255,.05),transparent 72%),
+    radial-gradient(18% 54% at 78% 64%,rgba(255,255,255,.05),transparent 72%);
 }
 body.worn[data-case="titanium"] .palmrest::after{
   background:
-    radial-gradient(20% 54% at 26% 64%,rgba(0,0,0,.05),transparent 72%),
-    radial-gradient(20% 54% at 74% 64%,rgba(0,0,0,.05),transparent 72%);
+    radial-gradient(18% 54% at 22% 64%,rgba(0,0,0,.05),transparent 72%),
+    radial-gradient(18% 54% at 78% 64%,rgba(0,0,0,.05),transparent 72%);
+}
+body.worn .touchpad::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(50% 60% at 48% 50%,rgba(255,255,255,.06),transparent 75%);
 }
 
 /* the cap's texture goes smooth in the middle, and picks up a sheen */
@@ -1005,8 +1127,25 @@ body.no-wrap .editor-underlay{white-space:pre;overflow-wrap:normal}
   background-color:var(--face);
   box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
 }
+.listbox::-webkit-scrollbar-button:vertical:start:decrement,
+#editor::-webkit-scrollbar-button:vertical:start:decrement,
+.dlg-body::-webkit-scrollbar-button:vertical:start:decrement{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 4l3.5-4L7 4z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:7px 4px;
+}
+.listbox::-webkit-scrollbar-button:vertical:end:increment,
+#editor::-webkit-scrollbar-button:vertical:end:increment,
+.dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 0h7L3.5 4z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:7px 4px;
+}
 .listbox::-webkit-scrollbar-corner,#editor::-webkit-scrollbar-corner{background:var(--face)}
-.listbox,#editor,.dlg-body{scrollbar-color:var(--face) #e6e3de;scrollbar-width:auto}
+/* Firefox draws no ::-webkit-scrollbar, so it gets the colours instead. It
+   has to be only Firefox: Chromium honours scrollbar-color too, and when it
+   is set it throws the drawn scrollbar away and paints a plain native one. */
+@supports not selector(::-webkit-scrollbar){
+  .listbox,#editor,.dlg-body{scrollbar-color:var(--face) #e6e3de;scrollbar-width:auto}
+}
 
 /* ---------- status bar ---------- */
 .statusbar{
@@ -1128,7 +1267,7 @@ body[data-case="graphite"]{
 }
 body[data-case="titanium"]{
   --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;
-  --key-text:#23262b;
+  --key-text:#23262b;--key-blue:#12408f;
   --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
 }
 body[data-case="graphite"] .lid,
@@ -1142,17 +1281,31 @@ body[data-case="titanium"] .base{
 body[data-case="titanium"] .bezel{background:linear-gradient(180deg,#2a2c30,#1c1e21 40%,#191b1e)}
 body[data-case="titanium"] .palmrest{background:linear-gradient(180deg,#9ba0a8,#878b93 55%,#767a81)}
 body[data-case="titanium"] .keyboard{background:linear-gradient(180deg,#3a3d43,#2c2f34)}
-body[data-case="titanium"] .key{
+body[data-case="titanium"] .key .cap{
   background:linear-gradient(180deg,#e6e8ea 0%,#d2d5d9 42%,#b9bdc3 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(0,0,0,.16),0 2px 2px rgba(0,0,0,.35);
 }
-body[data-case="titanium"] .key.down,body[data-case="titanium"] .key:active{
+body[data-case="titanium"] .key.down .cap,body[data-case="titanium"] .key:active .cap{
   background:linear-gradient(180deg,#c3c7cc,#b3b7bd 60%,#a6aab0);
 }
-body[data-case="titanium"] .key.fn{color:#12408f}
+body[data-case="titanium"] .key .glyph{stroke:var(--key-text)}
+body[data-case="titanium"] .touchpad{
+  background:linear-gradient(180deg,#a3a8b0,#949aa2);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35),inset 0 1px 2px rgba(0,0,0,.25),0 1px 0 var(--hair-lo);
+}
+body[data-case="titanium"] .touchpad .tp-scroll{
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 1px,transparent 1px 4px);
+}
+body[data-case="titanium"] .tpb:not(.center){background:linear-gradient(180deg,#b6bbc3,#9da2aa 60%,#8f949c)}
+body[data-case="titanium"] .fingerprint{box-shadow:inset 0 0 0 1px #2c2e33,0 0 0 2px #7e838b,0 0 0 3px #5a5e65}
 body[data-case="titanium"] .badge-plate{color:#3c4046;background:linear-gradient(180deg,#a9aeb6,#93979f)}
 body[data-case="titanium"] .front-lip{background:linear-gradient(180deg,#6e7279,#4f5259)}
 body[data-case="titanium"] .hinges .hinge{background:linear-gradient(180deg,#a7acb4,#7c8087 60%,#63666c)}
+body[data-case="titanium"] .power,body[data-case="titanium"] .hwb{
+  background:linear-gradient(180deg,#c3c7cc,#a4a9b0 55%,#959aa1);border-color:#4a4d53;
+}
+body[data-case="titanium"] .power svg,body[data-case="titanium"] .hwb svg{stroke:#2b2e33}
+body[data-case="titanium"] .hwb svg .spk{fill:#2b2e33}
 
 /* ---------- desk surfaces ---------- */
 body[data-desk="office"] .desk{
@@ -1179,7 +1332,231 @@ body[data-cap="eraser"] .trackpoint::after{
   background-size:auto;opacity:.8;
 }
 
-/* ---------- panel colour schemes ---------- */
+/* ============================================================
+   panel colour schemes
+   ============================================================ */
+
+/* ---------- Luna: what a T4x actually booted into ----------
+   Windows XP's default look — the sand-coloured face, the blue
+   rounded title bar with its red close button, orange-striped
+   tabs, and blue rounded scrollbars. The bevel variables the
+   classic look relies on are flattened here, and the pieces
+   that were drawn differently are redrawn below. */
+.lcd[data-theme="luna"]{
+  --face:#ece9d8;--face-lt:#f6f5ee;--hi:#ffffff;--sh:#aca899;--dk:#716f64;
+  --ink:#000000;--navy:#316ac5;--navy-lt:#a7c8f9;
+  --paper:#ffffff;--paper-ink:#000000;
+  --field:#7f9db9;--frame:#0831d9;
+  --flash:#ffffe1;
+}
+.lcd[data-theme="luna"] .win{border:0;box-shadow:none}
+.lcd[data-theme="luna"] .titlebar{
+  height:25px;margin:0;padding:0 4px 0 6px;gap:6px;
+  background:
+    linear-gradient(180deg,#0a5cf1 0%,#3e93fb 4%,#2b7cf4 10%,#0f5cee 30%,#0058e6 62%,#0053df 88%,#0a5ff0 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+}
+.lcd[data-theme="luna"] .titlebar .title{
+  font:700 13px/1 "Trebuchet MS",Tahoma,Verdana,sans-serif;
+  letter-spacing:0;text-shadow:1px 1px 0 #0a246a;
+}
+.lcd[data-theme="luna"] body.modal .win > .titlebar,
+body.modal .lcd[data-theme="luna"] .win > .titlebar{
+  background:linear-gradient(180deg,#8cb0f2 0%,#7599e7 40%,#7096e5 100%);
+}
+body.modal .lcd[data-theme="luna"] .win > .titlebar .title{color:#d8e4f8;text-shadow:1px 1px 0 #3a5a9a}
+.lcd[data-theme="luna"] .app-icon{
+  width:16px;height:16px;border-radius:2px;
+  background:linear-gradient(180deg,#9bc0f5 0 31%,#fff 31% 100%);
+  box-shadow:inset 0 0 0 1px #46618f;
+}
+.lcd[data-theme="luna"] .app-icon::after{
+  left:3px;right:3px;top:7px;height:1px;background:#7b8aa3;
+  box-shadow:0 3px 0 #7b8aa3,0 6px 0 #7b8aa3;
+}
+.lcd[data-theme="luna"] .tb-buttons{gap:2px}
+.lcd[data-theme="luna"] .tb{
+  width:21px;height:21px;border-radius:3px;border:1px solid #fff;
+  background:linear-gradient(180deg,#78a9f7 0%,#3c7ff0 40%,#2160d8 60%,#3a78e6 100%);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.25);
+}
+.lcd[data-theme="luna"] .tb.close{
+  background:linear-gradient(180deg,#f0a086 0%,#e0603f 40%,#c84a2b 60%,#d9633f 100%);
+}
+.lcd[data-theme="luna"] .tb:hover{filter:brightness(1.1)}
+.lcd[data-theme="luna"] .tb:active{filter:brightness(.85);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.lcd[data-theme="luna"] .tb b{background:#fff}
+.lcd[data-theme="luna"] .g-min{width:8px;height:3px;margin-top:6px}
+.lcd[data-theme="luna"] .g-max{border-color:#fff;border-top-width:3px;width:9px;height:8px}
+.lcd[data-theme="luna"] .g-close::before,.lcd[data-theme="luna"] .g-close::after{
+  background:#fff;height:2px;width:11px;left:-1px;top:3px;
+}
+.lcd[data-theme="luna"] .menubar{
+  height:20px;margin:0;padding:0 2px;border-bottom:0;box-shadow:none;background:var(--face);
+}
+.lcd[data-theme="luna"] .dropdown{
+  top:20px;background:#fff;padding:2px;
+  border:1px solid #aca899;box-shadow:2px 2px 3px rgba(0,0,0,.3);
+}
+.lcd[data-theme="luna"] .mi{padding:3px 8px 3px 24px}
+.lcd[data-theme="luna"] .msep{border-top:1px solid #aca899;border-bottom:0;margin:3px 3px 3px 26px}
+.lcd[data-theme="luna"] .workspace{margin:3px}
+.lcd[data-theme="luna"] .find input,
+.lcd[data-theme="luna"] .listbox,
+.lcd[data-theme="luna"] .editor-wrap,
+.lcd[data-theme="luna"] .dlg-body .sunken{
+  box-shadow:none;border:1px solid var(--field);
+}
+.lcd[data-theme="luna"] .find input{height:19px}
+.lcd[data-theme="luna"] .find input:focus,
+.lcd[data-theme="luna"] #search:focus-visible{box-shadow:none;outline:0}
+.lcd[data-theme="luna"] .note-item{border-bottom-color:#e6e4dd}
+.lcd[data-theme="luna"] .btn,
+.lcd[data-theme="luna"] .set-row.is-action .btn{
+  height:21px;border:1px solid #003c74;border-radius:3px;
+  background:linear-gradient(180deg,#fff 0%,#f4f3ee 55%,#e3e1d6 100%);
+  box-shadow:none;padding:0 8px;
+}
+.lcd[data-theme="luna"] .btn:hover{
+  box-shadow:inset 0 0 0 1px #ffe9a8,inset 0 0 0 2px #f9c46a;
+}
+.lcd[data-theme="luna"] .btn:active{
+  background:#e6e4d9;box-shadow:inset 1px 1px 2px rgba(0,0,0,.2);padding:0 8px;
+}
+.lcd[data-theme="luna"] .btn.primary{
+  box-shadow:inset 0 0 0 1px #a7c1e8,inset 0 0 0 2px #cad9f0;
+}
+.lcd[data-theme="luna"] .btn:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+.lcd[data-theme="luna"] .pane-foot .btn{height:20px}
+.lcd[data-theme="luna"] .splitter{background:var(--face)}
+.lcd[data-theme="luna"] .splitter:hover{background:#dcd9cc}
+.lcd[data-theme="luna"] .statusbar{margin:0 2px 2px;padding-top:1px}
+.lcd[data-theme="luna"] .statusbar .cell{
+  box-shadow:none;border-left:1px solid #aca899;border-right:1px solid #fff;padding:3px 6px;
+}
+.lcd[data-theme="luna"] .statusbar .cell:first-child{border-left:0}
+.lcd[data-theme="luna"] .statusbar .click:hover{background:#e0ddcf}
+
+/* XP's rounded blue scrollbars */
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-track,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-track{
+  background:linear-gradient(90deg,#f3f2ec,#fbfaf6 50%,#f3f2ec);background-image:none;background-color:#f4f3ee;
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-thumb,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-thumb,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-thumb{
+  background:linear-gradient(90deg,#c9d8fb,#bacbf8 50%,#adc1f4);
+  border:1px solid #93a9dd;border-radius:3px;box-shadow:inset 1px 1px 0 #e6eefc;
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  background-color:#bacbf8;
+  border:1px solid #7e98cd;border-radius:3px;box-shadow:inset 1px 1px 0 #e6eefc;
+  background-repeat:no-repeat;
+  background-position:center,0 0;background-size:7px 4px,100% 100%;
+}
+/* the arrow is listed first, because the first layer is the one on top */
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:start:decrement{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 4l3.5-4L7 4z' fill='%23253c78'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,#d3dffc,#aec2f4);
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 0h7L3.5 4z' fill='%23253c78'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,#d3dffc,#aec2f4);
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-corner,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-corner{background:#f4f3ee}
+@supports not selector(::-webkit-scrollbar){
+  .lcd[data-theme="luna"] .listbox,
+  .lcd[data-theme="luna"] #editor,
+  .lcd[data-theme="luna"] .dlg-body{scrollbar-color:#bacbf8 #f4f3ee}
+}
+
+/* dialogs get the blue XP frame with its rounded top */
+.lcd[data-theme="luna"] .dlg{
+  padding:0 3px 3px;background:var(--frame);border-radius:8px 8px 0 0;
+  box-shadow:0 0 0 1px rgba(0,0,0,.3),3px 4px 12px rgba(0,0,0,.45);
+}
+.lcd[data-theme="luna"] .dlg .titlebar{
+  margin:0 -3px;height:27px;border-radius:7px 7px 0 0;padding:0 5px 0 8px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 1px 0 0 rgba(255,255,255,.15),inset -1px 0 0 rgba(255,255,255,.15);
+}
+.lcd[data-theme="luna"] .dlg-body,.lcd[data-theme="luna"] .dlg-foot{background:var(--face)}
+.lcd[data-theme="luna"] .dlg-foot .btn{height:23px;min-width:75px}
+
+/* XP tabs: white pages with an orange stripe on the one that's up */
+.lcd[data-theme="luna"] .dlg-tabs{gap:1px;padding:8px 12px 0}
+.lcd[data-theme="luna"] .dlg-tab{
+  border:1px solid #919b9c;border-bottom:0;border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,#fff,#f0f0ea 55%,#e2e1da);
+  box-shadow:none;padding:3px 9px;
+}
+.lcd[data-theme="luna"] .dlg-tab.on{
+  background:#fcfcfe;box-shadow:inset 0 3px 0 #e68b2c;font-weight:400;
+  padding:4px 9px 4px;margin-bottom:-1px;position:relative;z-index:1;
+}
+.lcd[data-theme="luna"] .dlg-tab:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+.lcd[data-theme="luna"] .dlg.wide .dlg-body{padding-top:0}
+.lcd[data-theme="luna"] .set-panes,
+.lcd[data-theme="luna"] .tabpanes{
+  border:1px solid #919b9c;background:#fcfcfe;padding:9px 10px;margin:0 12px;
+}
+.lcd[data-theme="luna"] .dlg-body .dlg-tabs{padding:0 12px}
+.lcd[data-theme="luna"] .dlg-body .dlg-tabs + .tabpanes{margin:0 12px 6px}
+.lcd[data-theme="luna"] .settings .dlg-tabs{padding:8px 12px 0}
+.lcd[data-theme="luna"] .dlg.wide .dlg-body{padding-left:0;padding-right:0}
+.lcd[data-theme="luna"] .dlg-body .dlg-tabs{padding-left:12px}
+
+/* XP's controls: the green tick, the blue dropdown button */
+.lcd[data-theme="luna"] .set-check{
+  border:1px solid #1c5180;border-radius:2px;
+  background:linear-gradient(135deg,#dcdcd7,#fff 60%);box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-check:checked::after{border-color:#21a121}
+.lcd[data-theme="luna"] .set-check:focus-visible{outline:1px dotted #000;outline-offset:1px}
+.lcd[data-theme="luna"] .set-select{
+  height:20px;border:1px solid var(--field);border-radius:0;
+  background-color:#fff;box-shadow:none;padding:0 22px 0 4px;
+  background-image:
+    linear-gradient(45deg,transparent 50%,#fff 50%),
+    linear-gradient(135deg,#fff 50%,transparent 50%),
+    linear-gradient(180deg,#c5d5fb,#a9bff1 60%,#8fabe9);
+  background-position:calc(100% - 11px) 8px,calc(100% - 6px) 8px,right 1px top 1px;
+  background-size:5px 5px,5px 5px,15px calc(100% - 2px);
+  background-repeat:no-repeat;
+}
+.lcd[data-theme="luna"] .set-select option{background:#fff;color:#000}
+.lcd[data-theme="luna"] .set-range::-webkit-slider-runnable-track{
+  height:4px;background:#f0efea;border:1px solid #9d9da1;border-radius:2px;box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-range::-webkit-slider-thumb{
+  width:11px;height:19px;margin-top:-8px;border-radius:2px;
+  background:linear-gradient(180deg,#fff,#e5e4dc);border:1px solid #6a7f9a;
+  box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-range::-moz-range-track{
+  height:4px;background:#f0efea;border:1px solid #9d9da1;border-radius:2px;box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-range::-moz-range-thumb{
+  width:11px;height:19px;border-radius:2px;
+  background:linear-gradient(180deg,#fff,#e5e4dc);border:1px solid #6a7f9a;box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-hint{color:#6d6b62}
+.lcd[data-theme="luna"] .dropzone{border-color:var(--navy);background:rgba(49,106,197,.16)}
+.lcd[data-theme="luna"] .dropzone span{box-shadow:0 0 0 1px #003c74,3px 3px 8px rgba(0,0,0,.4);border-radius:3px}
+
+/* ---------- the older schemes ---------- */
 .lcd[data-theme="paper"]{
   --face:#ded9cd;--face-lt:#f2eee4;--hi:#fffdf7;--sh:#948d7c;--dk:#4a463d;
   --ink:#1d1a14;--navy:#4a3a22;--navy-lt:#d8c9a8;
@@ -1245,7 +1622,7 @@ body[data-cap="eraser"] .trackpoint::after{
 /* ---------- optional parts of the window ---------- */
 body.no-status .statusbar{display:none}
 body.no-leds .leds{visibility:hidden}
-body.no-tpb .tp-buttons{display:none}
+body.no-tpb .tp-buttons:not(.lower){display:none}
 body.list-right .workspace{flex-direction:row-reverse}
 body.list-right .pane-notes{padding-right:0;padding-left:3px}
 
@@ -1357,6 +1734,9 @@ body.no-case .lcd{border-radius:0}
         <div class="bezel-top">
           <button type="button" class="thinklight" id="thinklightBtn" title="ThinkLight — Alt+L here, Fn+PgUp on the real thing" aria-label="ThinkLight">
             <span class="bulb" aria-hidden="true"></span>
+            <svg class="lamp-mark" viewBox="0 0 14 10" aria-hidden="true">
+              <path d="M2 1.5h10M7 1.5v2.2"/><path d="M4.2 7.5 7 3.7l2.8 3.8"/>
+            </svg>
           </button>
         </div>
 
@@ -1377,7 +1757,7 @@ body.no-case .lcd{border-radius:0}
                   <span class="tb-buttons">
                     <button type="button" class="tb" id="tbMin" title="Minimise (Standby)" aria-label="Standby"><b class="g-min"></b></button>
                     <button type="button" class="tb" id="tbMax" title="Toggle note list" aria-label="Toggle note list"><b class="g-max"></b></button>
-                    <button type="button" class="tb" id="tbClose" title="Close lid (Standby)" aria-label="Standby"><b class="g-close"></b></button>
+                    <button type="button" class="tb close" id="tbClose" title="Close lid (Standby)" aria-label="Standby"><b class="g-close"></b></button>
                   </span>
                 </div>
 
@@ -1425,13 +1805,45 @@ body.no-case .lcd{border-radius:0}
           </div>
         </div>
 
+        <!-- The foot of the bezel: the IBM logo on the left, the ThinkPad wordmark on
+             the right, and between them the indicators — printed marks lit from
+             behind, so the mark itself is the light. Left to right as the T4x had
+             them: Bluetooth, wireless, Num Lock, Caps Lock, drive, battery, standby,
+             power. The <i class="led"> carries the state; the mark shows it. -->
         <div class="bezel-foot">
           <div class="ibm-logo" aria-label="IBM"><span>IBM</span></div>
           <div class="leds" id="leds">
-            <span class="led-cell" title="Power">
-              <i class="led led-pwr on"></i>
-              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Power">
-                <path d="M3.6 3.1a4 4 0 1 0 4.8 0"/><path d="M6 1v4.2"/>
+            <span class="led-cell" title="Bluetooth">
+              <i class="led led-bt"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Bluetooth">
+                <path d="M3.4 3.6 8.6 8.4 6 10.8V1.2l2.6 2.4-5.2 4.8"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Wireless">
+              <i class="led led-wifi"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Wireless">
+                <path d="M6 11V6.2"/><path d="M3.6 4.6a3.4 3.4 0 0 1 4.8 0"/><path d="M1.6 2.6a6.2 6.2 0 0 1 8.8 0"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Num Lock">
+              <i class="led led-num"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Num Lock">
+                <rect x="1.4" y="1.8" width="9.2" height="8.4" rx="1.2"/>
+                <path d="M5.1 4.9 6.2 4v4.1"/><path d="M4.9 8.1h2.6"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Caps Lock">
+              <i class="led led-cap"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Caps Lock">
+                <rect x="1.4" y="1.8" width="9.2" height="8.4" rx="1.2"/>
+                <path d="M4.3 8.4 6 3.7l1.7 4.7"/><path d="M4.9 6.9h2.2"/>
+              </svg>
+            </span>
+            <span class="led-cell" title="Drive in use">
+              <i class="led led-hdd"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Drive in use">
+                <path d="M2.2 3.4v5.2c0 .8 1.7 1.4 3.8 1.4s3.8-.6 3.8-1.4V3.4"/>
+                <ellipse cx="6" cy="3.4" rx="3.8" ry="1.4"/>
               </svg>
             </span>
             <span class="led-cell" title="Battery">
@@ -1448,25 +1860,10 @@ body.no-case .lcd{border-radius:0}
                 <path d="M8.9 7.7A4.1 4.1 0 1 1 6.1 1.4a3.3 3.3 0 0 0 2.8 6.3z"/>
               </svg>
             </span>
-            <span class="led-cell" title="Drive in use">
-              <i class="led led-hdd"></i>
-              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Drive in use">
-                <path d="M2.2 3.4v5.2c0 .8 1.7 1.4 3.8 1.4s3.8-.6 3.8-1.4V3.4"/>
-                <ellipse cx="6" cy="3.4" rx="3.8" ry="1.4"/>
-              </svg>
-            </span>
-            <span class="led-cell" title="Num Lock">
-              <i class="led led-num"></i>
-              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Num Lock">
-                <rect x="1.4" y="1.8" width="9.2" height="8.4" rx="1.2"/>
-                <path d="M5.1 4.9 6.2 4v4.1"/><path d="M4.9 8.1h2.6"/>
-              </svg>
-            </span>
-            <span class="led-cell" title="Caps Lock">
-              <i class="led led-cap"></i>
-              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Caps Lock">
-                <rect x="1.4" y="1.8" width="9.2" height="8.4" rx="1.2"/>
-                <path d="M4.3 8.4 6 3.7l1.7 4.7"/><path d="M4.9 6.9h2.2"/>
+            <span class="led-cell" title="Power">
+              <i class="led led-pwr on"></i>
+              <svg class="ico" viewBox="0 0 12 12" role="img" aria-label="Power">
+                <path d="M3.6 3.1a4 4 0 1 0 4.8 0"/><path d="M6 1v4.2"/>
               </svg>
             </span>
           </div>
@@ -1484,32 +1881,62 @@ body.no-case .lcd{border-radius:0}
 
     <!-- ============ BASE ============ -->
     <div class="base">
+      <!-- Above the keys, left to right as on the T4x: the power button with its
+           own light, the three volume buttons, the blue Access IBM button. -->
       <div class="topdeck">
+        <button type="button" class="power" id="powerBtn" title="Power — standby, and back">
+          <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3.6 3.1a4 4 0 1 0 4.8 0"/><path d="M6 1v4.2"/></svg>
+        </button>
+        <i class="pwr-led" aria-hidden="true"></i>
+        <div class="hw-buttons">
+          <button type="button" class="hwb" id="volDown" title="Volume down (key click)" aria-label="Volume down">
+            <svg viewBox="0 0 14 12" aria-hidden="true"><path class="spk" d="M1 4.2h2.4L6.6 1.6v8.8L3.4 7.8H1z"/><path d="M8.6 6h3.6"/></svg>
+          </button>
+          <button type="button" class="hwb" id="volUp" title="Volume up (key click)" aria-label="Volume up">
+            <svg viewBox="0 0 14 12" aria-hidden="true"><path class="spk" d="M1 4.2h2.4L6.6 1.6v8.8L3.4 7.8H1z"/><path d="M8.6 6h3.6M10.4 4.2v3.6"/></svg>
+          </button>
+          <button type="button" class="hwb" id="volMute" title="Mute key click" aria-label="Mute">
+            <span class="mute-led"></span>
+            <svg viewBox="0 0 14 12" aria-hidden="true"><path class="spk" d="M1 4.2h2.4L6.6 1.6v8.8L3.4 7.8H1z"/><path d="M8.6 4.4l3.2 3.2M11.8 4.4 8.6 7.6"/></svg>
+          </button>
+        </div>
         <button type="button" class="access-ibm" id="accessBtn" title="Access IBM — help &amp; shortcuts">Access IBM</button>
         <div class="drilled" aria-hidden="true"></div>
-        <div class="hw-buttons">
-          <button type="button" class="hwb" id="volDown" title="Volume down (key click)">&minus;</button>
-          <button type="button" class="hwb" id="volUp" title="Volume up (key click)">+</button>
-          <button type="button" class="hwb" id="volMute" title="Mute key click"><span class="mute-led"></span>&#9679;</button>
-          <button type="button" class="power" id="powerBtn" title="Standby"><span class="ring"></span></button>
-        </div>
       </div>
 
       <div class="keyboard" id="keyboard">
         <div class="trackpoint" id="trackpoint" title="TrackPoint — drag to scroll" role="button" tabindex="0" aria-label="TrackPoint scroller"></div>
       </div>
 
+      <!-- The palm rest, with the UltraNav in the middle: TrackPoint buttons
+           under the space bar, the touchpad under those, and its own pair of
+           buttons under that — the T40 was the first ThinkPad to carry both. -->
       <div class="palmrest">
-        <div class="tp-buttons" aria-hidden="false">
-          <button type="button" class="tpb left" id="tpbLeft" title="Previous note"></button>
-          <button type="button" class="tpb center" id="tpbCenter" title="Scroll lock — drag the TrackPoint"></button>
-          <button type="button" class="tpb right" id="tpbRight" title="Next note"></button>
+        <div class="ultranav">
+          <div class="tp-buttons" aria-hidden="false">
+            <button type="button" class="tpb left" id="tpbLeft" title="Previous note"></button>
+            <button type="button" class="tpb center" id="tpbCenter" title="Scroll lock — drag the TrackPoint"></button>
+            <button type="button" class="tpb right" id="tpbRight" title="Next note"></button>
+          </div>
+          <div class="touchpad" id="touchpad" title="UltraNav touchpad — drag to scroll" role="button" tabindex="0" aria-label="Touchpad scroller">
+            <i class="tp-scroll" aria-hidden="true"></i>
+          </div>
+          <div class="tp-buttons lower">
+            <button type="button" class="tpb left" id="tpbLeft2" title="Previous note"></button>
+            <button type="button" class="tpb right" id="tpbRight2" title="Next note"></button>
+          </div>
         </div>
+        <div class="fingerprint" aria-hidden="true" title="Fingerprint reader"></div>
         <div class="badge" aria-hidden="true">
           <span class="badge-plate">ThinkPad</span>
         </div>
       </div>
-      <div class="front-lip" aria-hidden="true"><i class="latch-slot"></i><i class="latch-slot"></i></div>
+      <div class="front-lip" aria-hidden="true">
+        <i class="latch-slot"></i>
+        <i class="latch-slider"></i>
+        <i class="latch-slot"></i>
+        <i class="ir-window"></i>
+      </div>
     </div>
 
   </div>
@@ -2048,12 +2475,12 @@ body.no-case .lcd{border-radius:0}
 
   var DEFAULTS = {
     /* the machine */
-    showCase: true, deck: false, tpButtons: true, leds: true,
+    showCase: true, deck: false, tpButtons: true, touchpad: true, leds: true,
     caseFinish: 'black', capStyle: 'tongue', desk: 'studio', aspect: '4:3',
     deckTilt: true, battery: true, wear: false, bootScreen: false, screensaver: 0,
     night: false, glare: true, grain: true, sound: false, vol: 0.35,
     /* the screen */
-    theme: 'classic', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
+    theme: 'luna', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
     fontSize: 13, lineHeight: 1.45, wrap: true, tabSize: 8,
     spellcheck: false, statusbar: true,
     /* the notes */
@@ -2092,6 +2519,8 @@ body.no-case .lcd{border-radius:0}
       { k: 'deck', t: 'check', label: 'Keyboard',
         hint: 'Folding it away gives the panel about 1024x768' },
       { k: 'tpButtons', t: 'check', label: 'TrackPoint buttons' },
+      { k: 'touchpad', t: 'check', label: 'UltraNav touchpad',
+        hint: 'Drag it to scroll. The T40 was the first ThinkPad to carry one' },
       { k: 'leds', t: 'check', label: 'Indicator lights' },
       { k: 'caseFinish', t: 'select', label: 'Case finish', options: [
         ['black', 'Matte black'], ['graphite', 'Graphite'], ['titanium', 'Titanium'] ] },
@@ -2119,7 +2548,8 @@ body.no-case .lcd{border-radius:0}
     ]},
     { id: 'screen', label: 'Screen', items: [
       { k: 'theme', t: 'select', label: 'Colours', options: [
-        ['classic', 'Classic grey'], ['paper', 'Warm paper'], ['midnight', 'Midnight'],
+        ['luna', 'Luna blue — Windows XP'], ['classic', 'Classic grey — Windows 2000'],
+        ['paper', 'Warm paper'], ['midnight', 'Midnight'],
         ['amber', 'Amber monochrome'], ['green', 'Green phosphor'] ] },
       { k: 'preset', t: 'select', label: 'Typeface', options: [
         ['period', 'Period correct — Tahoma / Courier New'],
@@ -2356,27 +2786,55 @@ body.no-case .lcd{border-radius:0}
 /* js/keyboard.js */
 /* ============================================================
    keyboard.js — the ThinkPad keyboard
-   Builds the deck, mirrors real keystrokes, and lets you type
-   by clicking the keys. Fn sits in the corner where it belongs.
+   The seven-row deck IBM shipped on the T4x: Esc and twelve
+   function keys, then PrtSc, ScrLk, Pause, and the six editing
+   keys in one long half-height row; the browser keys either side
+   of the up arrow; Fn in the corner, in blue. Builds the deck,
+   mirrors real keystrokes, and lets you type by clicking caps.
    ============================================================ */
 (function (global) {
   'use strict';
 
+  var UNITS = 15;                      /* every row is fifteen key widths */
+
   function k(code, label, w, opts) {
     var o = opts || {};
-    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls };
+    return { code: code, label: label, w: w || 1, sub: o.sub, ch: o.ch, cls: o.cls,
+             fn: o.fn, icon: o.icon, name: o.name };
   }
   function sp(w) { return { spacer: true, w: w }; }
 
-  /* Widths per row sum to 15 so the columns line up like a real deck. */
+  /* The blue marks under the legends: what Fn does to that key on the
+     real machine. Drawn small, so only the shape has to read. */
+  var ICONS = {
+    screen:   'M1.5 2.5h9v6h-9zM4 10.5h4',
+    moon:     'M8.9 7.7A4.1 4.1 0 1 1 6.1 1.4a3.3 3.3 0 0 0 2.8 6.3z',
+    wireless: 'M6 11V6.2M3.6 4.6a3.4 3.4 0 0 1 4.8 0M1.6 2.6a6.2 6.2 0 0 1 8.8 0',
+    displays: 'M1.5 4.5h6v5h-6zM4.5 2.5h6v5H8.5',
+    hibernate:'M2 2.5h8v7H2zM4.5 5h3l-3 3h3',
+    sunhi:    'M6 1.2v1.6M6 9.2v1.6M1.2 6h1.6M9.2 6h1.6M2.6 2.6l1.1 1.1M8.3 8.3l1.1 1.1M2.6 9.4l1.1-1.1M8.3 3.7l1.1-1.1M8 6a2 2 0 1 1-4 0 2 2 0 0 1 4 0z',
+    sunlo:    'M6 2.2v1.2M6 8.6v1.2M2.2 6h1.2M8.6 6h1.2M7.5 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z',
+    lamp:     'M3 1.5h6M6 1.5v2.1M3.6 9.5 6 5.4l2.4 4.1',
+    back:     'M9.5 9A3 3 0 0 0 6.5 6H3M5 4 3 6l2 2',
+    fwd:      'M2.5 9A3 3 0 0 1 5.5 6H9M7 4l2 2-2 2'
+  };
+
+  var F = 0.66, EDIT = 0.66, GAP = 0.06;
   var ROWS = [
     { cls: 'fn-row', keys: [
-      k('Escape', 'Esc', 1.2, { cls: 'wide-label' }), sp(0.4),
-      k('F1', 'F1', 0.8), k('F2', 'F2', 0.8), k('F3', 'F3', 0.8), k('F4', 'F4', 0.8), sp(0.35),
-      k('F5', 'F5', 0.8), k('F6', 'F6', 0.8), k('F7', 'F7', 0.8), k('F8', 'F8', 0.8), sp(0.35),
-      k('F9', 'F9', 0.8), k('F10', 'F10', 0.8), k('F11', 'F11', 0.8), k('F12', 'F12', 0.8), sp(0.3),
-      k('Home', 'Home', 0.7, { cls: 'wide-label' }), k('End', 'End', 0.7, { cls: 'wide-label' }),
-      k('Insert', 'Ins', 0.7, { cls: 'wide-label' }), k('Delete', 'Del', 0.7, { cls: 'wide-label' })
+      k('Escape', 'Esc', 0.9, { cls: 'wide-label' }),
+      k('F1', 'F1', F), k('F2', 'F2', F), k('F3', 'F3', F, { fn: 'screen' }), k('F4', 'F4', F, { fn: 'moon' }), sp(GAP),
+      k('F5', 'F5', F, { fn: 'wireless' }), k('F6', 'F6', F), k('F7', 'F7', F, { fn: 'displays' }), k('F8', 'F8', F), sp(GAP),
+      k('F9', 'F9', F), k('F10', 'F10', F), k('F11', 'F11', F), k('F12', 'F12', F, { fn: 'hibernate' }), sp(GAP),
+      k('PrintScreen', 'PrtSc', F, { cls: 'wide-label' }),
+      k('ScrollLock', 'ScrLk', F, { cls: 'wide-label' }),
+      k('Pause', 'Pause', F, { cls: 'wide-label' }), sp(GAP),
+      k('Insert', 'Insert', EDIT, { cls: 'wide-label' }),
+      k('Delete', 'Delete', EDIT, { cls: 'wide-label' }),
+      k('Home', 'Home', EDIT, { cls: 'wide-label', fn: 'sunhi' }),
+      k('End', 'End', EDIT, { cls: 'wide-label', fn: 'sunlo' }),
+      k('PageUp', 'PgUp', EDIT, { cls: 'wide-label', fn: 'lamp' }),
+      k('PageDown', 'PgDn', EDIT, { cls: 'wide-label' })
     ]},
     { keys: [
       k('Backquote', '`', 1, { sub: '~', ch: '`' }),
@@ -2398,7 +2856,7 @@ body.no-case .lcd{border-radius:0}
       k('Backslash', '\\', 1.5, { sub: '|', ch: '\\' })
     ]},
     { keys: [
-      k('CapsLock', 'Caps', 1.75, { cls: 'wide-label' }),
+      k('CapsLock', 'Caps Lock', 1.75, { cls: 'wide-label' }),
       k('KeyA', 'A', 1, { ch: 'a' }), k('KeyS', 'S', 1, { ch: 's' }), k('KeyD', 'D', 1, { ch: 'd' }),
       k('KeyF', 'F', 1, { ch: 'f' }), k('KeyG', 'G', 1, { ch: 'g' }), k('KeyH', 'H', 1, { ch: 'h' }),
       k('KeyJ', 'J', 1, { ch: 'j' }), k('KeyK', 'K', 1, { ch: 'k' }), k('KeyL', 'L', 1, { ch: 'l' }),
@@ -2406,23 +2864,28 @@ body.no-case .lcd{border-radius:0}
       k('Enter', 'Enter', 2.25, { cls: 'wide-label', ch: '\n' })
     ]},
     { keys: [
-      k('ShiftLeft', 'Shift', 2.25, { cls: 'wide-label' }),
+      k('ShiftLeft', 'Shift', 2, { cls: 'wide-label' }),
       k('KeyZ', 'Z', 1, { ch: 'z' }), k('KeyX', 'X', 1, { ch: 'x' }), k('KeyC', 'C', 1, { ch: 'c' }),
       k('KeyV', 'V', 1, { ch: 'v' }), k('KeyB', 'B', 1, { ch: 'b' }), k('KeyN', 'N', 1, { ch: 'n' }),
       k('KeyM', 'M', 1, { ch: 'm' }),
       k('Comma', ',', 1, { sub: '<', ch: ',' }), k('Period', '.', 1, { sub: '>', ch: '.' }),
       k('Slash', '/', 1, { sub: '?', ch: '/' }),
-      k('ShiftRight', 'Shift', 1.75, { cls: 'wide-label' }),
-      k('ArrowUp', '▲', 1)
+      k('ShiftRight', 'Shift', 0.85, { cls: 'wide-label' }),
+      k('BrowserBack', '', 0.48, { cls: 'browser', icon: 'back', name: 'Browser back' }),
+      k('ArrowUp', '▲', 0.83, { cls: 'arrow' }),
+      k('BrowserForward', '', 0.48, { cls: 'browser', icon: 'fwd', name: 'Browser forward' }),
+      sp(0.36)
     ]},
     { keys: [
       k('Fn', 'Fn', 1, { cls: 'fn' }),
       k('ControlLeft', 'Ctrl', 1, { cls: 'wide-label' }),
       k('AltLeft', 'Alt', 1.25, { cls: 'wide-label' }),
-      k('Space', '', 6.25, { ch: ' ' }),
+      k('Space', '', 6.75, { ch: ' ', name: 'Space' }),
       k('AltRight', 'Alt', 1.25, { cls: 'wide-label' }),
       k('ControlRight', 'Ctrl', 1.25, { cls: 'wide-label' }),
-      k('ArrowLeft', '◀', 1), k('ArrowDown', '▼', 1), k('ArrowRight', '▶', 1)
+      k('ArrowLeft', '◀', 0.83, { cls: 'arrow' }),
+      k('ArrowDown', '▼', 0.84, { cls: 'arrow' }),
+      k('ArrowRight', '▶', 0.83, { cls: 'arrow' })
     ]}
   ];
 
@@ -2441,6 +2904,18 @@ body.no-case .lcd{border-radius:0}
 
   var byCode = Object.create(null);
 
+  function svg(d, cls) {
+    var NS = 'http://www.w3.org/2000/svg';
+    var el = document.createElementNS(NS, 'svg');
+    el.setAttribute('viewBox', '0 0 12 12');
+    el.setAttribute('class', cls);
+    el.setAttribute('aria-hidden', 'true');
+    var path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', d);
+    el.appendChild(path);
+    return el;
+  }
+
   function build(root, onKeyClick) {
     var frag = document.createDocumentFragment();
 
@@ -2449,7 +2924,10 @@ body.no-case .lcd{border-radius:0}
       r.className = 'krow' + (row.cls ? ' ' + row.cls : '');
       row.keys.forEach(function (key) {
         var el = document.createElement(key.spacer ? 'div' : 'button');
-        el.style.flex = key.w + ' 1 0';
+        /* A fixed share of the row rather than a flex weight, so a column
+           lands in the same place on every row however many keys the row
+           holds — the up arrow has to sit exactly over the down arrow. */
+        el.style.flex = '0 0 ' + (key.w * 100 / UNITS).toFixed(4) + '%';
         if (key.spacer) {
           el.className = 'key spacer';
           el.setAttribute('aria-hidden', 'true');
@@ -2458,16 +2936,27 @@ body.no-case .lcd{border-radius:0}
           el.className = 'key' + (key.cls ? ' ' + key.cls : '');
           el.dataset.code = key.code;
           if (WEAR[key.code]) el.dataset.wear = WEAR[key.code];
+          if (key.fn) el.classList.add('has-fn');
+
+          var cap = document.createElement('span');
+          cap.className = 'cap';
           if (key.sub) {
             el.classList.add('dual');
-            el.innerHTML = '<span class="sub"></span><span class="main"></span>';
-            el.firstChild.textContent = key.sub;
-            el.lastChild.textContent = key.label;
-          } else {
-            el.textContent = key.label;
+            var sub = document.createElement('span');
+            sub.className = 'sub';
+            sub.textContent = key.sub;
+            cap.appendChild(sub);
           }
+          var main = document.createElement('span');
+          main.className = 'main';
+          main.textContent = key.label;
+          cap.appendChild(main);
+          if (key.fn) cap.appendChild(svg(ICONS[key.fn], 'fnl'));
+          if (key.icon) cap.appendChild(svg(ICONS[key.icon], 'glyph'));
+          el.appendChild(cap);
+
           el.tabIndex = -1;
-          el.setAttribute('aria-label', key.label || 'Space');
+          el.setAttribute('aria-label', key.label || key.name || key.code);
           byCode[key.code] = el;
           el.addEventListener('mousedown', function (e) { e.preventDefault(); }); // never steal focus
           el.addEventListener('click', function (e) { onKeyClick(key, e); });
@@ -2515,7 +3004,7 @@ body.no-case .lcd{border-radius:0}
 
   var deps = {};
   var body, desk, machineEl, screenEl, editor;
-  var ledPwr, ledBat, ledSlp, ledHdd, ledCap, ledNum, batteryCell;
+  var ledPwr, ledBat, ledSlp, ledHdd, ledCap, ledNum, ledWifi, batteryCell, wifiCell;
   var batteryRepaint = null;
 
   var ASPECTS = { '4:3': 4 / 3, '16:10': 1.6 };
@@ -2533,13 +3022,17 @@ body.no-case .lcd{border-radius:0}
 
     ledPwr = $('.led-pwr'); ledBat = $('.led-bat'); ledSlp = $('.led-slp');
     ledHdd = $('.led-hdd'); ledCap = $('.led-cap'); ledNum = $('.led-num');
+    ledWifi = $('.led-wifi');
     batteryCell = ledBat.parentNode;
+    wifiCell = ledWifi.parentNode;
 
     addLightCone();
     wireButtons();
     wireTrackPoint();
+    wireTouchpad();
     wireKeyMirror();
     wireIdle();
+    watchWireless();
     window.addEventListener('resize', onResize);
   }
 
@@ -2618,6 +3111,7 @@ body.no-case .lcd{border-radius:0}
     body.classList.toggle('no-case', !p.showCase);
     body.classList.toggle('no-keyboard', !p.deck);
     body.classList.toggle('no-tpb', !p.tpButtons);
+    body.classList.toggle('no-touchpad', !p.touchpad);
     body.classList.toggle('no-leds', !p.leds);
     body.classList.toggle('no-glare', !p.glare);
     body.classList.toggle('no-grain', !p.grain);
@@ -2681,6 +3175,21 @@ body.no-case .lcd{border-radius:0}
       b.addEventListener('levelchange', batteryRepaint);
       b.addEventListener('chargingchange', batteryRepaint);
     }, function () { /* refused: leave the light alone */ });
+  }
+
+  /* The wireless light is the one indicator with something honest to
+     report: it is lit while the browser says it has a network, and goes
+     out when it does not — which is exactly what the antenna mark on the
+     bezel meant. */
+  function paintWireless() {
+    var online = navigator.onLine !== false;
+    ledWifi.classList.toggle('on', online);
+    wifiCell.title = online ? 'Wireless — connected' : 'Wireless — no network';
+  }
+  function watchWireless() {
+    paintWireless();
+    window.addEventListener('online', paintWireless);
+    window.addEventListener('offline', paintWireless);
   }
 
   /* ---------------------------------------------------------
@@ -2819,6 +3328,8 @@ body.no-case .lcd{border-radius:0}
     $('#tpbCenter').addEventListener('click', function () {
       deps.setMsg('Hold the red nub and push to scroll');
     });
+    $('#tpbLeft2').addEventListener('click', function () { deps.onPrevNote(); });
+    $('#tpbRight2').addEventListener('click', function () { deps.onNextNote(); });
 
     /* any prod wakes it up, except the button that put it to sleep */
     desk.addEventListener('mousedown', function (e) {
@@ -2868,6 +3379,43 @@ body.no-case .lcd{border-radius:0}
     nub.addEventListener('pointerup', stop);
     nub.addEventListener('pointercancel', stop);
     nub.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') { editor.scrollTop += 40; e.preventDefault(); }
+      if (e.key === 'ArrowUp') { editor.scrollTop -= 40; e.preventDefault(); }
+    });
+  }
+
+  /* ---------------------------------------------------------
+     UltraNav touchpad: a finger dragged down it scrolls the page down,
+     one for one, the way a touchpad's scroll strip did. The TrackPoint
+     is a force stick and scrolls by how hard you push; this scrolls by
+     how far you move.
+     --------------------------------------------------------- */
+  function wireTouchpad() {
+    var pad = $('#touchpad');
+    if (!pad) return;
+    var dragging = false, lastY = 0;
+
+    pad.addEventListener('pointerdown', function (e) {
+      dragging = true;
+      lastY = e.clientY;
+      pad.classList.add('dragging');
+      pad.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    });
+    pad.addEventListener('pointermove', function (e) {
+      if (!dragging) return;
+      editor.scrollTop += (e.clientY - lastY) * 2;
+      lastY = e.clientY;
+    });
+    function stop(e) {
+      if (!dragging) return;
+      dragging = false;
+      pad.classList.remove('dragging');
+      try { pad.releasePointerCapture(e.pointerId); } catch (err) { /* already gone */ }
+    }
+    pad.addEventListener('pointerup', stop);
+    pad.addEventListener('pointercancel', stop);
+    pad.addEventListener('keydown', function (e) {
       if (e.key === 'ArrowDown') { editor.scrollTop += 40; e.preventDefault(); }
       if (e.key === 'ArrowUp') { editor.scrollTop -= 40; e.preventDefault(); }
     });
@@ -2924,7 +3472,7 @@ body.no-case .lcd{border-radius:0}
       '<div class="post-mem"></div>' +
       '<div class="post-foot">' +
         '<span class="post-tp">ThinkPad</span>' +
-        '<span class="post-hint">Press F1 for IBM BIOS Setup Utility</span>' +
+        '<span class="post-hint">To interrupt normal startup, press the blue Access IBM button</span>' +
       '</div>';
     lcd.appendChild(postEl);
 
@@ -3243,12 +3791,62 @@ body.no-case .lcd{border-radius:0}
     if (key.code === 'CapsLock') { machine.toggleVirtualCaps(); return; }
     if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
     if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
-    if (key.code === 'Backspace') {
+    if (key.code === 'Backspace' || key.code === 'Delete') {
       editor.focus();
       var start = editor.selectionStart, end = editor.selectionEnd;
-      if (start === end && start > 0) editor.setRangeText('', start - 1, start, 'end');
-      else editor.setRangeText('', start, end, 'end');
+      if (start !== end) editor.setRangeText('', start, end, 'end');
+      else if (key.code === 'Backspace' && start > 0) editor.setRangeText('', start - 1, start, 'end');
+      else if (key.code === 'Delete' && end < editor.value.length) editor.setRangeText('', start, start + 1, 'end');
       editor.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (key.code === 'ArrowLeft' || key.code === 'ArrowRight') {
+      editor.focus();
+      var at = key.code === 'ArrowLeft'
+        ? Math.max(0, editor.selectionStart - 1)
+        : Math.min(editor.value.length, editor.selectionEnd + 1);
+      editor.setSelectionRange(at, at);
+      updatePos();
+      return;
+    }
+    if (key.code === 'Home' || key.code === 'End') {
+      editor.focus();
+      var text = editor.value, pos = editor.selectionStart, to;
+      if (key.code === 'Home') to = text.lastIndexOf('\n', pos - 1) + 1;
+      else { to = text.indexOf('\n', pos); if (to < 0) to = text.length; }
+      editor.setSelectionRange(to, to);
+      updatePos();
+      return;
+    }
+    /* Up and down move the caret a line, keeping the column, which is what
+       the key does. Page up and down scroll, which is also what the key does. */
+    if (key.code === 'ArrowUp' || key.code === 'ArrowDown') {
+      editor.focus();
+      var body = editor.value, caret = editor.selectionStart;
+      var lineStart = body.lastIndexOf('\n', caret - 1) + 1;
+      var column = caret - lineStart;
+      var target;
+      if (key.code === 'ArrowUp') {
+        if (lineStart === 0) target = 0;
+        else {
+          var prevStart = body.lastIndexOf('\n', lineStart - 2) + 1;
+          target = Math.min(prevStart + column, lineStart - 1);
+        }
+      } else {
+        var lineEnd = body.indexOf('\n', caret);
+        if (lineEnd < 0) target = body.length;
+        else {
+          var nextEnd = body.indexOf('\n', lineEnd + 1);
+          if (nextEnd < 0) nextEnd = body.length;
+          target = Math.min(lineEnd + 1 + column, nextEnd);
+        }
+      }
+      editor.setSelectionRange(target, target);
+      updatePos();
+      return;
+    }
+    if (key.code === 'PageUp' || key.code === 'PageDown') {
+      editor.scrollTop += (key.code === 'PageUp' ? -1 : 1) * editor.clientHeight * 0.9;
       return;
     }
     if (key.ch !== undefined) {
@@ -4089,7 +4687,8 @@ body.no-case .lcd{border-radius:0}
         '<dl>' +
         '<dt>ThinkLight</dt><dd>The lamp above the screen. Dims the room and lights the keys.</dd>' +
         '<dt>TrackPoint</dt><dd>Push the red nub to scroll the page, like the real thing.</dd>' +
-        '<dt>Mouse buttons</dt><dd>Left and right walk through your notes.</dd>' +
+        '<dt>UltraNav</dt><dd>Drag the touchpad to scroll the page a line at a time. ' +
+        'Both pairs of buttons walk through your notes.</dd>' +
         '<dt>Access IBM</dt><dd>This window.</dd>' +
         '<dt>Volume</dt><dd>Key click volume. The dot lights when muted.</dd>' +
         '<dt>Power</dt><dd>Standby. Click anywhere to wake.</dd>' +
@@ -4099,6 +4698,7 @@ body.no-case .lcd{border-radius:0}
         '<dt>Battery light</dt><dd>Follows this laptop where the browser will say: ' +
         'amber below 20%, pulsing while charging.</dd>' +
         '<dt>Drive light</dt><dd>Flickers on every save, and sits amber when storage is nearly full.</dd>' +
+        '<dt>Wireless light</dt><dd>Lit while this browser has a network, out when it does not.</dd>' +
         '<dt>Keyboard</dt><dd>Folded away by default. <b>View &gt; Keyboard</b> brings it back — ' +
         'it mirrors what you type, and you can click the caps to type with the mouse.</dd>' +
         '</dl>' +

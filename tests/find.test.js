@@ -88,7 +88,7 @@ module.exports = {
     /* ---------- the highlight has to be readable under every scheme ---------- */
     await page.fill('#search', 'printer');
     await page.waitForTimeout(300);
-    for (const theme of ['classic', 'paper', 'midnight', 'amber', 'green']) {
+    for (const theme of ['luna', 'classic', 'paper', 'midnight', 'amber', 'green']) {
       const worst = await page.evaluate((name) => {
         document.querySelector('#lcd').dataset.theme = name;
         const ink = getComputedStyle(document.querySelector('#editor')).color;
@@ -109,7 +109,7 @@ module.exports = {
       t.ok(worst >= 4.5,
         theme + ': text stays readable on a highlight (' + worst.toFixed(1) + ':1)');
     }
-    await page.evaluate(() => { document.querySelector('#lcd').dataset.theme = 'classic'; });
+    await page.evaluate(() => { document.querySelector('#lcd').dataset.theme = 'luna'; });
 
     /* ---------- and line up when the tab width is not eight ---------- */
     await page.keyboard.press('Control+,');

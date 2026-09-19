@@ -8,12 +8,12 @@
 
   var DEFAULTS = {
     /* the machine */
-    showCase: true, deck: false, tpButtons: true, leds: true,
+    showCase: true, deck: false, tpButtons: true, touchpad: true, leds: true,
     caseFinish: 'black', capStyle: 'tongue', desk: 'studio', aspect: '4:3',
     deckTilt: true, battery: true, wear: false, bootScreen: false, screensaver: 0,
     night: false, glare: true, grain: true, sound: false, vol: 0.35,
     /* the screen */
-    theme: 'classic', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
+    theme: 'luna', preset: 'period', uiFont: 'tahoma', monoFont: 'courier',
     fontSize: 13, lineHeight: 1.45, wrap: true, tabSize: 8,
     spellcheck: false, statusbar: true,
     /* the notes */
@@ -52,6 +52,8 @@
       { k: 'deck', t: 'check', label: 'Keyboard',
         hint: 'Folding it away gives the panel about 1024x768' },
       { k: 'tpButtons', t: 'check', label: 'TrackPoint buttons' },
+      { k: 'touchpad', t: 'check', label: 'UltraNav touchpad',
+        hint: 'Drag it to scroll. The T40 was the first ThinkPad to carry one' },
       { k: 'leds', t: 'check', label: 'Indicator lights' },
       { k: 'caseFinish', t: 'select', label: 'Case finish', options: [
         ['black', 'Matte black'], ['graphite', 'Graphite'], ['titanium', 'Titanium'] ] },
@@ -79,7 +81,8 @@
     ]},
     { id: 'screen', label: 'Screen', items: [
       { k: 'theme', t: 'select', label: 'Colours', options: [
-        ['classic', 'Classic grey'], ['paper', 'Warm paper'], ['midnight', 'Midnight'],
+        ['luna', 'Luna blue — Windows XP'], ['classic', 'Classic grey — Windows 2000'],
+        ['paper', 'Warm paper'], ['midnight', 'Midnight'],
         ['amber', 'Amber monochrome'], ['green', 'Green phosphor'] ] },
       { k: 'preset', t: 'select', label: 'Typeface', options: [
         ['period', 'Period correct — Tahoma / Courier New'],

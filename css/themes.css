@@ -11,7 +11,7 @@ body[data-case="graphite"]{
 }
 body[data-case="titanium"]{
   --case:#83878e;--case-dk:#6d7178;--case-dkr:#4a4d53;--case-lt:#9ba0a8;
-  --key-text:#23262b;
+  --key-text:#23262b;--key-blue:#12408f;
   --hair:rgba(255,255,255,.28);--hair-lo:rgba(255,255,255,.16);
 }
 body[data-case="graphite"] .lid,
@@ -25,17 +25,31 @@ body[data-case="titanium"] .base{
 body[data-case="titanium"] .bezel{background:linear-gradient(180deg,#2a2c30,#1c1e21 40%,#191b1e)}
 body[data-case="titanium"] .palmrest{background:linear-gradient(180deg,#9ba0a8,#878b93 55%,#767a81)}
 body[data-case="titanium"] .keyboard{background:linear-gradient(180deg,#3a3d43,#2c2f34)}
-body[data-case="titanium"] .key{
+body[data-case="titanium"] .key .cap{
   background:linear-gradient(180deg,#e6e8ea 0%,#d2d5d9 42%,#b9bdc3 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,.7),inset 0 -2px 3px rgba(0,0,0,.16),0 2px 2px rgba(0,0,0,.35);
 }
-body[data-case="titanium"] .key.down,body[data-case="titanium"] .key:active{
+body[data-case="titanium"] .key.down .cap,body[data-case="titanium"] .key:active .cap{
   background:linear-gradient(180deg,#c3c7cc,#b3b7bd 60%,#a6aab0);
 }
-body[data-case="titanium"] .key.fn{color:#12408f}
+body[data-case="titanium"] .key .glyph{stroke:var(--key-text)}
+body[data-case="titanium"] .touchpad{
+  background:linear-gradient(180deg,#a3a8b0,#949aa2);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35),inset 0 1px 2px rgba(0,0,0,.25),0 1px 0 var(--hair-lo);
+}
+body[data-case="titanium"] .touchpad .tp-scroll{
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.35) 0 1px,transparent 1px 4px);
+}
+body[data-case="titanium"] .tpb:not(.center){background:linear-gradient(180deg,#b6bbc3,#9da2aa 60%,#8f949c)}
+body[data-case="titanium"] .fingerprint{box-shadow:inset 0 0 0 1px #2c2e33,0 0 0 2px #7e838b,0 0 0 3px #5a5e65}
 body[data-case="titanium"] .badge-plate{color:#3c4046;background:linear-gradient(180deg,#a9aeb6,#93979f)}
 body[data-case="titanium"] .front-lip{background:linear-gradient(180deg,#6e7279,#4f5259)}
 body[data-case="titanium"] .hinges .hinge{background:linear-gradient(180deg,#a7acb4,#7c8087 60%,#63666c)}
+body[data-case="titanium"] .power,body[data-case="titanium"] .hwb{
+  background:linear-gradient(180deg,#c3c7cc,#a4a9b0 55%,#959aa1);border-color:#4a4d53;
+}
+body[data-case="titanium"] .power svg,body[data-case="titanium"] .hwb svg{stroke:#2b2e33}
+body[data-case="titanium"] .hwb svg .spk{fill:#2b2e33}
 
 /* ---------- desk surfaces ---------- */
 body[data-desk="office"] .desk{
@@ -62,7 +76,231 @@ body[data-cap="eraser"] .trackpoint::after{
   background-size:auto;opacity:.8;
 }
 
-/* ---------- panel colour schemes ---------- */
+/* ============================================================
+   panel colour schemes
+   ============================================================ */
+
+/* ---------- Luna: what a T4x actually booted into ----------
+   Windows XP's default look — the sand-coloured face, the blue
+   rounded title bar with its red close button, orange-striped
+   tabs, and blue rounded scrollbars. The bevel variables the
+   classic look relies on are flattened here, and the pieces
+   that were drawn differently are redrawn below. */
+.lcd[data-theme="luna"]{
+  --face:#ece9d8;--face-lt:#f6f5ee;--hi:#ffffff;--sh:#aca899;--dk:#716f64;
+  --ink:#000000;--navy:#316ac5;--navy-lt:#a7c8f9;
+  --paper:#ffffff;--paper-ink:#000000;
+  --field:#7f9db9;--frame:#0831d9;
+  --flash:#ffffe1;
+}
+.lcd[data-theme="luna"] .win{border:0;box-shadow:none}
+.lcd[data-theme="luna"] .titlebar{
+  height:25px;margin:0;padding:0 4px 0 6px;gap:6px;
+  background:
+    linear-gradient(180deg,#0a5cf1 0%,#3e93fb 4%,#2b7cf4 10%,#0f5cee 30%,#0058e6 62%,#0053df 88%,#0a5ff0 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35);
+}
+.lcd[data-theme="luna"] .titlebar .title{
+  font:700 13px/1 "Trebuchet MS",Tahoma,Verdana,sans-serif;
+  letter-spacing:0;text-shadow:1px 1px 0 #0a246a;
+}
+.lcd[data-theme="luna"] body.modal .win > .titlebar,
+body.modal .lcd[data-theme="luna"] .win > .titlebar{
+  background:linear-gradient(180deg,#8cb0f2 0%,#7599e7 40%,#7096e5 100%);
+}
+body.modal .lcd[data-theme="luna"] .win > .titlebar .title{color:#d8e4f8;text-shadow:1px 1px 0 #3a5a9a}
+.lcd[data-theme="luna"] .app-icon{
+  width:16px;height:16px;border-radius:2px;
+  background:linear-gradient(180deg,#9bc0f5 0 31%,#fff 31% 100%);
+  box-shadow:inset 0 0 0 1px #46618f;
+}
+.lcd[data-theme="luna"] .app-icon::after{
+  left:3px;right:3px;top:7px;height:1px;background:#7b8aa3;
+  box-shadow:0 3px 0 #7b8aa3,0 6px 0 #7b8aa3;
+}
+.lcd[data-theme="luna"] .tb-buttons{gap:2px}
+.lcd[data-theme="luna"] .tb{
+  width:21px;height:21px;border-radius:3px;border:1px solid #fff;
+  background:linear-gradient(180deg,#78a9f7 0%,#3c7ff0 40%,#2160d8 60%,#3a78e6 100%);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.25);
+}
+.lcd[data-theme="luna"] .tb.close{
+  background:linear-gradient(180deg,#f0a086 0%,#e0603f 40%,#c84a2b 60%,#d9633f 100%);
+}
+.lcd[data-theme="luna"] .tb:hover{filter:brightness(1.1)}
+.lcd[data-theme="luna"] .tb:active{filter:brightness(.85);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+.lcd[data-theme="luna"] .tb b{background:#fff}
+.lcd[data-theme="luna"] .g-min{width:8px;height:3px;margin-top:6px}
+.lcd[data-theme="luna"] .g-max{border-color:#fff;border-top-width:3px;width:9px;height:8px}
+.lcd[data-theme="luna"] .g-close::before,.lcd[data-theme="luna"] .g-close::after{
+  background:#fff;height:2px;width:11px;left:-1px;top:3px;
+}
+.lcd[data-theme="luna"] .menubar{
+  height:20px;margin:0;padding:0 2px;border-bottom:0;box-shadow:none;background:var(--face);
+}
+.lcd[data-theme="luna"] .dropdown{
+  top:20px;background:#fff;padding:2px;
+  border:1px solid #aca899;box-shadow:2px 2px 3px rgba(0,0,0,.3);
+}
+.lcd[data-theme="luna"] .mi{padding:3px 8px 3px 24px}
+.lcd[data-theme="luna"] .msep{border-top:1px solid #aca899;border-bottom:0;margin:3px 3px 3px 26px}
+.lcd[data-theme="luna"] .workspace{margin:3px}
+.lcd[data-theme="luna"] .find input,
+.lcd[data-theme="luna"] .listbox,
+.lcd[data-theme="luna"] .editor-wrap,
+.lcd[data-theme="luna"] .dlg-body .sunken{
+  box-shadow:none;border:1px solid var(--field);
+}
+.lcd[data-theme="luna"] .find input{height:19px}
+.lcd[data-theme="luna"] .find input:focus,
+.lcd[data-theme="luna"] #search:focus-visible{box-shadow:none;outline:0}
+.lcd[data-theme="luna"] .note-item{border-bottom-color:#e6e4dd}
+.lcd[data-theme="luna"] .btn,
+.lcd[data-theme="luna"] .set-row.is-action .btn{
+  height:21px;border:1px solid #003c74;border-radius:3px;
+  background:linear-gradient(180deg,#fff 0%,#f4f3ee 55%,#e3e1d6 100%);
+  box-shadow:none;padding:0 8px;
+}
+.lcd[data-theme="luna"] .btn:hover{
+  box-shadow:inset 0 0 0 1px #ffe9a8,inset 0 0 0 2px #f9c46a;
+}
+.lcd[data-theme="luna"] .btn:active{
+  background:#e6e4d9;box-shadow:inset 1px 1px 2px rgba(0,0,0,.2);padding:0 8px;
+}
+.lcd[data-theme="luna"] .btn.primary{
+  box-shadow:inset 0 0 0 1px #a7c1e8,inset 0 0 0 2px #cad9f0;
+}
+.lcd[data-theme="luna"] .btn:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+.lcd[data-theme="luna"] .pane-foot .btn{height:20px}
+.lcd[data-theme="luna"] .splitter{background:var(--face)}
+.lcd[data-theme="luna"] .splitter:hover{background:#dcd9cc}
+.lcd[data-theme="luna"] .statusbar{margin:0 2px 2px;padding-top:1px}
+.lcd[data-theme="luna"] .statusbar .cell{
+  box-shadow:none;border-left:1px solid #aca899;border-right:1px solid #fff;padding:3px 6px;
+}
+.lcd[data-theme="luna"] .statusbar .cell:first-child{border-left:0}
+.lcd[data-theme="luna"] .statusbar .click:hover{background:#e0ddcf}
+
+/* XP's rounded blue scrollbars */
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-track,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-track,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-track{
+  background:linear-gradient(90deg,#f3f2ec,#fbfaf6 50%,#f3f2ec);background-image:none;background-color:#f4f3ee;
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-thumb,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-thumb,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-thumb{
+  background:linear-gradient(90deg,#c9d8fb,#bacbf8 50%,#adc1f4);
+  border:1px solid #93a9dd;border-radius:3px;box-shadow:inset 1px 1px 0 #e6eefc;
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  background-color:#bacbf8;
+  border:1px solid #7e98cd;border-radius:3px;box-shadow:inset 1px 1px 0 #e6eefc;
+  background-repeat:no-repeat;
+  background-position:center,0 0;background-size:7px 4px,100% 100%;
+}
+/* the arrow is listed first, because the first layer is the one on top */
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:start:decrement,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:start:decrement{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 4l3.5-4L7 4z' fill='%23253c78'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,#d3dffc,#aec2f4);
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-button:vertical:end:increment,
+.lcd[data-theme="luna"] .dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 0h7L3.5 4z' fill='%23253c78'/%3E%3C/svg%3E"),
+    linear-gradient(180deg,#d3dffc,#aec2f4);
+}
+.lcd[data-theme="luna"] .listbox::-webkit-scrollbar-corner,
+.lcd[data-theme="luna"] #editor::-webkit-scrollbar-corner{background:#f4f3ee}
+@supports not selector(::-webkit-scrollbar){
+  .lcd[data-theme="luna"] .listbox,
+  .lcd[data-theme="luna"] #editor,
+  .lcd[data-theme="luna"] .dlg-body{scrollbar-color:#bacbf8 #f4f3ee}
+}
+
+/* dialogs get the blue XP frame with its rounded top */
+.lcd[data-theme="luna"] .dlg{
+  padding:0 3px 3px;background:var(--frame);border-radius:8px 8px 0 0;
+  box-shadow:0 0 0 1px rgba(0,0,0,.3),3px 4px 12px rgba(0,0,0,.45);
+}
+.lcd[data-theme="luna"] .dlg .titlebar{
+  margin:0 -3px;height:27px;border-radius:7px 7px 0 0;padding:0 5px 0 8px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 1px 0 0 rgba(255,255,255,.15),inset -1px 0 0 rgba(255,255,255,.15);
+}
+.lcd[data-theme="luna"] .dlg-body,.lcd[data-theme="luna"] .dlg-foot{background:var(--face)}
+.lcd[data-theme="luna"] .dlg-foot .btn{height:23px;min-width:75px}
+
+/* XP tabs: white pages with an orange stripe on the one that's up */
+.lcd[data-theme="luna"] .dlg-tabs{gap:1px;padding:8px 12px 0}
+.lcd[data-theme="luna"] .dlg-tab{
+  border:1px solid #919b9c;border-bottom:0;border-radius:3px 3px 0 0;
+  background:linear-gradient(180deg,#fff,#f0f0ea 55%,#e2e1da);
+  box-shadow:none;padding:3px 9px;
+}
+.lcd[data-theme="luna"] .dlg-tab.on{
+  background:#fcfcfe;box-shadow:inset 0 3px 0 #e68b2c;font-weight:400;
+  padding:4px 9px 4px;margin-bottom:-1px;position:relative;z-index:1;
+}
+.lcd[data-theme="luna"] .dlg-tab:focus-visible{outline:1px dotted #000;outline-offset:-4px}
+.lcd[data-theme="luna"] .dlg.wide .dlg-body{padding-top:0}
+.lcd[data-theme="luna"] .set-panes,
+.lcd[data-theme="luna"] .tabpanes{
+  border:1px solid #919b9c;background:#fcfcfe;padding:9px 10px;margin:0 12px;
+}
+.lcd[data-theme="luna"] .dlg-body .dlg-tabs{padding:0 12px}
+.lcd[data-theme="luna"] .dlg-body .dlg-tabs + .tabpanes{margin:0 12px 6px}
+.lcd[data-theme="luna"] .settings .dlg-tabs{padding:8px 12px 0}
+.lcd[data-theme="luna"] .dlg.wide .dlg-body{padding-left:0;padding-right:0}
+.lcd[data-theme="luna"] .dlg-body .dlg-tabs{padding-left:12px}
+
+/* XP's controls: the green tick, the blue dropdown button */
+.lcd[data-theme="luna"] .set-check{
+  border:1px solid #1c5180;border-radius:2px;
+  background:linear-gradient(135deg,#dcdcd7,#fff 60%);box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-check:checked::after{border-color:#21a121}
+.lcd[data-theme="luna"] .set-check:focus-visible{outline:1px dotted #000;outline-offset:1px}
+.lcd[data-theme="luna"] .set-select{
+  height:20px;border:1px solid var(--field);border-radius:0;
+  background-color:#fff;box-shadow:none;padding:0 22px 0 4px;
+  background-image:
+    linear-gradient(45deg,transparent 50%,#fff 50%),
+    linear-gradient(135deg,#fff 50%,transparent 50%),
+    linear-gradient(180deg,#c5d5fb,#a9bff1 60%,#8fabe9);
+  background-position:calc(100% - 11px) 8px,calc(100% - 6px) 8px,right 1px top 1px;
+  background-size:5px 5px,5px 5px,15px calc(100% - 2px);
+  background-repeat:no-repeat;
+}
+.lcd[data-theme="luna"] .set-select option{background:#fff;color:#000}
+.lcd[data-theme="luna"] .set-range::-webkit-slider-runnable-track{
+  height:4px;background:#f0efea;border:1px solid #9d9da1;border-radius:2px;box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-range::-webkit-slider-thumb{
+  width:11px;height:19px;margin-top:-8px;border-radius:2px;
+  background:linear-gradient(180deg,#fff,#e5e4dc);border:1px solid #6a7f9a;
+  box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-range::-moz-range-track{
+  height:4px;background:#f0efea;border:1px solid #9d9da1;border-radius:2px;box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-range::-moz-range-thumb{
+  width:11px;height:19px;border-radius:2px;
+  background:linear-gradient(180deg,#fff,#e5e4dc);border:1px solid #6a7f9a;box-shadow:none;
+}
+.lcd[data-theme="luna"] .set-hint{color:#6d6b62}
+.lcd[data-theme="luna"] .dropzone{border-color:var(--navy);background:rgba(49,106,197,.16)}
+.lcd[data-theme="luna"] .dropzone span{box-shadow:0 0 0 1px #003c74,3px 3px 8px rgba(0,0,0,.4);border-radius:3px}
+
+/* ---------- the older schemes ---------- */
 .lcd[data-theme="paper"]{
   --face:#ded9cd;--face-lt:#f2eee4;--hi:#fffdf7;--sh:#948d7c;--dk:#4a463d;
   --ink:#1d1a14;--navy:#4a3a22;--navy-lt:#d8c9a8;
@@ -128,7 +366,7 @@ body[data-cap="eraser"] .trackpoint::after{
 /* ---------- optional parts of the window ---------- */
 body.no-status .statusbar{display:none}
 body.no-leds .leds{visibility:hidden}
-body.no-tpb .tp-buttons{display:none}
+body.no-tpb .tp-buttons:not(.lower){display:none}
 body.list-right .workspace{flex-direction:row-reverse}
 body.list-right .pane-notes{padding-right:0;padding-left:3px}
 

@@ -129,7 +129,7 @@ module.exports = {
     /* a bare hash change would not reload anything, so make it a real navigation */
     await page.goto(t.origin + '/index.html?from=test#reset');
     await page.waitForTimeout(500);
-    t.eq(await page.evaluate(() => document.querySelector('#lcd').dataset.theme), 'classic',
+    t.eq(await page.evaluate(() => document.querySelector('#lcd').dataset.theme), 'luna',
       '#reset starts again with standard settings');
     t.eq(await page.evaluate(() => window.location.hash + window.location.search), '',
       'and tidies the hash away');
