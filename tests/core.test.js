@@ -86,6 +86,28 @@ module.exports = {
     await page.keyboard.press('Backspace');
     await page.keyboard.press('Backspace');
 
+    /* the caps that are not letters do what the key does */
+    await page.click('#editor');
+    await page.keyboard.press('Control+A');
+    await page.keyboard.type('alpha\nbravo\ncharlie');
+    await page.waitForTimeout(400);
+    const caretAt = () => page.evaluate(() => {
+      const ed = document.querySelector('#editor');
+      const upto = ed.value.slice(0, ed.selectionStart).split('\n');
+      return upto.length + ':' + upto[upto.length - 1].length;
+    });
+    await page.click('.key[data-code="Home"]');
+    t.eq(await caretAt(), '3:0', 'Home on the deck goes to the start of the line');
+    await page.click('.key[data-code="ArrowUp"]');
+    t.eq(await caretAt(), '2:0', 'the up arrow moves the caret a line rather than scrolling');
+    await page.click('.key[data-code="End"]');
+    t.eq(await caretAt(), '2:5', 'End goes to the end of that line');
+    await page.click('.key[data-code="ArrowDown"]');
+    t.eq(await caretAt(), '3:5', 'and the down arrow keeps the column');
+    await page.click('.key[data-code="Delete"]');
+    t.eq(await page.inputValue('#editor'), 'alpha\nbravo\ncharle',
+      'Delete takes the character in front of the caret, not behind it');
+
     /* F5 the way Notepad always did */
     await page.click('#editor');
     await page.keyboard.press('F5');
@@ -104,6 +126,22 @@ module.exports = {
     const scrolled = await page.evaluate(() => document.querySelector('#editor').scrollTop);
     await page.mouse.up();
     t.ok(scrolled > 20, 'pushing the TrackPoint scrolls the page (scrollTop ' + scrolled + ')');
+
+    /* UltraNav: the touchpad scrolls by how far the finger moves */
+    await page.evaluate(() => { document.querySelector('#editor').scrollTop = 0; });
+    const pad = await (await page.$('#touchpad')).boundingBox();
+    await page.mouse.move(pad.x + pad.width / 2, pad.y + 4);
+    await page.mouse.down();
+    await page.mouse.move(pad.x + pad.width / 2, pad.y + pad.height - 4, { steps: 6 });
+    await page.mouse.up();
+    const padScrolled = await page.evaluate(() => document.querySelector('#editor').scrollTop);
+    t.ok(padScrolled > 20, 'dragging down the touchpad scrolls the page (scrollTop ' + padScrolled + ')');
+    await page.click('#tpbRight2');
+    await page.waitForTimeout(150);
+    t.ok(!/line 0/.test(await page.inputValue('#editor')), 'and the buttons under it walk to the next note');
+    await page.click('#tpbLeft2');
+    await page.waitForTimeout(150);
+    t.ok(/line 0/.test(await page.inputValue('#editor')), 'and back');
 
     /* menus and dialogs */
     await page.click('.menu-top[data-menu="help"]');

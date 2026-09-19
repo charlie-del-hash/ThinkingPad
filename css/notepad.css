@@ -269,8 +269,25 @@ body.no-wrap .editor-underlay{white-space:pre;overflow-wrap:normal}
   background-color:var(--face);
   box-shadow:inset 1px 1px 0 var(--hi),inset -1px -1px 0 var(--dk),inset 2px 2px 0 var(--face-lt),inset -2px -2px 0 var(--sh);
 }
+.listbox::-webkit-scrollbar-button:vertical:start:decrement,
+#editor::-webkit-scrollbar-button:vertical:start:decrement,
+.dlg-body::-webkit-scrollbar-button:vertical:start:decrement{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 4l3.5-4L7 4z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:7px 4px;
+}
+.listbox::-webkit-scrollbar-button:vertical:end:increment,
+#editor::-webkit-scrollbar-button:vertical:end:increment,
+.dlg-body::-webkit-scrollbar-button:vertical:end:increment{
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 7 4'%3E%3Cpath d='M0 0h7L3.5 4z' fill='%23000'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:7px 4px;
+}
 .listbox::-webkit-scrollbar-corner,#editor::-webkit-scrollbar-corner{background:var(--face)}
-.listbox,#editor,.dlg-body{scrollbar-color:var(--face) #e6e3de;scrollbar-width:auto}
+/* Firefox draws no ::-webkit-scrollbar, so it gets the colours instead. It
+   has to be only Firefox: Chromium honours scrollbar-color too, and when it
+   is set it throws the drawn scrollbar away and paints a plain native one. */
+@supports not selector(::-webkit-scrollbar){
+  .listbox,#editor,.dlg-body{scrollbar-color:var(--face) #e6e3de;scrollbar-width:auto}
+}
 
 /* ---------- status bar ---------- */
 .statusbar{
