@@ -1,8 +1,11 @@
 # ThinkPad Notes
 
 A skeuomorphic plain-text notepad shaped like an IBM ThinkPad from the last
-years before Lenovo — matte black plastic, a chunky bezel, a red TrackPoint,
-the blue Access IBM button, and a ThinkLight above the screen.
+years before Lenovo — the T4x of 2003-05: soft-touch matte black, a deep bezel
+with the indicators lit through printed marks, the seven-row keyboard with its
+blue Fn legends, a red TrackPoint, the UltraNav touchpad under the space bar,
+the blue Access IBM button beside the power key, and a ThinkLight above the
+screen. On the screen, Windows XP.
 
 Open `index.html` in a browser. That's the whole install: no build step, no
 dependencies, no server.
@@ -18,12 +21,13 @@ USB stick, email to yourself, or double-click from anywhere. `--fragment`
 writes the same page without the document wrapper, for hosts that supply
 their own.
 
-**On the web:** `.github/workflows/pages.yml` publishes the repository to
-GitHub Pages on every push. Pages has to be switched on once by hand —
-*Settings > Pages > Source: **GitHub Actions*** — because a workflow token is
-not allowed to switch it on for you; until then the job reports that and
-stops instead of failing. The site serves `index.html` at the root and the
-one-file copy at `/dist/thinkpad-notes.html`.
+**On the web:** <https://thinkingpad.vercel.app>. Vercel builds this
+repository directly — it serves the repo root, so `index.html` is at `/` and
+the one-file copy at `/dist/thinkpad-notes.html`, exactly as opening the file
+locally does. There is no build step to go wrong: the site is the source.
+
+`.github/workflows/checks.yml` lints, rebuilds `dist/` and runs the tests on
+every push; it no longer publishes anything. GitHub Pages is retired.
 
 ## What it does
 
@@ -60,14 +64,23 @@ change it.
 
 | Tab | What's in it |
 | --- | --- |
-| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, wear and tear, power-on self test, screensaver delay, ThinkLight, screen glare, LCD grain, key click and its volume |
-| **Screen** | Colour scheme (classic grey / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
+| **Machine** | Show the machine at all, keyboard, TrackPoint buttons, UltraNav touchpad, indicator lights, case finish (matte black / graphite / titanium), TrackPoint cap (cat's tongue / soft dome / eraser head), desk surface, panel shape, whether the deck lies flat, whether the battery light is real, wear and tear, power-on self test, screensaver delay, ThinkLight, screen glare, LCD grain, key click and its volume |
+| **Screen** | Colour scheme (Luna blue as Windows XP drew it / classic grey as Windows 2000 did / warm paper / midnight / amber monochrome / green phosphor), typeface preset, interface face, note face, note size, line spacing, word wrap, tab width, spell check, status bar |
 | **Notes** | Note list on or off, list on the left or right, list width, sort by last edited / created / title, date format, and whether opening the app resumes your last note or starts a blank one |
 | **Data** | Back up everything to `.json`, restore from a backup, empty the trash, reset every setting, erase all notes, or factory reset the lot — with a live count of notes, words, storage used and what's in the trash |
 
 Turning the machine off entirely (**Machine > Show the machine**) leaves the
 notepad alone in the window, which is the mode to use when you actually have
 to get work done.
+
+## The window
+
+It boots into **Luna**, the look Windows XP shipped with and the one every
+T4x wore out of the box: the sand-coloured face, the blue title bar with its
+rounded corners and red close button, orange-striped tabs, blue rounded
+scrollbars, green ticks in the checkboxes. **Settings > Screen > Colours**
+puts it back to the Windows 2000 grey if that is the ThinkPad you remember,
+or to one of the four schemes that never shipped on anything.
 
 ## Two typefaces
 
@@ -95,17 +108,17 @@ or a system mono for the page — which switches the preset to Custom.
 | Part | What it does |
 | --- | --- |
 | ThinkLight (the lamp above the screen) | Darkens the room and throws a warm cone over the keys. `Alt+L` |
-| Keyboard | Folded away by default — **View > Keyboard** brings it back |
+| Keyboard | Folded away by default — **View > Keyboard** brings it back. The seven-row deck IBM shipped: `PrtSc`, `ScrLk`, `Pause` and the six editing keys along the top, the browser keys either side of the up arrow, `Fn` in blue with blue marks for what it does |
+| Keyboard | Mirrors what you actually type; click the caps to type with the mouse. Backspace, Delete, Home, End, PgUp, PgDn and the arrows all do what they say |
 | TrackPoint | Push the red nub to scroll a long note, like the real thing |
-| Mouse buttons | Left and right walk through your notes |
+| UltraNav touchpad | Drag it to scroll by how far you move; both pairs of buttons walk through your notes |
 | Access IBM (blue button) | Help, shortcuts, and how much storage you've used |
-| Volume rocker | Key-click volume. The dot lights when muted — it starts muted, because you're at work |
-| Power button | Standby. Click anywhere to wake |
+| Volume buttons | Key-click volume. The light above the mute button comes on when muted — it starts muted, because you're at work |
+| Power button | Standby, with its own light beside it. Click anywhere to wake |
+| Indicators | Eight marks along the bottom of the bezel, lit from behind so the mark itself glows: Bluetooth, wireless, Num Lock, Caps Lock, drive, battery, standby, power — left to right as the T4x had them |
+| Wireless light | Lit while this browser has a network, out when it does not |
 | Battery light | Follows this laptop where the browser will say: amber below 20%, pulsing while charging |
 | Drive light | Flickers on every save, and sits amber when storage is nearly full |
-| Indicators | Six lights under drawn marks — power, battery, standby, drive, num lock, caps lock — not text labels |
-| Keyboard | Mirrors what you actually type; click the caps to type with the mouse |
-| LEDs | Power, battery, sleep, drive (flickers on every save), Num Lock, Caps Lock |
 
 ## Keyboard shortcuts
 
@@ -141,15 +154,16 @@ All three live in **Settings > Machine**, and all three are off by default.
 
 **Power-on self test.** Switch it on and the machine posts before it hands
 over: the striped IBM logo, the memory counted out to 262144 KB, the ThinkPad
-line, and a note about the setup utility nobody ever pressed in time. About
-two and a half seconds, and any key skips it — that key is swallowed rather
-than typed into your note.
+line, and the line about pressing the blue Access IBM button that nobody ever
+pressed in time. About two and a half seconds, and any key skips it — that
+key is swallowed rather than typed into your note.
 
 **Wear and tear.** Off by default — it leaves the factory unmarked. Switch it
 on and it becomes a machine somebody actually used: the home row and the
 letters English leans on carry a shine, the space bar wears to the right of
 centre where the thumb sits, the palm rest has two faint patches where wrists
-rested, and the TrackPoint cap has gone smooth in the middle. On the titanium
+rested, the touchpad has gone dull in the middle, and the TrackPoint cap has
+gone smooth. On the titanium
 case the same wear reads as a darker patch rather than a shine, because that
 is what grease does to light plastic.
 
@@ -200,9 +214,10 @@ the live site.
 
 ```
 index.html          markup for the machine and the window on its screen
-css/chassis.css     the hardware: case, bezel, LEDs, keys, TrackPoint, ThinkLight
+css/chassis.css     the hardware: case, bezel, indicators, keys, TrackPoint, UltraNav
 css/notepad.css     the software: bevelled chrome, menus, listbox, dialogs, print
-css/themes.css      case finishes, desk surfaces, panel colours, the settings form
+css/themes.css      case finishes, desk surfaces, Luna and the other panel colours,
+                    the settings form
 js/store.js         where notes live: per-note keys, the index, migration
 js/ui.js            dialogs, menus and the status bar — no knowledge of notes
 js/machine.js       the case: panel geometry, lights, ThinkLight, TrackPoint, sound
@@ -234,7 +249,7 @@ Every control takes focus and shows it. Menus open with `Alt`+their letter and
 walk with the arrow keys — up and down the items, left and right between
 menus, `Enter` to choose, `Esc` to leave. Dialogs keep Tab inside themselves
 and hand focus back where it came from when they close. The status bar is an
-`aria-live` region, so what it says is announced. All five colour schemes are
+`aria-live` region, so what it says is announced. All six colour schemes are
 checked for contrast by the test suite, and `prefers-reduced-motion` stills
 the pulsing lights.
 

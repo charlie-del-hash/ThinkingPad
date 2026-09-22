@@ -132,12 +132,62 @@
     if (key.code === 'CapsLock') { machine.toggleVirtualCaps(); return; }
     if (key.code === 'Escape') { closeMenu(); closeDialog(); return; }
     if (key.code === 'F5') { editor.focus(); insertDateTime(); return; }
-    if (key.code === 'Backspace') {
+    if (key.code === 'Backspace' || key.code === 'Delete') {
       editor.focus();
       var start = editor.selectionStart, end = editor.selectionEnd;
-      if (start === end && start > 0) editor.setRangeText('', start - 1, start, 'end');
-      else editor.setRangeText('', start, end, 'end');
+      if (start !== end) editor.setRangeText('', start, end, 'end');
+      else if (key.code === 'Backspace' && start > 0) editor.setRangeText('', start - 1, start, 'end');
+      else if (key.code === 'Delete' && end < editor.value.length) editor.setRangeText('', start, start + 1, 'end');
       editor.dispatchEvent(new Event('input', { bubbles: true }));
+      return;
+    }
+    if (key.code === 'ArrowLeft' || key.code === 'ArrowRight') {
+      editor.focus();
+      var at = key.code === 'ArrowLeft'
+        ? Math.max(0, editor.selectionStart - 1)
+        : Math.min(editor.value.length, editor.selectionEnd + 1);
+      editor.setSelectionRange(at, at);
+      updatePos();
+      return;
+    }
+    if (key.code === 'Home' || key.code === 'End') {
+      editor.focus();
+      var text = editor.value, pos = editor.selectionStart, to;
+      if (key.code === 'Home') to = text.lastIndexOf('\n', pos - 1) + 1;
+      else { to = text.indexOf('\n', pos); if (to < 0) to = text.length; }
+      editor.setSelectionRange(to, to);
+      updatePos();
+      return;
+    }
+    /* Up and down move the caret a line, keeping the column, which is what
+       the key does. Page up and down scroll, which is also what the key does. */
+    if (key.code === 'ArrowUp' || key.code === 'ArrowDown') {
+      editor.focus();
+      var body = editor.value, caret = editor.selectionStart;
+      var lineStart = body.lastIndexOf('\n', caret - 1) + 1;
+      var column = caret - lineStart;
+      var target;
+      if (key.code === 'ArrowUp') {
+        if (lineStart === 0) target = 0;
+        else {
+          var prevStart = body.lastIndexOf('\n', lineStart - 2) + 1;
+          target = Math.min(prevStart + column, lineStart - 1);
+        }
+      } else {
+        var lineEnd = body.indexOf('\n', caret);
+        if (lineEnd < 0) target = body.length;
+        else {
+          var nextEnd = body.indexOf('\n', lineEnd + 1);
+          if (nextEnd < 0) nextEnd = body.length;
+          target = Math.min(lineEnd + 1 + column, nextEnd);
+        }
+      }
+      editor.setSelectionRange(target, target);
+      updatePos();
+      return;
+    }
+    if (key.code === 'PageUp' || key.code === 'PageDown') {
+      editor.scrollTop += (key.code === 'PageUp' ? -1 : 1) * editor.clientHeight * 0.9;
       return;
     }
     if (key.ch !== undefined) {
@@ -978,7 +1028,8 @@
         '<dl>' +
         '<dt>ThinkLight</dt><dd>The lamp above the screen. Dims the room and lights the keys.</dd>' +
         '<dt>TrackPoint</dt><dd>Push the red nub to scroll the page, like the real thing.</dd>' +
-        '<dt>Mouse buttons</dt><dd>Left and right walk through your notes.</dd>' +
+        '<dt>UltraNav</dt><dd>Drag the touchpad to scroll the page a line at a time. ' +
+        'Both pairs of buttons walk through your notes.</dd>' +
         '<dt>Access IBM</dt><dd>This window.</dd>' +
         '<dt>Volume</dt><dd>Key click volume. The dot lights when muted.</dd>' +
         '<dt>Power</dt><dd>Standby. Click anywhere to wake.</dd>' +
@@ -988,6 +1039,7 @@
         '<dt>Battery light</dt><dd>Follows this laptop where the browser will say: ' +
         'amber below 20%, pulsing while charging.</dd>' +
         '<dt>Drive light</dt><dd>Flickers on every save, and sits amber when storage is nearly full.</dd>' +
+        '<dt>Wireless light</dt><dd>Lit while this browser has a network, out when it does not.</dd>' +
         '<dt>Keyboard</dt><dd>Folded away by default. <b>View &gt; Keyboard</b> brings it back — ' +
         'it mirrors what you type, and you can click the caps to type with the mouse.</dd>' +
         '</dl>' +
