@@ -1,0 +1,53 @@
+# Lints, rebuilds the single-file copy and runs the test suite.
+#
+# This used to publish to GitHub Pages as well. It never managed to: the
+# deploy job declared `environment: github-pages`, which is resolved at the
+# JOB level before any step runs, so the `continue-on-error` guard on
+# actions/configure-pages could not rescue it. Publishing moved to Vercel,
+# which builds this repository directly and needs nothing from CI.
+#
+# Both trunk names are listed below on purpose. The workflow previously
+# watched `main` alone while the repository's default branch was
+# `claude/thinkpad-notepad-app-k4013w`, so the branch that pull requests
+# actually landed on never ran these checks at all.
+name: Checks
+
+on:
+  push:
+    branches: ["main", "claude/thinkpad-notepad-app-k4013w"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install
+        run: npm install --no-audit --no-fund
+
+      - name: Install Chromium for the tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Rebuild the single-file copy
+        run: npm run build
+
+      - name: Fail if dist is out of date
+        run: git diff --exit-code -- dist/
+
+      - name: Test
+        run: npm test

@@ -21,12 +21,13 @@ USB stick, email to yourself, or double-click from anywhere. `--fragment`
 writes the same page without the document wrapper, for hosts that supply
 their own.
 
-**On the web:** `.github/workflows/pages.yml` publishes the repository to
-GitHub Pages on every push. Pages has to be switched on once by hand —
-*Settings > Pages > Source: **GitHub Actions*** — because a workflow token is
-not allowed to switch it on for you; until then the job reports that and
-stops instead of failing. The site serves `index.html` at the root and the
-one-file copy at `/dist/thinkpad-notes.html`.
+**On the web:** <https://thinkingpad.vercel.app>. Vercel builds this
+repository directly — it serves the repo root, so `index.html` is at `/` and
+the one-file copy at `/dist/thinkpad-notes.html`, exactly as opening the file
+locally does. There is no build step to go wrong: the site is the source.
+
+`.github/workflows/checks.yml` lints, rebuilds `dist/` and runs the tests on
+every push; it no longer publishes anything. GitHub Pages is retired.
 
 ## What it does
 
